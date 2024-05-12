@@ -39,3 +39,7 @@ out/
 
 # application.yaml 제외
 application.*
+Dockerfile
+docker-compose.yaml
+dockerenv
+bindMount

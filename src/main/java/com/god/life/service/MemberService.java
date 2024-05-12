@@ -8,6 +8,7 @@ import com.god.life.dto.SignupResponse;
 import com.god.life.repository.MemberRepository;
 import com.god.life.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,5 +43,9 @@ public class MemberService {
                 .nickname(signUpRequest.getNickname()).build();
     }
 
+    @Transactional(readOnly = true)
+    public Member loadByUsername(Long id) {
+       return memberRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("회원이 존재하지 않습니다.."));
+    }
 
 }

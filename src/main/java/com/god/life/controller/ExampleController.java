@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "예제 API", description = "스웨거 테스트 API")
 @RestController
-@RequestMapping("/")
+@RequestMapping("/example")
 public class ExampleController {
 
     @Operation(summary = "문자열 반복", description = "파라미터로 받은 문자열을 2회 반복하여 반환합니다.")

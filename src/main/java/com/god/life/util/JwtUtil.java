@@ -38,6 +38,9 @@ public class JwtUtil {
 
     private SecretKey secretKey;
 
+    public static final String ACCESS = "access";
+    public static final String REFRESH = "refresh";
+
 
 
     @PostConstruct
@@ -48,26 +51,27 @@ public class JwtUtil {
 
     // ACCESS TOKEN 생성
     public String createAccessToken(String id, String nickname) {
-        return createJWT(id, nickname, ACCESS_EXPIRATION_TIME);
+        return createJWT(id, nickname, ACCESS_EXPIRATION_TIME, ACCESS);
     }
 
     // REFRESH TOKEN 생성
     public String createRefreshToken() {
-        return createJWT("refresh", "refresh", REFRESH_EXPIRATION_TIME);
+        return createJWT("refresh", "refresh", REFRESH_EXPIRATION_TIME, REFRESH);
     }
 
     public String testCreateToken(String id, String nickname) {
-        return createJWT(id, nickname, 10);
+        return createJWT(id, nickname, 10, ACCESS);
     }
 
 
-    private String createJWT(String id, String nickname, int time) {
+    private String createJWT(String id, String nickname, int time, String tokenType) {
         Date now = new Date();
         return Jwts.builder()
                 .issuer(ISSUER)
                 .subject(SUBJECT)
                 .claim("nickname", nickname)
                 .claim("id", id)
+                .claim("type", tokenType)
                 .issuedAt(now)
                 .expiration(new Date(now.getTime() + time))
                 .signWith(secretKey, Jwts.SIG.HS512).compact();

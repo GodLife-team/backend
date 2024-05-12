@@ -19,7 +19,7 @@ public class Member {
     @Enumerated(value = EnumType.STRING)
     private ProviderType providerName;
 
-    @Column(name = "refresh_token")
+    @Column(name = "refresh_token", length = 1024)
     private String refreshToken;
 
     @Column(nullable = false)
@@ -36,14 +36,21 @@ public class Member {
 
     private Integer age;
 
-
     @Column(name = "god_life_point")
     private long godLifePoint;
-
 
     @Column(name = "introduction")
     private String whoAmI;
 
+
+    @Override
+    public String toString() {
+        return "Member{" +
+                "id=" + id +
+                ", nickname='" + nickname + '\'' +
+                ", email='" + email + '\'' +
+                '}';
+    }
 
     public void updateRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
