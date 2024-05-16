@@ -1,5 +1,6 @@
 package com.god.life.util;
 
+import com.god.life.dto.TokenResponse;
 import com.god.life.exception.JwtInvalidException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -11,6 +12,7 @@ import io.jsonwebtoken.security.SignatureException;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -37,6 +39,9 @@ public class JwtUtil {
     private int REFRESH_EXPIRATION_TIME;
 
     private SecretKey secretKey;
+
+    public static final String AUTHORIZE_HEADER = "Authorization";
+    public static final String AUTHORIZE_HEADER_PREFIX = "Bearer ";
 
     public static final String ACCESS = "access";
     public static final String REFRESH = "refresh";
@@ -102,7 +107,7 @@ public class JwtUtil {
     }
 
     public String getRole(String jwt) {
-        return getContent(jwt, "role");
+        return getContent(jwt, "type");
     }
 
     public String getTokenType(String jwt) {
@@ -120,7 +125,19 @@ public class JwtUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(jwt).getPayload().getExpiration().before(new Date());
     }
 
+    public static String parseJwt(String authorizeHeader) {
+        if (StringUtils.hasText(authorizeHeader) &&
+                authorizeHeader.startsWith(AUTHORIZE_HEADER_PREFIX)) {
+            return authorizeHeader.substring(AUTHORIZE_HEADER_PREFIX.length());
+        }
 
+        return null;
+    }
 
+    public TokenResponse createToken(String id, String nickname){
+        String accessToken = createAccessToken(id, nickname);
+        String refreshToken = createRefreshToken();
+        return new TokenResponse(accessToken, refreshToken);
+    }
 
 }

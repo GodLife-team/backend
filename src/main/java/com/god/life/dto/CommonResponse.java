@@ -21,7 +21,7 @@ public class CommonResponse<T> {
     }
 
     public CommonResponse(HttpStatus status, T body) {
-        this(status, body, null);
+        this(status, body, "");
     }
 
 
