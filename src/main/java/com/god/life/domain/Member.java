@@ -25,8 +25,8 @@ public class Member {
     @Column(nullable = false)
     private String nickname;
 
-    @Column(name = "provider_token", nullable = false)
-    private String providerToken;
+    @Column(name = "provider_id", nullable = false)
+    private String providerId;
 
     @Column(nullable = false)
     private String email;

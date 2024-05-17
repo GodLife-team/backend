@@ -31,43 +31,74 @@ public class MemberController {
     private final JwtUtil jwtUtil;
 
     @Operation(summary = "닉네임 중복체크")
+    @Parameter(name = "nickname", required = true, description = "중복을 확인할 닉네임")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "body에 중복이면 false, 중복이 아니면 true",
+                            useReturnTypeSchema = true)
+            }
+    )
     @GetMapping("/check/nickname")
-    public ResponseEntity<Object> checkNickname(@RequestParam(value = "nickname") String nickname) {
+    public ResponseEntity<CommonResponse<Boolean>>  checkNickname(@RequestParam(value = "nickname") String nickname) {
         if(nickname == null){
-            return ResponseEntity.badRequest().body(new CommonResponse<>(HttpStatus.BAD_REQUEST, false));
+            return ResponseEntity.ok().body(new CommonResponse<>(HttpStatus.BAD_REQUEST, false));
         }
         if (!StringUtils.hasText(nickname) || nickname.length() > 10) {
-            return ResponseEntity.badRequest().body(new CommonResponse<>(HttpStatus.BAD_REQUEST, false));
+            return ResponseEntity.ok().body(new CommonResponse<>(HttpStatus.BAD_REQUEST, false));
         }
 
         //중복된 경우
         boolean check = memberService.checkDuplicateNickname(nickname);
         if (check) {
-            return ResponseEntity.badRequest()
+            return ResponseEntity.ok()
                     .body(new CommonResponse<>(HttpStatus.BAD_REQUEST, false));
         }
 
         return ResponseEntity.ok().body(new CommonResponse<>(HttpStatus.OK, true));
     }
 
+    @Operation(summary = "가입 여부 확인")
+    @Parameter(name = "id", required = true, description = "카카오 ID")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "이미 가입했으면 false, 가입 가능하면 true",
+                            useReturnTypeSchema = true)
+            }
+    )
+    @GetMapping("/check/id")
+    public ResponseEntity<CommonResponse<Boolean>> checkAlreadySignup(@RequestParam(value = "id") String userId) {
+        if (!StringUtils.hasText(userId)) {
+            return ResponseEntity.ok().body(new CommonResponse<>(HttpStatus.BAD_REQUEST, false));
+        }
+
+        return ResponseEntity.ok().body(new CommonResponse<>(HttpStatus.OK, memberService.checkAlreadySignup(userId)));
+    }
+
     @Operation(summary = "이메일 중복체크")
+    @Parameter(name = "email", required = true, description = "중복을 확인할 이메일")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "body에 중복이면 false, 중복이 아니면 true",
+                            useReturnTypeSchema = true)
+            }
+    )
     @GetMapping("/check/email")
-    public ResponseEntity<Object> checkEmail(@RequestParam(name = "email") String email) {
+    public ResponseEntity<CommonResponse<Boolean>> checkEmail(@RequestParam(name = "email") String email) {
         if(email == null){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.ok().body(new CommonResponse<>(HttpStatus.BAD_REQUEST, false));
         }
         if (!StringUtils.hasText(email)) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.ok().body(new CommonResponse<>(HttpStatus.BAD_REQUEST, false));
         }
 
         //중복된 경우
         boolean check = memberService.checkDuplicateEmail(email);
         if (check) {
-            return ResponseEntity.badRequest()
-                    .body(new CommonResponse<>(HttpStatus.BAD_REQUEST, "", "중복된 이메일"));
+            return ResponseEntity.ok()
+                    .body(new CommonResponse<>(HttpStatus.BAD_REQUEST, false));
         }
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok().body(new CommonResponse<>(HttpStatus.OK, true));
     }
 
     @Operation(summary = "회원가입", description = "회원가입을 진행합니다.")
@@ -90,7 +121,7 @@ public class MemberController {
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode = "200", description = "body에 access Token과 refreshToken 발급",
-                            content = @Content(schema = @Schema(implementation = TokenResponse.class))),
+                    useReturnTypeSchema = true),
                     @ApiResponse(responseCode = "400", description = "Refresh Token이 유효하지 않음, 재발급 필요")
             }
     )
@@ -126,4 +157,6 @@ public class MemberController {
             throw new JwtInvalidException("잘못된 토큰입니다.");
         }
     }
+
+
 }

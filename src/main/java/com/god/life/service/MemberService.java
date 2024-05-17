@@ -25,7 +25,7 @@ public class MemberService {
 
     @Transactional
     public TokenResponse signUp(SignupRequest signUpRequest) {
-        Member member = createMember(signUpRequest);
+        Member member = SignupRequest.toMember(signUpRequest);
         Member savedMember = memberRepository.save(member);
 
         TokenResponse response = jwtUtil.createToken(String.valueOf(savedMember.getId()), savedMember.getNickname());
@@ -34,16 +34,6 @@ public class MemberService {
         return response;
     }
 
-    private Member createMember(SignupRequest signUpRequest) {
-        return Member.builder()
-                .age(signUpRequest.getAge())
-                .sex(Sex.findSex(signUpRequest.getSex()))
-                .email(signUpRequest.getEmail())
-                .godLifePoint(0L)
-                .providerName(ProviderType.KAKAO)
-                .providerToken(signUpRequest.getProviderToken())
-                .nickname(signUpRequest.getNickname()).build();
-    }
 
     @Transactional(readOnly = true)
     public Member loadByUsername(Long id) {
@@ -71,4 +61,7 @@ public class MemberService {
         return memberRepository.existsByEmail(email);
     }
 
+    public boolean checkAlreadySignup(String id) {
+        return memberRepository.existsByProviderId(id);
+    }
 }
