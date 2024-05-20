@@ -42,4 +42,5 @@ application.*
 Dockerfile
 docker-compose.yaml
 dockerenv
-bindMount
+bindMount/
+*.json

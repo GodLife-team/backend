@@ -46,7 +46,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if ((authorizeHeader = request.getHeader(JwtUtil.AUTHORIZE_HEADER)) != null) {
             String jwt = parseJwt(authorizeHeader);
             if(jwt == null) {
-                setErrorResponse(response, "Acecss Token이 없습니다.");
+                setErrorResponse(response, "Access Token이 없습니다.");
                 return;
             }
             try {

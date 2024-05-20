@@ -1,5 +1,6 @@
 package com.god.life.token;
 
+import com.god.life.domain.Member;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
@@ -9,7 +10,7 @@ import java.util.Collection;
 public class JwtAuthenticationToken extends AbstractAuthenticationToken {
 
     private String jwt;
-    private Object principal;
+    private Member principal;
     private Object credentials;
 
 
@@ -21,7 +22,7 @@ public class JwtAuthenticationToken extends AbstractAuthenticationToken {
     }
 
     // 인증 후
-    public JwtAuthenticationToken(Object principal, Object credentials, Collection<? extends GrantedAuthority> authorities) {
+    public JwtAuthenticationToken(Member principal, Object credentials, Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
         this.principal = principal;
         this.credentials = credentials;

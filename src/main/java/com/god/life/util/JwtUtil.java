@@ -140,4 +140,20 @@ public class JwtUtil {
         return new TokenResponse(accessToken, refreshToken);
     }
 
+    public void validateJwt(String jwt) {
+        if (jwt == null) {
+            throw new JwtInvalidException("refresh 토큰이 존재하지 않습니다.");
+        }
+
+        // jwt 만료 확인
+        if (validateExpiredJwt(jwt)) {
+            throw new JwtInvalidException("토큰이 만료되었습니다.");
+        }
+
+        // jwt 토큰 종류 확인
+        if (!getRole(jwt).equals(JwtUtil.REFRESH)) {
+            throw new JwtInvalidException("잘못된 토큰입니다.");
+        }
+    }
+
 }

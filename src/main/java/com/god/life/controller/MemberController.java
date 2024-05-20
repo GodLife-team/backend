@@ -1,10 +1,10 @@
 package com.god.life.controller;
 
-import com.god.life.dto.CommonResponse;
-import com.god.life.dto.SignupRequest;
-import com.god.life.dto.SignupResponse;
-import com.god.life.dto.TokenResponse;
+import com.god.life.annotation.LoginUser;
+import com.god.life.domain.Member;
+import com.god.life.dto.*;
 import com.god.life.exception.JwtInvalidException;
+import com.god.life.service.ImageService;
 import com.god.life.service.MemberService;
 import com.god.life.util.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,18 +17,22 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "로그인 및 회원가입 API", description = "로그인과 회원가입시 이용되는 API 입니다.")
+@Slf4j
 public class MemberController {
 
     private final MemberService memberService;
     private final JwtUtil jwtUtil;
+    private final ImageService imageService;
 
     @Operation(summary = "닉네임 중복체크")
     @Parameter(name = "nickname", required = true, description = "중복을 확인할 닉네임")
@@ -39,8 +43,8 @@ public class MemberController {
             }
     )
     @GetMapping("/check/nickname")
-    public ResponseEntity<CommonResponse<Boolean>>  checkNickname(@RequestParam(value = "nickname") String nickname) {
-        if(nickname == null){
+    public ResponseEntity<CommonResponse<Boolean>> checkNickname(@RequestParam(value = "nickname") String nickname) {
+        if (nickname == null) {
             return ResponseEntity.ok().body(new CommonResponse<>(HttpStatus.BAD_REQUEST, false));
         }
         if (!StringUtils.hasText(nickname) || nickname.length() > 10) {
@@ -61,7 +65,7 @@ public class MemberController {
     @Parameter(name = "id", required = true, description = "카카오 ID")
     @ApiResponses(
             value = {
-                    @ApiResponse(responseCode = "200", description = "이미 가입했으면 false, 가입 가능하면 true",
+                    @ApiResponse(responseCode = "200", description = "이미 가입했으면 true, 가입 가능하면 false",
                             useReturnTypeSchema = true)
             }
     )
@@ -71,6 +75,8 @@ public class MemberController {
             return ResponseEntity.ok().body(new CommonResponse<>(HttpStatus.BAD_REQUEST, false));
         }
 
+        // 129321819
+        // 추후 고민 필요
         return ResponseEntity.ok().body(new CommonResponse<>(HttpStatus.OK, memberService.checkAlreadySignup(userId)));
     }
 
@@ -84,7 +90,7 @@ public class MemberController {
     )
     @GetMapping("/check/email")
     public ResponseEntity<CommonResponse<Boolean>> checkEmail(@RequestParam(name = "email") String email) {
-        if(email == null){
+        if (email == null) {
             return ResponseEntity.ok().body(new CommonResponse<>(HttpStatus.BAD_REQUEST, false));
         }
         if (!StringUtils.hasText(email)) {
@@ -115,16 +121,15 @@ public class MemberController {
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, memberService.signUp(request)));
     }
 
-
-
-    @Operation(summary = "reissue access Token", description = "access Token을 재발급합니다.")
+    @Operation(summary = "reissue access Token", description = "refreshToken과 accessToken을 재발급합니다.")
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode = "200", description = "body에 access Token과 refreshToken 발급",
-                    useReturnTypeSchema = true),
-                    @ApiResponse(responseCode = "400", description = "Refresh Token이 유효하지 않음, 재발급 필요")
+                            useReturnTypeSchema = true),
+                    @ApiResponse(responseCode = "400", description = "Refresh Token이 유효하지 않음, 재로그인 필요")
             }
     )
+    @Parameter(name="Authorization", description = "Bearer {Refresh Token}형태", required = true)
     @PostMapping("/reissue")
     public ResponseEntity<CommonResponse<TokenResponse>> reissueToken(HttpServletRequest request) {
         String jwtHeader = request.getHeader(JwtUtil.AUTHORIZE_HEADER);
@@ -133,7 +138,7 @@ public class MemberController {
         }
 
         String jwt = JwtUtil.parseJwt(jwtHeader);
-        validateJwt(jwt);
+        jwtUtil.validateJwt(jwt);
 
         // 새로운 Refresh Token과 accessToken 재발급
         TokenResponse response = memberService.updateRefreshToken(jwt);
@@ -142,21 +147,39 @@ public class MemberController {
                 .ok(new CommonResponse<>(HttpStatus.OK, response));
     }
 
-    private void validateJwt(String jwt) {
-        if (jwt == null) {
-            throw new JwtInvalidException("refresh 토큰이 존재하지 않습니다.");
-        }
-
-        // jwt 만료 확인
-        if (jwtUtil.validateExpiredJwt(jwt)) {
-            throw new JwtInvalidException("토큰이 만료되었습니다.");
-        }
-
-        // jwt 토큰 종류 확인
-        if (!jwtUtil.getRole(jwt).equals(JwtUtil.REFRESH)) {
-            throw new JwtInvalidException("잘못된 토큰입니다.");
-        }
+    @Operation(summary = "현재 로그인 중인 유저 정보를 조회합니다.")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "Body에 유저 정보가 담인 DTO 반환",
+                    useReturnTypeSchema = true),
+            }
+    )
+    @Parameter(name="Authorization", description = "Bearer {Access Token}형태", required = true)
+    @GetMapping("/info")
+    public ResponseEntity<CommonResponse<LoginInfoResponse>> loginUserInfo(@LoginUser Member loginMember) {
+        log.info("login member = {}", loginMember);
+        LoginInfoResponse userInfo = memberService.getUserInfo(loginMember);
+        return ResponseEntity.ok((new CommonResponse<>(HttpStatus.OK, userInfo)));
     }
+
+
+    @Operation(summary = "이미지 업로드", description = "요청된 타입에 따른 사진을 저장합니다. (프로필:profile, 배경:background)")
+    @PostMapping("/image-upload")
+    @Parameter(name="Authorization", description = "Bearer {Access Token}형태", required = true)
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "Body에 이미지 저장 주소반환",
+                            useReturnTypeSchema = true),
+            }
+    )
+    public ResponseEntity<CommonResponse<ImageSaveResponse>> uploadTest(ImageUploadRequest file
+            , @LoginUser Member loginMember) {
+        ImageSaveResponse save = imageService.save(file.getImage(), loginMember);
+
+        return ResponseEntity.ok((new CommonResponse<>(HttpStatus.OK, save)));
+    }
+
+
 
 
 }

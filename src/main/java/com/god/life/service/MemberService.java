@@ -1,8 +1,10 @@
 package com.god.life.service;
 
+import com.god.life.domain.Image;
 import com.god.life.domain.Member;
 import com.god.life.domain.ProviderType;
 import com.god.life.domain.Sex;
+import com.god.life.dto.LoginInfoResponse;
 import com.god.life.dto.SignupRequest;
 import com.god.life.dto.TokenResponse;
 import com.god.life.exception.JwtInvalidException;
@@ -13,6 +15,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -63,5 +67,30 @@ public class MemberService {
 
     public boolean checkAlreadySignup(String id) {
         return memberRepository.existsByProviderId(id);
+    }
+
+    // jwt에서 DB 정보 불러올때 사진도 같이?? 아니면 유저정보가 필요할 때만???
+    // 일단 DB에서 조회하는 것오르 하자.
+    public LoginInfoResponse getUserInfo(Member loginMember) {
+        Member findMember = memberRepository.findByIdWithImage(loginMember.getId());
+
+        LoginInfoResponse response = LoginInfoResponse.builder()
+                .age(findMember.getAge())
+                .sex(findMember.getSex().getSex())
+                .nickname(findMember.getNickname())
+                .godLifeScore((int) findMember.getGodLifePoint())
+                .backgroundImage("")
+                .profileImage("").build();
+
+        List<Image> memberImages = findMember.getImages();
+        for (Image image : memberImages) {
+            if (image.getServerName().equals("profile")) {
+                response.setProfileImage(image.getServerName());
+            } else if (image.getServerName().equals("background")) {
+                response.setBackgroundImage(image.getServerName());
+            }
+        }
+
+        return response;
     }
 }
