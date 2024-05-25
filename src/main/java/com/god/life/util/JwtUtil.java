@@ -20,7 +20,7 @@ import java.util.List;
 
 
 @Component
-public class JwtUtil {
+public class    JwtUtil {
 
 
     @Value("${jwt.secret.key}")
@@ -77,6 +77,7 @@ public class JwtUtil {
                 .claim("nickname", nickname)
                 .claim("id", id)
                 .claim("type", tokenType)
+                .claim("role", "ROLE_USER")
                 .issuedAt(now)
                 .expiration(new Date(now.getTime() + time))
                 .signWith(secretKey, Jwts.SIG.HS512).compact();
@@ -107,7 +108,7 @@ public class JwtUtil {
     }
 
     public String getRole(String jwt) {
-        return getContent(jwt, "type");
+        return getContent(jwt, "role");
     }
 
     public String getTokenType(String jwt) {
@@ -151,7 +152,7 @@ public class JwtUtil {
         }
 
         // jwt 토큰 종류 확인
-        if (!getRole(jwt).equals(JwtUtil.REFRESH)) {
+        if (!getTokenType(jwt).equals(JwtUtil.REFRESH)) {
             throw new JwtInvalidException("잘못된 토큰입니다.");
         }
     }

@@ -1,4 +1,4 @@
-package com.god.life.dto;
+package com.god.life.dto.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

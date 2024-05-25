@@ -71,8 +71,8 @@ public class MemberService {
 
     // jwt에서 DB 정보 불러올때 사진도 같이?? 아니면 유저정보가 필요할 때만???
     // 일단 DB에서 조회하는 것오르 하자.
-    public LoginInfoResponse getUserInfo(Member loginMember) {
-        Member findMember = memberRepository.findByIdWithImage(loginMember.getId());
+    public LoginInfoResponse getUserInfo(Long loginMember) {
+        Member findMember = memberRepository.findByIdWithImage(loginMember);
 
         LoginInfoResponse response = LoginInfoResponse.builder()
                 .age(findMember.getAge())
@@ -90,6 +90,16 @@ public class MemberService {
                 response.setBackgroundImage(image.getServerName());
             }
         }
+
+        return response;
+    }
+
+    public TokenResponse reissueToken(String memberId) {
+        Member member = memberRepository.findByProviderId(memberId)
+                .orElseThrow(() -> new UsernameNotFoundException("회원이 존재하지 않습니다."));
+
+        TokenResponse response = jwtUtil.createToken(String.valueOf(member.getId()), member.getNickname());
+        member.updateRefreshToken(response.getRefreshToken()); // refresh 토큰 업데이트
 
         return response;
     }

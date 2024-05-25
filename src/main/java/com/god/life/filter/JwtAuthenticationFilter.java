@@ -1,7 +1,7 @@
 package com.god.life.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.god.life.dto.CommonResponse;
+import com.god.life.dto.common.CommonResponse;
 import com.god.life.token.JwtAuthenticationToken;
 import com.god.life.util.JwtUtil;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -14,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -26,10 +25,7 @@ import static com.god.life.util.JwtUtil.parseJwt;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final ObjectMapper objectMapper;
-
-
     private final AuthenticationManager manager;
-
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -57,9 +53,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 setErrorResponse(response, "토큰이 만료되었습니다.");
                 return;
             } catch (Exception exception) { // 그 외의 Token Error
-                setErrorResponse(response, "잘못된 토큰입니다. ");
+                setErrorResponse(response, "잘못된 토큰입니다.");
             }
-
         }
 
         filterChain.doFilter(request, response);

@@ -1,9 +1,14 @@
 package com.god.life.controller;
 
-import com.god.life.annotation.LoginUser;
+import com.god.life.annotation.LoginMember;
 import com.god.life.domain.Member;
-import com.god.life.dto.*;
+import com.god.life.dto.ImageSaveResponse;
+import com.god.life.dto.LoginInfoResponse;
+import com.god.life.dto.SignupRequest;
+import com.god.life.dto.TokenResponse;
+import com.god.life.dto.common.CommonResponse;
 import com.god.life.exception.JwtInvalidException;
+import com.god.life.exception.NotFoundResource;
 import com.god.life.service.ImageService;
 import com.god.life.service.MemberService;
 import com.god.life.util.JwtUtil;
@@ -22,7 +27,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -62,7 +66,7 @@ public class MemberController {
     }
 
     @Operation(summary = "가입 여부 확인")
-    @Parameter(name = "id", required = true, description = "카카오 ID")
+    @Parameter(name = "memberId", required = true, description = "카카오 ID")
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode = "200", description = "이미 가입했으면 true, 가입 가능하면 false",
@@ -70,14 +74,18 @@ public class MemberController {
             }
     )
     @GetMapping("/check/id")
-    public ResponseEntity<CommonResponse<Boolean>> checkAlreadySignup(@RequestParam(value = "id") String userId) {
-        if (!StringUtils.hasText(userId)) {
+    public ResponseEntity<CommonResponse<Object>> checkAlreadySignup(@RequestParam(value = "memberId") String memberId) {
+        if (!StringUtils.hasText(memberId)) {
             return ResponseEntity.ok().body(new CommonResponse<>(HttpStatus.BAD_REQUEST, false));
         }
 
-        // 129321819
-        // 추후 고민 필요
-        return ResponseEntity.ok().body(new CommonResponse<>(HttpStatus.OK, memberService.checkAlreadySignup(userId)));
+        boolean alreadySignup = memberService.checkAlreadySignup(memberId);
+        if(alreadySignup){
+            TokenResponse response = memberService.reissueToken(memberId);
+            return ResponseEntity.ok().body(new CommonResponse<>(HttpStatus.OK, response));
+        }
+
+        return ResponseEntity.ok().body(new CommonResponse<>(HttpStatus.OK, false));
     }
 
     @Operation(summary = "이메일 중복체크")
@@ -156,9 +164,10 @@ public class MemberController {
     )
     @Parameter(name="Authorization", description = "Bearer {Access Token}형태", required = true)
     @GetMapping("/info")
-    public ResponseEntity<CommonResponse<LoginInfoResponse>> loginUserInfo(@LoginUser Member loginMember) {
+    public ResponseEntity<CommonResponse<LoginInfoResponse>> loginUserInfo(@LoginMember Member loginMember) {
         log.info("login member = {}", loginMember);
-        LoginInfoResponse userInfo = memberService.getUserInfo(loginMember);
+
+        LoginInfoResponse userInfo = memberService.getUserInfo(loginMember.getId());
         return ResponseEntity.ok((new CommonResponse<>(HttpStatus.OK, userInfo)));
     }
 
@@ -173,13 +182,22 @@ public class MemberController {
             }
     )
     public ResponseEntity<CommonResponse<ImageSaveResponse>> uploadTest(ImageUploadRequest file
-            , @LoginUser Member loginMember) {
-        ImageSaveResponse save = imageService.save(file.getImage(), loginMember);
+            , @LoginMember Member loginMember) {
+        ImageSaveResponse save = imageService.uploadImage(file.getImage(), loginMember);
+        imageService.saveImage(save, loginMember, null);
 
         return ResponseEntity.ok((new CommonResponse<>(HttpStatus.OK, save)));
     }
 
 
+    private Long checkId(String id) {
+        Long memberId = null;
+        try {
+            memberId = Long.parseLong(id);
+        } catch (NumberFormatException ex) {
+            throw new NotFoundResource("존재하지 않는 회원입니다.");
+        }
 
-
+        return memberId;
+    }
 }

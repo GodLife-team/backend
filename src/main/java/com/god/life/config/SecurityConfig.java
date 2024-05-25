@@ -1,12 +1,11 @@
 package com.god.life.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.god.life.exception.handler.CustomAccessDeniedHandler;
+import com.god.life.exception.handler.CustomAuthenticationEntryPoint;
 import com.god.life.service.JwtAuthenticationProvider;
-import com.god.life.util.JwtUtil;
-import io.jsonwebtoken.Jwt;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -14,12 +13,14 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.access.AccessDeniedHandler;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
 
     private final ObjectMapper objectMapper;
     private final AuthenticationManagerBuilder builder;
@@ -33,17 +34,16 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain chainConfig(HttpSecurity http) throws Exception {
-
         http.csrf(AbstractHttpConfigurer::disable) // CSRF 대비 X
                         .sessionManagement(sessionConfig -> { // 세선 사용 X
                             sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
                         });
 
-
         http.authorizeHttpRequests(request -> {
             request.requestMatchers("/signup", "/check/**").permitAll();
             request.requestMatchers("/example/**").permitAll();
             request.requestMatchers("/reissue").permitAll();
+            request.requestMatchers("/admin").hasRole("ADMIN");
             request.anyRequest().authenticated();
         });
 
@@ -53,7 +53,22 @@ public class SecurityConfig {
 
         http.with(new JwtSecurityConfig(objectMapper, builder.getOrBuild()), Customizer.withDefaults());
 
+        http.exceptionHandling(exceptionConfig -> {
+            exceptionConfig.accessDeniedHandler(customAccessDeniedHandler())
+                    .authenticationEntryPoint(customAuthenticationEntryPoint());
+        });
+
         return http.build();
+    }
+
+    @Bean
+    public AccessDeniedHandler customAccessDeniedHandler() {
+        return new CustomAccessDeniedHandler(objectMapper);
+    }
+
+    @Bean
+    public AuthenticationEntryPoint customAuthenticationEntryPoint(){
+        return new CustomAuthenticationEntryPoint(objectMapper);
     }
 
     @Bean
@@ -63,5 +78,6 @@ public class SecurityConfig {
             web.ignoring().requestMatchers("/api/**", "/v3/**");
         };
     }
+
 
 }

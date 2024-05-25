@@ -3,6 +3,7 @@ package com.god.life.service;
 
 import com.god.life.dto.ImageSaveResponse;
 import com.god.life.util.FileUtil;
+import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -37,4 +41,39 @@ public class GoogleImageService implements ImageUploadService {
 
         return new ImageSaveResponse(originName, serverName);
     }
+
+    // 여러 사진 업로드
+    @Override
+    public List<ImageSaveResponse> uploads(List<MultipartFile> Images) {
+        List<ImageSaveResponse> responses = new ArrayList<>();
+
+        for (MultipartFile image : Images) {
+            try {
+                responses.add(upload(image));
+            } catch (IOException ex) {
+                for (int i = 0; i < responses.size(); i++) { //사진 업로드에 실패했으면 이전까지 업로드했던 사진 예외
+                    delete(responses.get(i).getServerName());
+                }
+                throw new IllegalStateException("사진 업로드에 실패했습니다. 다시 시도해 주세요.");
+            }
+        }
+
+        return responses;
+    }
+
+    // 사진 삭제
+    @Override
+    public void delete(String fileName) {
+        BlobId blobId = BlobId.of(bucketName, fileName);
+        storage.delete(blobId);
+    }
+
+    @Override
+    public List<String> getAllImageNames() {
+        List<String> saveImageNameInCloud = new ArrayList<>();
+        storage.list(bucketName).getValues()
+                .forEach(blob -> saveImageNameInCloud.add(blob.getName()));
+        return saveImageNameInCloud;
+    }
+
 }

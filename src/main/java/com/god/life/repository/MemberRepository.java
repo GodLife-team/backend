@@ -20,4 +20,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @Query("SELECT m from Member m join fetch m.images where m.id = :memberId")
     Member findByIdWithImage(@Param("memberId") Long memberId);
+
+    Optional<Member> findByProviderId(String providerId);
 }
