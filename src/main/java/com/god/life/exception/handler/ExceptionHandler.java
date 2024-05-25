@@ -1,6 +1,6 @@
 package com.god.life.exception;
 
-import com.god.life.dto.CommonResponse;
+import com.god.life.dto.common.CommonResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,8 +39,24 @@ public class ExceptionHandler {
 
     // JWT 에러.
     @org.springframework.web.bind.annotation.ExceptionHandler(JwtInvalidException.class)
-    public ResponseEntity<CommonResponse<String>> jwtInvalidException(JwtInvalidException exception) {
+    public ResponseEntity<CommonResponse<String>> jwtInvalidException(JwtInvalidException ex) {
         return ResponseEntity.badRequest()
-                .body(new CommonResponse<>(HttpStatus.BAD_REQUEST, "", exception.getMessage()));
+                .body(new CommonResponse<>(HttpStatus.BAD_REQUEST, "", ex.getMessage()));
     }
+
+    // 존재하지 않는 Resource(게시판 등) 조회
+    @org.springframework.web.bind.annotation.ExceptionHandler(NotFoundResource.class)
+    public ResponseEntity<CommonResponse<String>> notFoundException(NotFoundResource ex) {
+        return ResponseEntity.badRequest()
+                .body(new CommonResponse<>(HttpStatus.BAD_REQUEST, "", ex.getMessage()));
+    }
+
+    // 권한이 없는 리소스 삭제 시도
+    @org.springframework.web.bind.annotation.ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<CommonResponse<String>> forbiddenException(ForbiddenException ex) {
+        log.info("Forbidden Exception!!");
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new CommonResponse<>(HttpStatus.FORBIDDEN, "", ex.getMessage()));
+    }
+
 }
