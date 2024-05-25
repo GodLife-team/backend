@@ -1,6 +1,9 @@
-package com.god.life.exception;
+package com.god.life.exception.handler;
 
 import com.god.life.dto.common.CommonResponse;
+import com.god.life.exception.ForbiddenException;
+import com.god.life.exception.JwtInvalidException;
+import com.god.life.exception.NotFoundResource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
