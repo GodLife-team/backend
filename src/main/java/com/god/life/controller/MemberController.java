@@ -2,10 +2,7 @@ package com.god.life.controller;
 
 import com.god.life.annotation.LoginMember;
 import com.god.life.domain.Member;
-import com.god.life.dto.ImageSaveResponse;
-import com.god.life.dto.LoginInfoResponse;
-import com.god.life.dto.SignupRequest;
-import com.god.life.dto.TokenResponse;
+import com.god.life.dto.*;
 import com.god.life.dto.common.CommonResponse;
 import com.god.life.exception.JwtInvalidException;
 import com.god.life.exception.NotFoundResource;
@@ -69,7 +66,8 @@ public class MemberController {
     @Parameter(name = "memberId", required = true, description = "카카오 ID")
     @ApiResponses(
             value = {
-                    @ApiResponse(responseCode = "200", description = "이미 가입했으면 true, 가입 가능하면 false",
+                    @ApiResponse(responseCode = "200", description = "이미 가입한 경우 : Body = TokenResponse" +
+                            "가입하지 않은 경우 : Body = false",
                             useReturnTypeSchema = true)
             }
     )
@@ -81,11 +79,15 @@ public class MemberController {
 
         boolean alreadySignup = memberService.checkAlreadySignup(memberId);
         if(alreadySignup){
-            TokenResponse response = memberService.reissueToken(memberId);
+            TokenResponse token = memberService.reissueToken(memberId);
+            AlreadySignUpResponse response =
+                    new AlreadySignUpResponse(token.getAccessToken(), token.getRefreshToken(), "true");
             return ResponseEntity.ok().body(new CommonResponse<>(HttpStatus.OK, response));
         }
 
-        return ResponseEntity.ok().body(new CommonResponse<>(HttpStatus.OK, false));
+        return ResponseEntity.ok()
+                .body(new CommonResponse<>(HttpStatus.OK,
+                        new AlreadySignUpResponse("", "", "false")));
     }
 
     @Operation(summary = "이메일 중복체크")
