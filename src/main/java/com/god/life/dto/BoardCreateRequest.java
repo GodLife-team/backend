@@ -35,6 +35,7 @@ public class BoardCreateRequest {
                 .title(title)
                 .content(content)
                 .member(loginMember)
+                .tag(tags)
                 .build();
     }
 

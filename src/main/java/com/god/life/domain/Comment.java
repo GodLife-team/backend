@@ -11,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @AllArgsConstructor
-public class Comment {
+public class Comment extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,5 +39,7 @@ public class Comment {
     private List<Comment> child = new ArrayList<>();
 
 
-
+    public void updateComment(String comment) {
+        this.replyContent = comment;
+    }
 }

@@ -1,4 +1,4 @@
-package com.god.life.exception.handler;
+package com.god.life.error.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.god.life.dto.common.CommonResponse;

@@ -3,7 +3,7 @@ package com.god.life.board;
 
 import com.god.life.domain.*;
 import com.god.life.dto.ImageSaveResponse;
-import com.god.life.exception.ForbiddenException;
+import com.god.life.error.ForbiddenException;
 import com.god.life.mockuser.MockUserCustom;
 import com.god.life.repository.BoardRepository;
 import com.god.life.repository.ImageRepository;

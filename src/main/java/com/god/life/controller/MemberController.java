@@ -4,9 +4,10 @@ import com.god.life.annotation.LoginMember;
 import com.god.life.domain.Member;
 import com.god.life.dto.*;
 import com.god.life.dto.common.CommonResponse;
-import com.god.life.exception.JwtInvalidException;
-import com.god.life.exception.NotFoundResource;
+import com.god.life.error.JwtInvalidException;
+import com.god.life.error.NotFoundResource;
 import com.god.life.service.ImageService;
+import com.god.life.service.ImageUploadService;
 import com.god.life.service.MemberService;
 import com.god.life.util.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,9 +22,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,6 +38,7 @@ public class MemberController {
     private final MemberService memberService;
     private final JwtUtil jwtUtil;
     private final ImageService imageService;
+    private final ImageUploadService imageUploadService;
 
     @Operation(summary = "닉네임 중복체크")
     @Parameter(name = "nickname", required = true, description = "중복을 확인할 닉네임")
@@ -66,28 +71,27 @@ public class MemberController {
     @Parameter(name = "memberId", required = true, description = "카카오 ID")
     @ApiResponses(
             value = {
-                    @ApiResponse(responseCode = "200", description = "이미 가입한 경우 : Body = TokenResponse" +
-                            "가입하지 않은 경우 : Body = false",
+                    @ApiResponse(responseCode = "200", description = "이미 가입한 경우 : alreadySignup = true \t\n 가입하지 않은 경우 : alreadySignup : false",
                             useReturnTypeSchema = true)
             }
     )
     @GetMapping("/check/id")
-    public ResponseEntity<CommonResponse<Object>> checkAlreadySignup(@RequestParam(value = "memberId") String memberId) {
+    public ResponseEntity<CommonResponse<AlreadySignUpResponse>> checkAlreadySignup(@RequestParam(value = "memberId") String memberId) {
+        AlreadySignUpResponse response = new AlreadySignUpResponse("", "", "false");
+
         if (!StringUtils.hasText(memberId)) {
-            return ResponseEntity.ok().body(new CommonResponse<>(HttpStatus.BAD_REQUEST, false));
+            return ResponseEntity.ok().body(new CommonResponse<>(HttpStatus.BAD_REQUEST, response));
         }
 
         boolean alreadySignup = memberService.checkAlreadySignup(memberId);
-        if(alreadySignup){
+        if (alreadySignup) {
             TokenResponse token = memberService.reissueToken(memberId);
-            AlreadySignUpResponse response =
-                    new AlreadySignUpResponse(token.getAccessToken(), token.getRefreshToken(), "true");
+            response.updateResponse(token, "true");
             return ResponseEntity.ok().body(new CommonResponse<>(HttpStatus.OK, response));
         }
 
         return ResponseEntity.ok()
-                .body(new CommonResponse<>(HttpStatus.OK,
-                        new AlreadySignUpResponse("", "", "false")));
+                .body(new CommonResponse<>(HttpStatus.OK, response));
     }
 
     @Operation(summary = "이메일 중복체크")
@@ -175,7 +179,7 @@ public class MemberController {
 
 
     @Operation(summary = "이미지 업로드", description = "요청된 타입에 따른 사진을 저장합니다. (프로필:profile, 배경:background)")
-    @PostMapping("/image-upload")
+    @PostMapping(value = "/image-upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Parameter(name="Authorization", description = "Bearer {Access Token}형태", required = true)
     @ApiResponses(
             value = {
@@ -183,12 +187,17 @@ public class MemberController {
                             useReturnTypeSchema = true),
             }
     )
-    public ResponseEntity<CommonResponse<ImageSaveResponse>> uploadTest(ImageUploadRequest file
-            , @LoginMember Member loginMember) {
-        ImageSaveResponse save = imageService.uploadImage(file.getImage(), loginMember);
-        imageService.saveImage(save, loginMember, null);
+    public ResponseEntity<CommonResponse<ImageSaveResponse>> profileUpload(
+            @ModelAttribute ImageUploadRequest uploadRequest
+            ,@LoginMember Member loginMember) throws IOException {
 
-        return ResponseEntity.ok((new CommonResponse<>(HttpStatus.OK, save)));
+        //ImageSaveResponse save = imageService.uploadImage(file.getImage(), loginMember);
+        ImageSaveResponse response = imageUploadService.upload(uploadRequest.getImage());
+        response.setServerName(uploadRequest.getImageType() + response.getServerName());
+        imageService.saveImage(response, loginMember, null);
+        response.setServerName(response.getServerName().substring(uploadRequest.imageType.length()));
+
+        return ResponseEntity.ok((new CommonResponse<>(HttpStatus.OK, response)));
     }
 
 

@@ -1,9 +1,9 @@
-package com.god.life.exception.handler;
+package com.god.life.error.handler;
 
 import com.god.life.dto.common.CommonResponse;
-import com.god.life.exception.ForbiddenException;
-import com.god.life.exception.JwtInvalidException;
-import com.god.life.exception.NotFoundResource;
+import com.god.life.error.ForbiddenException;
+import com.god.life.error.JwtInvalidException;
+import com.god.life.error.NotFoundResource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +11,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -57,9 +58,25 @@ public class ExceptionHandler {
     // 권한이 없는 리소스 삭제 시도
     @org.springframework.web.bind.annotation.ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<CommonResponse<String>> forbiddenException(ForbiddenException ex) {
-        log.info("Forbidden Exception!!");
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(new CommonResponse<>(HttpStatus.FORBIDDEN, "", ex.getMessage()));
     }
+
+    //파일 업로드 크기 에러
+    @org.springframework.web.bind.annotation.ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<CommonResponse<String>> multipartException(MaxUploadSizeExceededException ex) {
+        log.error("MaxUploadSizeExceededException", ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new CommonResponse<>(HttpStatus.BAD_REQUEST, "", "크기가 3MB이하 이미지만 업로드할 수 있습니다."));
+    }
+
+    // 그 외의 에러
+    @org.springframework.web.bind.annotation.ExceptionHandler(Exception.class)
+    public ResponseEntity<CommonResponse<String>> defaultException(Exception exception) {
+        log.error("exception Full Trace : ", exception);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new CommonResponse<>(HttpStatus.INTERNAL_SERVER_ERROR, "", "서버 내부 오류입니다."));
+    }
+
 
 }

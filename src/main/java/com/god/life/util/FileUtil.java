@@ -1,9 +1,8 @@
 package com.god.life.util;
 
-import com.god.life.exception.ForbiddenException;
+import com.god.life.error.ForbiddenException;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 

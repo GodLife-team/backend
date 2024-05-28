@@ -2,6 +2,7 @@ package com.god.life.dto;
 
 
 import com.god.life.domain.Image;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,7 +12,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ImageSaveResponse {
 
+    @Schema(description = "원본 이미지 이름")
     private String originalName; // 원본 이름
+
+    @Schema(description = "서버에 저장한 이미지 이름")
     private String serverName;  // 서버 저장 이름
 
 

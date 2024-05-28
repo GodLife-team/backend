@@ -16,4 +16,9 @@ public class AlreadySignUpResponse extends TokenResponse {
         this.alreadySignUp = alreadySignUp;
     }
 
+    public void updateResponse(TokenResponse token, String check) {
+        alreadySignUp = check;
+        accessToken = token.getAccessToken();
+        refreshToken = token.getRefreshToken();
+    }
 }

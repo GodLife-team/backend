@@ -1,7 +1,7 @@
 package com.god.life.util;
 
 import com.god.life.dto.TokenResponse;
-import com.god.life.exception.JwtInvalidException;
+import com.god.life.error.JwtInvalidException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -16,7 +16,6 @@ import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
-import java.util.List;
 
 
 @Component

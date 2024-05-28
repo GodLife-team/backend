@@ -1,4 +1,4 @@
-package com.god.life.exception;
+package com.god.life.error;
 
 public class NotFoundResource extends RuntimeException {
 

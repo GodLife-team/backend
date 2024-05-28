@@ -1,8 +1,8 @@
 package com.god.life.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.god.life.exception.handler.CustomAccessDeniedHandler;
-import com.god.life.exception.handler.CustomAuthenticationEntryPoint;
+import com.god.life.error.handler.CustomAccessDeniedHandler;
+import com.god.life.error.handler.CustomAuthenticationEntryPoint;
 import com.god.life.service.JwtAuthenticationProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

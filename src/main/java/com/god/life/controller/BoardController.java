@@ -6,16 +6,19 @@ import com.god.life.dto.BoardCreateRequest;
 import com.god.life.dto.BoardResponse;
 import com.god.life.dto.ImageSaveResponse;
 import com.god.life.dto.common.CommonResponse;
-import com.god.life.exception.NotFoundResource;
+import com.god.life.error.NotFoundResource;
 import com.god.life.service.BoardService;
 import com.god.life.service.ImageService;
 import com.god.life.service.ImageUploadService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,7 +40,8 @@ public class BoardController {
                             useReturnTypeSchema = true)
             }
     )
-    @PostMapping("/board")
+    @PostMapping(value = "/board", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponse<Long>> createBoard(@ModelAttribute BoardCreateRequest request,
                                                             @LoginMember Member member) {
 
@@ -74,8 +78,9 @@ public class BoardController {
                             useReturnTypeSchema = true)
             }
     )
-    @PutMapping("/board/{id}")
-    public ResponseEntity<CommonResponse<BoardResponse>> updateBoard(@PathVariable(name = "id") String id,
+    @PutMapping(value = "/board/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<CommonResponse<Long>> updateBoard(@PathVariable(name = "id") String id,
                                                                      @ModelAttribute BoardCreateRequest request,
                                                                      @LoginMember Member member) {
         Long boardId = checkId(id);
@@ -87,7 +92,7 @@ public class BoardController {
         BoardResponse boardResponse = boardService.updateBoard(boardId, images, request, member);
         boardResponse.setImagesURL(images.stream().map(ImageSaveResponse::getServerName).toList());
 
-        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, boardResponse));
+        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, boardId));
     }
 
     @Operation(summary = "게시판 삭제")
@@ -107,6 +112,20 @@ public class BoardController {
         imageService.deleteImages(boardId); //기존 이미지 삭제
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK,boardService.deleteBoard(boardId), ""));
     }
+
+
+//    @GetMapping("/boards")
+//    @ApiResponses(
+//            value = {
+//                    @ApiResponse(responseCode = "200", description = "최신 게시판 조회",
+//                     content = @Content(schema = @Schema(implementation = List.class)),
+//                    useReturnTypeSchema = true)
+//            }
+//    )
+//    public ResponseEntity<CommonResponse<List<BoardResponse>>> getBoardList(
+//            @ModelAttribute
+//
+//    )
 
 
     private Long checkId(String id) {

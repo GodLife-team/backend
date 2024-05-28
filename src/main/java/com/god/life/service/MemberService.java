@@ -2,12 +2,10 @@ package com.god.life.service;
 
 import com.god.life.domain.Image;
 import com.god.life.domain.Member;
-import com.god.life.domain.ProviderType;
-import com.god.life.domain.Sex;
 import com.god.life.dto.LoginInfoResponse;
 import com.god.life.dto.SignupRequest;
 import com.god.life.dto.TokenResponse;
-import com.god.life.exception.JwtInvalidException;
+import com.god.life.error.JwtInvalidException;
 import com.god.life.repository.MemberRepository;
 import com.god.life.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +13,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -84,10 +81,10 @@ public class MemberService {
 
         List<Image> memberImages = findMember.getImages();
         for (Image image : memberImages) {
-            if (image.getServerName().equals("profile")) {
-                response.setProfileImage(image.getServerName());
-            } else if (image.getServerName().equals("background")) {
-                response.setBackgroundImage(image.getServerName());
+            if (image.getServerName().startsWith("profile")) {
+                response.setProfileImage(image.getServerName().substring("profile".length()));
+            } else if (image.getServerName().startsWith("background")) {
+                response.setBackgroundImage(image.getServerName().substring("background".length()));
             }
         }
 

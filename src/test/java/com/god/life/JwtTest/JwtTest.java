@@ -1,9 +1,8 @@
 package com.god.life.JwtTest;
 
-import com.god.life.exception.JwtInvalidException;
+import com.god.life.error.JwtInvalidException;
 import com.god.life.util.JwtUtil;
 import io.jsonwebtoken.Claims;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
