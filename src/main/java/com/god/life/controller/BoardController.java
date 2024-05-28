@@ -2,9 +2,7 @@ package com.god.life.controller;
 
 import com.god.life.annotation.LoginMember;
 import com.god.life.domain.Member;
-import com.god.life.dto.BoardCreateRequest;
-import com.god.life.dto.BoardResponse;
-import com.god.life.dto.ImageSaveResponse;
+import com.god.life.dto.*;
 import com.god.life.dto.common.CommonResponse;
 import com.god.life.error.NotFoundResource;
 import com.god.life.service.BoardService;
@@ -16,10 +14,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,6 +28,7 @@ import java.util.List;
 @Tag(name = "게시판 업로드 관련 API", description = "게시판 CRUD API입니다.")
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class BoardController {
 
     private final BoardService boardService;
@@ -114,18 +116,22 @@ public class BoardController {
     }
 
 
-//    @GetMapping("/boards")
-//    @ApiResponses(
-//            value = {
-//                    @ApiResponse(responseCode = "200", description = "최신 게시판 조회",
-//                     content = @Content(schema = @Schema(implementation = List.class)),
-//                    useReturnTypeSchema = true)
-//            }
-//    )
-//    public ResponseEntity<CommonResponse<List<BoardResponse>>> getBoardList(
-//            @ModelAttribute
-//
-//    )
+    @GetMapping("/boards")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "최신 게시판 조회",
+                     content = @Content(schema = @Schema(implementation = List.class)),
+                    useReturnTypeSchema = true)
+            }
+    )
+    public ResponseEntity<CommonResponse<List<BoardSearchResponse>>> getBoardList(
+            @Valid @ModelAttribute BoardSearchRequest boardSearchRequest) {
+        log.info("requestDTO = {}", boardSearchRequest);
+
+        List<BoardSearchResponse> boardList = boardService.getBoardList(boardSearchRequest);
+
+        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, boardList));
+    }
 
 
     private Long checkId(String id) {

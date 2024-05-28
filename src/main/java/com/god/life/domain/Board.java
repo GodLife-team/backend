@@ -43,7 +43,7 @@ public class Board extends BaseEntity{
     private List<Comment> comments = new ArrayList<>();
 
     @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
-    private List<Image> boards = new ArrayList<>();
+    private List<Image> images = new ArrayList<>();
 
     public void updateBoard(BoardCreateRequest request) {
         this.title = request.getTitle();

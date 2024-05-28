@@ -2,13 +2,15 @@ package com.god.life.service;
 
 import com.god.life.domain.Board;
 import com.god.life.domain.Member;
-import com.god.life.dto.BoardCreateRequest;
-import com.god.life.dto.BoardResponse;
-import com.god.life.dto.ImageSaveResponse;
+import com.god.life.dto.*;
 import com.god.life.error.ForbiddenException;
 import com.god.life.error.NotFoundResource;
 import com.god.life.repository.BoardRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +23,7 @@ public class BoardService {
 
     private final BoardRepository boardRepository;
     private final ImageService imageService;
+    private static final int PAGE_SIZE = 10;
 
     @Transactional
     public Long createBoard(BoardCreateRequest request, Member loginMember, List<ImageSaveResponse> uploadResponse) {
@@ -73,5 +76,24 @@ public class BoardService {
     public boolean deleteBoard(Long boardId) {
         boardRepository.deleteById(boardId);
         return true;
+    }
+
+    @Transactional(readOnly = true)
+    public List<BoardSearchResponse> getBoardList(BoardSearchRequest boardSearchRequest) {
+        Pageable pageable =
+                PageRequest
+                        .of((boardSearchRequest.getPage() - 1), 10, Sort.by("createDate").descending());
+
+        Page<Board> pagingBoard = boardRepository.findByBoardfetchjoin(pageable);
+
+        List<Board> boards = pagingBoard.getContent();
+
+        boards.stream()
+                .forEach(b -> {
+                    b.getComments();
+                    b.getImages();
+                });
+
+        return boards.stream().map(b -> BoardSearchResponse.of(b, false)).toList();
     }
 }

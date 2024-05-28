@@ -7,6 +7,7 @@ import com.god.life.error.NotFoundResource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -25,15 +26,25 @@ public class ExceptionHandler {
     @org.springframework.web.bind.annotation.ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<CommonResponse<Map<String, String>>> methodNotValidException(MethodArgumentNotValidException ex) {
         log.info("캐스팅 실패..");
-        Map<String, String> errors = parsingError(ex);
+        Map<String, String> errors = parsingError(ex.getBindingResult());
 
         return ResponseEntity.badRequest().body(
                 new CommonResponse<>(HttpStatus.BAD_REQUEST, errors, "잘못된 값이 있습니다."));
     }
 
-    private Map<String, String> parsingError(MethodArgumentNotValidException ex) {
+    // bind Exception
+    @org.springframework.web.bind.annotation.ExceptionHandler(BindException.class)
+    public ResponseEntity<CommonResponse<Map<String, String>>> bindExceptionHandler(BindException ex) {
+        log.info("캐스팅 실패..");
+        Map<String, String> errors = parsingError(ex.getBindingResult());
+
+        return ResponseEntity.badRequest().body(
+                new CommonResponse<>(HttpStatus.BAD_REQUEST, errors, "잘못된 값이 있습니다."));
+    }
+
+    private Map<String, String> parsingError(BindingResult bindingResult) {
+
         Map<String, String> result = new HashMap<>();
-        final BindingResult bindingResult = ex.getBindingResult();
         bindingResult.getAllErrors().forEach(
                 error -> result.put(((FieldError) error).getField(), error.getDefaultMessage())
         );

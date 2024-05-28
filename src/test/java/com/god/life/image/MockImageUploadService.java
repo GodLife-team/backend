@@ -1,6 +1,7 @@
 package com.god.life.image;
 
 import com.god.life.dto.ImageSaveResponse;
+import com.god.life.error.ForbiddenException;
 import com.god.life.service.ImageUploadService;
 import com.god.life.util.FileUtil;
 import com.google.cloud.storage.BlobInfo;
@@ -40,7 +41,7 @@ public class MockImageUploadService implements ImageUploadService  {
                 for (int i = 0; i < responses.size(); i++) { //사진 업로드에 실패했으면 이전까지 업로드했던 사진 예외
                     delete(responses.get(i).getServerName());
                 }
-                throw new IllegalArgumentException("사진 업로드에 실패했습니다. 다시 시도해 주세요.");
+                throw new ForbiddenException("사진 업로드에 실패했습니다. 다시 시도해 주세요.");
             }
         }
 
