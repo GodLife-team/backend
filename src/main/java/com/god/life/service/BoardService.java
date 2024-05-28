@@ -92,7 +92,9 @@ public class BoardService {
                 .forEach(b -> {
                     b.getComments();
                     b.getImages();
+                    b.getMember().getImages();
                 });
+
 
         return boards.stream().map(b -> BoardSearchResponse.of(b, false)).toList();
     }

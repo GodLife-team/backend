@@ -45,10 +45,22 @@ public class BoardSearchResponse {
 
     @Schema(description = "제목")
     private String title;
+
+    @Schema(description = "댓글 개수")
     private int commentCount; //댓글 개수
 
+    @Schema(description = "닉네임")
+    private String nickname;
+
+    @Schema(description = "프로필URL")
+    private String profileURL;
+
+    @Schema(description = "티어")
+    private String tier;
+
+
     public static BoardSearchResponse of(Board board, boolean isOwner) {
-        return BoardSearchResponse.builder()
+        BoardSearchResponse response = BoardSearchResponse.builder()
                 .board_id(board.getId())
                 .body(board.getContent())
                 .isBoardOwner(isOwner)
@@ -59,6 +71,19 @@ public class BoardSearchResponse {
                 .godScore(board.getTotalScore())
                 .imagesURL(board.getImages().stream().map(Image::getServerName).toList())
                 .commentCount(board.getComments().size())
+                .nickname(board.getMember().getNickname())
+                .tier("브론즈")
                 .build();
+
+        String profileURL = "";
+        List<Image> memberImages = board.getMember().getImages();
+        for (Image image : memberImages) {
+            if (image.getServerName().startsWith("profile")) {
+                profileURL = image.getServerName().substring("profile".length());
+            }
+        }
+        
+        response.setProfileURL(profileURL);
+        return response;
     }
 }

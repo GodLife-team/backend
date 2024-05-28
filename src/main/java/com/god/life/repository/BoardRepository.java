@@ -20,7 +20,7 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
     Optional<Board> findByIdWithMember(@Param("boardId") Long boardId);
 
 
-    @Query(value = "select b from Board b", countQuery = "select count(b) from Board b")
+    @Query(value = "select b from Board b join fetch b.member", countQuery = "select count(b) from Board b join b.member")
     Page<Board> findByBoardfetchjoin(Pageable pageable);
 
 }
