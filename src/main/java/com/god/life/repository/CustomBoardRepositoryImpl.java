@@ -34,6 +34,7 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
                 .where(keywordParam(boardSearchRequest.getKeyword()),tagsParam(boardSearchRequest.getTags()))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
+                .orderBy(board.createDate.desc())
                 .fetch();
 
         Long count = queryFactory.select(board.count())
