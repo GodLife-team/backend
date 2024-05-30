@@ -15,11 +15,13 @@ import lombok.NoArgsConstructor;
 public class BoardSearchRequest {
 
 
-    @Positive(message = "{BoardSearchRequest.page}")
-    Integer page;
+    @Positive(message = "페이지 번호는 자연수여야 합니다.")
+    Integer page = 0;
 
     String keyword;
 
     String tags;
+
+    String nickname;
 
 }

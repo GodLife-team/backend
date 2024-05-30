@@ -55,7 +55,7 @@ public class ImageUploadTest {
         MultipartFile mockFile = mock(MultipartFile.class);
         when(mockFile.getOriginalFilename()).thenReturn("file1.mp4");
 
-        Exception exception = Assertions.assertThrows(IllegalArgumentException.class, () -> {
+        Exception exception = Assertions.assertThrows(ForbiddenException.class, () -> {
             mockImageUploadService.upload(mockFile);
         });
 

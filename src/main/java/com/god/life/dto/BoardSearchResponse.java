@@ -58,7 +58,6 @@ public class BoardSearchResponse {
     @Schema(description = "티어")
     private String tier;
 
-
     public static BoardSearchResponse of(Board board, boolean isOwner) {
         BoardSearchResponse response = BoardSearchResponse.builder()
                 .board_id(board.getId())
@@ -66,7 +65,7 @@ public class BoardSearchResponse {
                 .isBoardOwner(isOwner)
                 .views(board.getView())
                 .title(board.getTitle())
-                .tags(board.getTag())
+                .tags(board.toListTag())
                 .writtenAt(DateUtil.formattingTimeDifference(board.getCreateDate()))
                 .godScore(board.getTotalScore())
                 .imagesURL(board.getImages().stream().map(Image::getServerName).toList())

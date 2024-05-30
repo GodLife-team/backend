@@ -119,7 +119,7 @@ public class BoardController {
     @GetMapping("/boards")
     @ApiResponses(
             value = {
-                    @ApiResponse(responseCode = "200", description = "최신 게시판 조회",
+                    @ApiResponse(responseCode = "200", description = "최신 게시판 검색 조회",
                      content = @Content(schema = @Schema(implementation = List.class)),
                     useReturnTypeSchema = true)
             }

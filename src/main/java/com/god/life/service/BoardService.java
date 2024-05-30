@@ -78,14 +78,34 @@ public class BoardService {
         return true;
     }
 
+//    @Transactional(readOnly = true)
+//    public List<BoardSearchResponse> getBoardList(BoardSearchRequest boardSearchRequest) {
+//        Pageable pageable =
+//                PageRequest
+//                        .of((boardSearchRequest.getPage() - 1), 10, Sort.by("createDate").descending());
+//
+//        Page<Board> pagingBoard = boardRepository.findByBoardfetchjoin(pageable);
+//
+//        List<Board> boards = pagingBoard.getContent();
+//
+//        boards.stream()
+//                .forEach(b -> {
+//                    b.getComments();
+//                    b.getImages();
+//                    b.getMember().getImages();
+//                });
+//
+//
+//        return boards.stream().map(b -> BoardSearchResponse.of(b, false)).toList();
+//    }
+
     @Transactional(readOnly = true)
     public List<BoardSearchResponse> getBoardList(BoardSearchRequest boardSearchRequest) {
         Pageable pageable =
                 PageRequest
                         .of((boardSearchRequest.getPage() - 1), 10, Sort.by("createDate").descending());
 
-        Page<Board> pagingBoard = boardRepository.findByBoardfetchjoin(pageable);
-
+        Page<Board> pagingBoard = boardRepository.findBoardWithSearchRequest(boardSearchRequest, pageable);
         List<Board> boards = pagingBoard.getContent();
 
         boards.stream()
@@ -95,6 +115,11 @@ public class BoardService {
                     b.getMember().getImages();
                 });
 
+        if (boardSearchRequest.getNickname() != null && !boardSearchRequest.getNickname().isBlank()) {
+            return boards.stream().
+                    filter(b -> b.getMember().getNickname().equals(boardSearchRequest.getNickname()))
+                    .map(b -> BoardSearchResponse.of(b, false)).toList();
+        }
 
         return boards.stream().map(b -> BoardSearchResponse.of(b, false)).toList();
     }

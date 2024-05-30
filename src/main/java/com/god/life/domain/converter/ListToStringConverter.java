@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@Converter
+//@Converter
 public class ListToStringConverter implements AttributeConverter<List<String>, String> {
 
     @Override

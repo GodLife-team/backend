@@ -53,7 +53,7 @@ public class BoardResponse {
                 .isBoardOwner(isOwner)
                 .views(board.getView())
                 .title(board.getTitle())
-                .tags(board.getTag())
+                .tags(board.toListTag())
                 .writtenAt(board.getCreateDate().toLocalDate())
                 .godScore(board.getTotalScore()).build();
     }
