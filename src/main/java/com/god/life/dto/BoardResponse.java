@@ -1,6 +1,7 @@
 package com.god.life.dto;
 
 import com.god.life.domain.Board;
+import com.god.life.domain.Image;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -45,16 +46,41 @@ public class BoardResponse {
     @Schema(description = "제목")
     private String title;
 
+    @Schema(description = "닉네임")
+    private String nickname;
+
+    @Schema(description = "자기소개")
+    private String whoAmI;
+
+    @Schema(description = "프로필이미지")
+    private String profileURL;
+
+    @Schema(description = "작성자 티어")
+    private String tier;
 
     public static BoardResponse of(Board board, Boolean isOwner) {
-        return BoardResponse.builder()
+        BoardResponse response = BoardResponse.builder()
                 .board_id(board.getId())
                 .body(board.getContent())
                 .isBoardOwner(isOwner)
                 .views(board.getView())
                 .title(board.getTitle())
                 .tags(board.toListTag())
+                .nickname(board.getMember().getNickname())
+                .whoAmI(board.getMember().getWhoAmI())
                 .writtenAt(board.getCreateDate().toLocalDate())
+                .tier("브론즈")
                 .godScore(board.getTotalScore()).build();
+
+        String profileURL = "";
+        List<Image> memberImages = board.getMember().getImages();
+        for (Image image : memberImages) {
+            if (image.getServerName().startsWith("profile")) {
+                profileURL = image.getServerName().substring("profile".length());
+            }
+        }
+
+        response.setProfileURL(profileURL);
+        return response;
     }
 }

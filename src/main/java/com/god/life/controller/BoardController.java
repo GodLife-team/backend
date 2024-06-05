@@ -117,10 +117,11 @@ public class BoardController {
 
 
     @GetMapping("/boards")
+    @Operation(summary = "검색 조건에 따른 최신 게시물 조회")
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode = "200", description = "최신 게시판 검색 조회",
-                     content = @Content(schema = @Schema(implementation = List.class)),
+                     //content = @Content(schema = @Schema(implementation = List.class)),
                     useReturnTypeSchema = true)
             }
     )
