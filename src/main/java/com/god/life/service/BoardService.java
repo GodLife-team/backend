@@ -21,9 +21,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BoardService {
 
+    private static final int PAGE_SIZE = 10;
+
     private final BoardRepository boardRepository;
     private final ImageService imageService;
-    private static final int PAGE_SIZE = 10;
+    private final GodLifeScoreService godLifeScoreService;
+
 
     @Transactional
     public Long createBoard(BoardCreateRequest request, Member loginMember, List<ImageSaveResponse> uploadResponse) {
@@ -40,13 +43,16 @@ public class BoardService {
     }
 
 
+    @Transactional
     public BoardResponse detailBoard(Long boardId, Member loginMember) {
         Board board = boardRepository.findByIdWithMember(boardId)
                 .orElseThrow(() -> new NotFoundResource("존재하지 않는 게시판입니다."));
 
+        board.increaseViewCount();
         boolean isOwner = board.getMember().getId().equals(loginMember.getId()); // 작성자와 현재 로그인한 사람이 동일인인지
+        boolean memberLikedBoard = godLifeScoreService.isMemberLikedBoard(board, loginMember);
 
-        return BoardResponse.of(board, isOwner);
+        return BoardResponse.of(board, isOwner, memberLikedBoard);
     }
 
     public void checkAuthorization(Member member, Long boardId) {
@@ -68,8 +74,9 @@ public class BoardService {
         }
 
         board.updateBoard(request);
+        boolean memberLikedBoard = godLifeScoreService.isMemberLikedBoard(board, loginMember);
 
-        return BoardResponse.of(board, true);
+        return BoardResponse.of(board, true, memberLikedBoard);
     }
 
     @Transactional
@@ -103,7 +110,7 @@ public class BoardService {
     public List<BoardSearchResponse> getBoardList(BoardSearchRequest boardSearchRequest) {
         Pageable pageable =
                 PageRequest
-                        .of((boardSearchRequest.getPage() - 1), 10, Sort.by("createDate").descending());
+                        .of((boardSearchRequest.getPage() - 1), PAGE_SIZE, Sort.by("createDate").descending());
 
         Page<Board> pagingBoard = boardRepository.findBoardWithSearchRequest(boardSearchRequest, pageable);
         List<Board> boards = pagingBoard.getContent();
@@ -115,7 +122,8 @@ public class BoardService {
                     b.getMember().getImages();
                 });
 
-        if (boardSearchRequest.getNickname() != null && !boardSearchRequest.getNickname().isBlank()) {
+        boolean SearchQueryContainNickname = (boardSearchRequest.getNickname() != null && !boardSearchRequest.getNickname().isBlank());
+        if (SearchQueryContainNickname) {
             return boards.stream().
                     filter(b -> b.getMember().getNickname().equals(boardSearchRequest.getNickname()))
                     .map(b -> BoardSearchResponse.of(b, false)).toList();

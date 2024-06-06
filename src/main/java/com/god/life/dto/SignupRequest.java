@@ -43,6 +43,7 @@ public class SignupRequest {
                 .godLifePoint(0L)
                 .providerName(ProviderType.KAKAO)
                 .providerId(request.getProviderId())
+                .whoAmI("") //가입할땐 빈 문자열로 전달
                 .nickname(request.getNickname()).build();
     }
 

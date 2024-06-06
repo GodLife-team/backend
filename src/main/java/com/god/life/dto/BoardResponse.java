@@ -58,7 +58,10 @@ public class BoardResponse {
     @Schema(description = "작성자 티어")
     private String tier;
 
-    public static BoardResponse of(Board board, Boolean isOwner) {
+    @Schema(description = "이미 해당 게시물에 좋아요를 눌렀는지")
+    private boolean memberLikedBoard;
+
+    public static BoardResponse of(Board board, Boolean isOwner, boolean likedBoard) {
         BoardResponse response = BoardResponse.builder()
                 .board_id(board.getId())
                 .body(board.getContent())
@@ -70,7 +73,8 @@ public class BoardResponse {
                 .whoAmI(board.getMember().getWhoAmI())
                 .writtenAt(board.getCreateDate().toLocalDate())
                 .tier("브론즈")
-                .godScore(board.getTotalScore()).build();
+                .godScore(board.getTotalScore())
+                .memberLikedBoard(likedBoard).build();
 
         String profileURL = "";
         List<Image> memberImages = board.getMember().getImages();

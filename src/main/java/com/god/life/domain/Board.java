@@ -63,4 +63,7 @@ public class Board extends BaseEntity{
     }
 
 
+    public void increaseViewCount() {
+        this.view += 1;
+    }
 }

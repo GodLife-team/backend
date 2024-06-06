@@ -6,6 +6,7 @@ import com.god.life.dto.*;
 import com.god.life.dto.common.CommonResponse;
 import com.god.life.error.NotFoundResource;
 import com.god.life.service.BoardService;
+import com.god.life.service.GodLifeScoreService;
 import com.god.life.service.ImageService;
 import com.god.life.service.ImageUploadService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,6 +35,7 @@ public class BoardController {
     private final BoardService boardService;
     private final ImageService imageService;
     private final ImageUploadService imageUploadService;
+    private final GodLifeScoreService godLifeScoreService;
 
     @Operation(summary = "게시판 생성")
     @ApiResponses(
@@ -69,6 +71,8 @@ public class BoardController {
         BoardResponse boardResponse = boardService.detailBoard(boardId, member);
         List<ImageSaveResponse> images = imageService.findImages(boardId);
         boardResponse.setImagesURL(images.stream().map(ImageSaveResponse::getServerName).toList());
+        int godLifeScore = godLifeScoreService.calculateGodLifeScore(boardId);
+        boardResponse.setGodScore(godLifeScore);
 
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, boardResponse));
     }
