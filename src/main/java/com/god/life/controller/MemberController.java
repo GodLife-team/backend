@@ -6,6 +6,7 @@ import com.god.life.dto.*;
 import com.god.life.dto.common.CommonResponse;
 import com.god.life.error.JwtInvalidException;
 import com.god.life.error.NotFoundResource;
+import com.god.life.service.GodLifeScoreService;
 import com.god.life.service.ImageService;
 import com.god.life.service.ImageUploadService;
 import com.god.life.service.MemberService;
@@ -39,6 +40,7 @@ public class MemberController {
     private final JwtUtil jwtUtil;
     private final ImageService imageService;
     private final ImageUploadService imageUploadService;
+    private final GodLifeScoreService godLifeScoreService;
 
     @Operation(summary = "닉네임 중복체크")
     @Parameter(name = "nickname", required = true, description = "중복을 확인할 닉네임")
@@ -169,11 +171,15 @@ public class MemberController {
             }
     )
     @Parameter(name="Authorization", description = "Bearer {Access Token}형태", required = true)
-    @GetMapping("/info")
+    @GetMapping("/member")
     public ResponseEntity<CommonResponse<LoginInfoResponse>> loginUserInfo(@LoginMember Member loginMember) {
         log.info("login member = {}", loginMember);
 
         LoginInfoResponse userInfo = memberService.getUserInfo(loginMember.getId());
+        // 로그인 한 유저 갓생점수 가져오기
+        Integer memberScore = godLifeScoreService.calculateGodLifeScoreMember(loginMember);
+        userInfo.setGodLifeScore(memberScore);
+
         return ResponseEntity.ok((new CommonResponse<>(HttpStatus.OK, userInfo)));
     }
 
@@ -198,6 +204,20 @@ public class MemberController {
         response.setServerName(response.getServerName().substring(uploadRequest.imageType.length()));
 
         return ResponseEntity.ok((new CommonResponse<>(HttpStatus.OK, response)));
+    }
+
+    @Operation(summary = "자기소개 변경")
+    @PatchMapping("/member")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "변경 성공시 body에 true, 실패시 false",
+                            useReturnTypeSchema = true),
+            }
+    )
+    public ResponseEntity<CommonResponse<Boolean>> modifyWhoAmI(@LoginMember Member member,
+                                       @RequestBody ModifyWhoAmIRequest modifyWhoAmIRequest) {
+
+        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, memberService.updateWhoAmI(member.getId(), modifyWhoAmIRequest)));
     }
 
 

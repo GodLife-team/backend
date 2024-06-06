@@ -51,8 +51,13 @@ public class GodLifeScoreService {
     }
 
     @Transactional(readOnly = true)
-    public int calculateGodLifeScore(Long boardId) {
-        Integer score = godLifeScoreRepository.calculateGodLifeScoreWithBoardId(boardId);
-        return score == null ? 0 : score;
+    public int calculateGodLifeScoreBoard(Long boardId) {
+        Integer boardScore = godLifeScoreRepository.calculateGodLifeScoreWithBoardId(boardId);
+        return boardScore == null ? 0 : boardScore;
+    }
+
+    public Integer calculateGodLifeScoreMember(Member loginMember) {
+        Integer memberScore = godLifeScoreRepository.calculateGodLifeScoreWithMember(loginMember.getId());
+        return memberScore == null ? 0 : memberScore;
     }
 }

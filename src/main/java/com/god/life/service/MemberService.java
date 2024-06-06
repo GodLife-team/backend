@@ -3,6 +3,7 @@ package com.god.life.service;
 import com.god.life.domain.Image;
 import com.god.life.domain.Member;
 import com.god.life.dto.LoginInfoResponse;
+import com.god.life.dto.ModifyWhoAmIRequest;
 import com.god.life.dto.SignupRequest;
 import com.god.life.dto.TokenResponse;
 import com.god.life.error.JwtInvalidException;
@@ -77,6 +78,7 @@ public class MemberService {
                 .nickname(findMember.getNickname())
                 .godLifeScore((int) findMember.getGodLifePoint())
                 .backgroundImage("")
+                .whoAmI(findMember.getWhoAmI())
                 .profileImage("").build();
 
         List<Image> memberImages = findMember.getImages();
@@ -99,5 +101,12 @@ public class MemberService {
         member.updateRefreshToken(response.getRefreshToken()); // refresh 토큰 업데이트
 
         return response;
+    }
+
+    @Transactional
+    public Boolean updateWhoAmI(Long memberId, ModifyWhoAmIRequest modifyWhoAmIRequest) {
+        Member member = memberRepository.findById(memberId).get();
+        member.updateWhoAmI(modifyWhoAmIRequest.getWhoAmI());
+        return true;
     }
 }

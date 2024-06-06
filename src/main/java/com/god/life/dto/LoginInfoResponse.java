@@ -18,5 +18,6 @@ public class LoginInfoResponse {
     private int godLifeScore;
     private String profileImage;
     private String backgroundImage;
+    private String whoAmI;
 
 }

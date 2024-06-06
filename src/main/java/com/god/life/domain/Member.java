@@ -61,4 +61,8 @@ public class Member {
     public void updateRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
     }
+
+    public void updateWhoAmI(String whoAmI){
+        this.whoAmI = whoAmI;
+    }
 }

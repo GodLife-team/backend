@@ -71,7 +71,7 @@ public class BoardController {
         BoardResponse boardResponse = boardService.detailBoard(boardId, member);
         List<ImageSaveResponse> images = imageService.findImages(boardId);
         boardResponse.setImagesURL(images.stream().map(ImageSaveResponse::getServerName).toList());
-        int godLifeScore = godLifeScoreService.calculateGodLifeScore(boardId);
+        int godLifeScore = godLifeScoreService.calculateGodLifeScoreBoard(boardId);
         boardResponse.setGodScore(godLifeScore);
 
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, boardResponse));

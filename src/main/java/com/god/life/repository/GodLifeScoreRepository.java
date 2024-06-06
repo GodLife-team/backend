@@ -14,6 +14,11 @@ public interface GodLifeScoreRepository extends JpaRepository<GodLifeScore, Long
     //@Query("delete from GodLifeScore g where g.member = :member and g.board = :board")
     void deleteByBoardAndMember(Board board, Member member);
 
+    // boardId 에 대응되는 게시판의 갓생 점수 합
     @Query("select sum(g.score) from GodLifeScore g where g.board.id = :boardId")
     Integer calculateGodLifeScoreWithBoardId(@Param("boardId") Long boardId); //만약 좋아요가 하나도 안달려있으면 NULL,
+
+    // memberId 가 받은 갓생 점수 합
+    @Query("select sum(g.score) from GodLifeScore g join g.board where g.board.member.id = :memberId or g.likedMember.id = :memberId")
+    Integer calculateGodLifeScoreWithMember(@Param("memberId") Long memberId);
 }
