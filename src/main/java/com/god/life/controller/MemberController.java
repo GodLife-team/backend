@@ -220,6 +220,32 @@ public class MemberController {
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, memberService.updateWhoAmI(member.getId(), modifyWhoAmIRequest)));
     }
 
+    @Operation(summary = "로그아웃")
+    @PostMapping("/member")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "현재 로그인 중 사용자 로그아웃 처리 --> 리프레시 토큰 삭제",
+                            useReturnTypeSchema = true),
+            }
+    )
+    public ResponseEntity<CommonResponse<String>> logout(@LoginMember Member member) {
+        memberService.removeRefreshToken(member.getId());
+        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, "로그아웃 되었습니다."));
+    }
+
+    @Operation(summary = "회원탈퇴")
+    @DeleteMapping("/member")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "현재 로그인 중 사용자 탈퇴처리, 작성한 내용 모두 삭제",
+                            useReturnTypeSchema = true),
+            }
+    )
+    public ResponseEntity<CommonResponse<String>> withdrawMember(@LoginMember Member member) {
+        memberService.withdrawalMember(member.getId());
+        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, "회원탈퇴 처리가 완료되었습니다."));
+    }
+
 
     private Long checkId(String id) {
         Long memberId = null;

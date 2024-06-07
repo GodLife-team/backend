@@ -24,6 +24,10 @@ public class MemberService {
 
     private final JwtUtil jwtUtil;
     private final MemberRepository memberRepository;
+    private final BoardService boardService;
+    private final CommentService commentService;
+    private final GodLifeScoreService godLifeScoreService;
+    private final ImageService imageService;
 
     @Transactional
     public TokenResponse signUp(SignupRequest signUpRequest) {
@@ -93,6 +97,7 @@ public class MemberService {
         return response;
     }
 
+    @Transactional
     public TokenResponse reissueToken(String memberId) {
         Member member = memberRepository.findByProviderId(memberId)
                 .orElseThrow(() -> new UsernameNotFoundException("회원이 존재하지 않습니다."));
@@ -109,4 +114,29 @@ public class MemberService {
         member.updateWhoAmI(modifyWhoAmIRequest.getWhoAmI());
         return true;
     }
+
+    @Transactional
+    public void removeRefreshToken(Long memberId) {
+        Member member = memberRepository.findById(memberId).get();
+        member.inValidateRefreshToken();
+    }
+
+    @Transactional
+    public void withdrawalMember(Long memberId) {
+        // 멤버 조회
+        Member deleteMember = memberRepository.findById(memberId).get();
+        //회원 이미지, 게시판 이미지 삭제
+        imageService.deleteUserImages(deleteMember);
+        //댓글 삭제
+        commentService.deleteCommentWrittenByMember(deleteMember);
+        //좋아요 삭제
+        godLifeScoreService.deleteUserLikedHistory(deleteMember);
+        //게시판 삭제
+        boardService.deleteBoardWrittenByMember(deleteMember);
+        //멤버 삭제
+        memberRepository.delete(deleteMember);
+    }
+
+
+
 }
