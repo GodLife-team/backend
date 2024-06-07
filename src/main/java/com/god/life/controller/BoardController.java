@@ -138,6 +138,12 @@ public class BoardController {
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, boardList));
     }
 
+    @GetMapping("/popularBoards")
+    public ResponseEntity<CommonResponse<List<BoardSearchResponse>>> getPopularBoards(){
+        List<BoardSearchResponse> result = boardService.searchPopularBoardList();
+
+        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, result));
+    }
 
     private Long checkId(String id) {
         long boardId;

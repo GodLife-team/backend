@@ -4,6 +4,7 @@ import com.god.life.domain.Board;
 import com.god.life.domain.GodLifeScore;
 import com.god.life.domain.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -21,4 +22,7 @@ public interface GodLifeScoreRepository extends JpaRepository<GodLifeScore, Long
     // memberId 가 받은 갓생 점수 합
     @Query("select sum(g.score) from GodLifeScore g join g.board where g.board.member.id = :memberId or g.likedMember.id = :memberId")
     Integer calculateGodLifeScoreWithMember(@Param("memberId") Long memberId);
+
+    @Modifying
+    void deleteByMember(Member deleteMember);
 }

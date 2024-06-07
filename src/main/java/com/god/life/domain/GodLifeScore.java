@@ -19,7 +19,7 @@ import lombok.*;
                 columnNames = {"member", "liked_member"}
         )
 })
-public class GodLifeScore {
+public class GodLifeScore extends BaseEntity {
 
     private static final int BOARD_LIKE = 2;
     private static final int GOD_LIFE_AGREE = 2;

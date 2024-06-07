@@ -60,4 +60,8 @@ public class GodLifeScoreService {
         Integer memberScore = godLifeScoreRepository.calculateGodLifeScoreWithMember(loginMember.getId());
         return memberScore == null ? 0 : memberScore;
     }
+
+    public void deleteUserLikedHistory(Member deleteMember) {
+        godLifeScoreRepository.deleteByMember(deleteMember);
+    }
 }

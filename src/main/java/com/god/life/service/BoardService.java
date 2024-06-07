@@ -131,4 +131,14 @@ public class BoardService {
 
         return boards.stream().map(b -> BoardSearchResponse.of(b, false)).toList();
     }
+
+    public void deleteBoardWrittenByMember(Member deteleMember) {
+        boardRepository.deleteByMember(deteleMember);
+    }
+
+    @Transactional(readOnly = true)
+    public List<BoardSearchResponse> searchPopularBoardList(){
+        return boardRepository.findPopularBoard();
+    }
+
 }

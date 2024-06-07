@@ -71,4 +71,8 @@ public class CommentService {
 
         commentRepository.delete(comment);
     }
+
+    public void deleteCommentWrittenByMember(Member deleteMember) {
+        commentRepository.deleteByMember(deleteMember);
+    }
 }

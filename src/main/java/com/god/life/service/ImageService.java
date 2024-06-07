@@ -81,4 +81,9 @@ public class ImageService {
     public void deleteImages(Long boardId) {
         imageRepository.deleteByBoardId(boardId);
     }
+
+    @Transactional
+    public void deleteUserImages(Member deleteMember) {
+        imageRepository.deleteByMember(deleteMember);
+    }
 }

@@ -65,4 +65,8 @@ public class Member {
     public void updateWhoAmI(String whoAmI){
         this.whoAmI = whoAmI;
     }
+
+    public void inValidateRefreshToken() {
+        this.refreshToken = "";
+    }
 }
