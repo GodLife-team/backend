@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class ImageUploadRequest {
 
     @Schema(description = "이미지 타입")

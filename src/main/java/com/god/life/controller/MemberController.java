@@ -200,6 +200,7 @@ public class MemberController {
         //ImageSaveResponse save = imageService.uploadImage(file.getImage(), loginMember);
         ImageSaveResponse response = imageUploadService.upload(uploadRequest.getImage());
         response.setServerName(uploadRequest.getImageType() + response.getServerName());
+        imageService.deleteTypeImage(uploadRequest.getImageType() + "%", loginMember.getId());
         imageService.saveImage(response, loginMember, null);
         response.setServerName(response.getServerName().substring(uploadRequest.imageType.length()));
 

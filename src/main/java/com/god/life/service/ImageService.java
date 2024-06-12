@@ -16,7 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -85,5 +84,11 @@ public class ImageService {
     @Transactional
     public void deleteUserImages(Member deleteMember) {
         imageRepository.deleteByMember(deleteMember);
+    }
+
+    // imageType에 해당하는 사진이 이미 있는지 확인하고 있다면 삭제,
+    @Transactional
+    public void deleteTypeImage(String imageType, Long memberId) {
+        imageRepository.deleteImageType(imageType, memberId);
     }
 }
