@@ -61,6 +61,9 @@ public class BoardResponse {
     @Schema(description = "이미 해당 게시물에 좋아요를 눌렀는지")
     private boolean memberLikedBoard;
 
+    @Schema(description = "해당 게시물 작성자 회원 ID")
+    private Long writerId;
+
     public static BoardResponse of(Board board, Boolean isOwner, boolean likedBoard) {
         BoardResponse response = BoardResponse.builder()
                 .board_id(board.getId())
@@ -74,6 +77,7 @@ public class BoardResponse {
                 .writtenAt(board.getCreateDate().toLocalDate())
                 .tier("브론즈")
                 .godScore(board.getTotalScore())
+                .writerId(board.getMember().getId())
                 .memberLikedBoard(likedBoard).build();
 
         String profileURL = "";

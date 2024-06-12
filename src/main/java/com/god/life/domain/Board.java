@@ -48,8 +48,8 @@ public class Board extends BaseEntity{
     @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
     private List<Image> images = new ArrayList<>();
 
-//    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
-//    private List<GodLifeScore> godLifeScores = new ArrayList<>();
+    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
+    private List<GodLifeScore> godLifeScores = new ArrayList<>();
 
     public void updateBoard(BoardCreateRequest request) {
         this.title = request.getTitle();

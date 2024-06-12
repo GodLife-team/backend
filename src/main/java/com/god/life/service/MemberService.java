@@ -2,15 +2,13 @@ package com.god.life.service;
 
 import com.god.life.domain.Image;
 import com.god.life.domain.Member;
-import com.god.life.dto.LoginInfoResponse;
-import com.god.life.dto.ModifyWhoAmIRequest;
-import com.god.life.dto.SignupRequest;
-import com.god.life.dto.TokenResponse;
+import com.god.life.dto.*;
+import com.god.life.error.ErrorMessage;
 import com.god.life.error.JwtInvalidException;
+import com.god.life.error.NotFoundResource;
 import com.god.life.repository.MemberRepository;
 import com.god.life.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,10 +38,10 @@ public class MemberService {
         return response;
     }
 
-
     @Transactional(readOnly = true)
     public Member loadByUsername(Long id) {
-       return memberRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("회원이 존재하지 않습니다.."));
+       return memberRepository.findById(id)
+               .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_MEMBER_MESSAGE.getErrorMessage()));
     }
 
     @Transactional
@@ -74,7 +72,8 @@ public class MemberService {
     // jwt에서 DB 정보 불러올때 사진도 같이?? 아니면 유저정보가 필요할 때만???
     // 일단 DB에서 조회하는 것오르 하자.
     public LoginInfoResponse getUserInfo(Long loginMember) {
-        Member findMember = memberRepository.findByIdWithImage(loginMember);
+        Member findMember = memberRepository.findByIdWithImage(loginMember)
+                .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_MEMBER_MESSAGE.getErrorMessage()));
 
         LoginInfoResponse response = LoginInfoResponse.builder()
                 .age(findMember.getAge())
@@ -97,10 +96,11 @@ public class MemberService {
         return response;
     }
 
+    // 토큰 재발급 ==> RTT 방식으로 리프레시 토큰도 재발급
     @Transactional
     public TokenResponse reissueToken(String memberId) {
         Member member = memberRepository.findByProviderId(memberId)
-                .orElseThrow(() -> new UsernameNotFoundException("회원이 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_MEMBER_MESSAGE.getErrorMessage()));
 
         TokenResponse response = jwtUtil.createToken(String.valueOf(member.getId()), member.getNickname());
         member.updateRefreshToken(response.getRefreshToken()); // refresh 토큰 업데이트
@@ -108,6 +108,7 @@ public class MemberService {
         return response;
     }
 
+    // 자기소개 업데이트
     @Transactional
     public Boolean updateWhoAmI(Long memberId, ModifyWhoAmIRequest modifyWhoAmIRequest) {
         Member member = memberRepository.findById(memberId).get();
@@ -115,12 +116,14 @@ public class MemberService {
         return true;
     }
 
+    // 로그 아웃
     @Transactional
     public void removeRefreshToken(Long memberId) {
         Member member = memberRepository.findById(memberId).get();
         member.inValidateRefreshToken();
     }
 
+    // 회원 탈퇴
     @Transactional
     public void withdrawalMember(Long memberId) {
         // 멤버 조회
@@ -137,6 +140,13 @@ public class MemberService {
         memberRepository.delete(deleteMember);
     }
 
+    // memberId의 유저 정보를 조회함
+    public MemberInfoResponse memberInfoResponse(Member member, Long findMemberId) {
+        MemberInfoResponse memberInfo = memberRepository.getMemberInfo(findMemberId);
+        memberInfo.setOwner(member.getId().equals(findMemberId));
+
+        return memberInfo;
+    }
 
 
 }

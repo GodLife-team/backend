@@ -194,8 +194,8 @@ public class MemberController {
             }
     )
     public ResponseEntity<CommonResponse<ImageSaveResponse>> profileUpload(
-            @ModelAttribute ImageUploadRequest uploadRequest
-            ,@LoginMember Member loginMember) throws IOException {
+            @ModelAttribute ImageUploadRequest uploadRequest,
+            @LoginMember Member loginMember) throws IOException {
 
         //ImageSaveResponse save = imageService.uploadImage(file.getImage(), loginMember);
         ImageSaveResponse response = imageUploadService.upload(uploadRequest.getImage());
@@ -244,6 +244,23 @@ public class MemberController {
     public ResponseEntity<CommonResponse<String>> withdrawMember(@LoginMember Member member) {
         memberService.withdrawalMember(member.getId());
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, "회원탈퇴 처리가 완료되었습니다."));
+    }
+
+    @Operation(summary = "회원 정보 조회", description = "조회하는 회원의 각종 정보를 조회합니다.")
+    @GetMapping("/member/{memberId}")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "memberId에 대응되는 회원 정보 조회",
+                            useReturnTypeSchema = true),
+                    @ApiResponse(responseCode = "400", description = "잘못된 memberId에 대응되는 회원 정보 조회")
+            }
+    )
+    @Parameter(name = "memberId", description = "조회하려는 회원의 id")
+    public ResponseEntity<CommonResponse<MemberInfoResponse>> getMemberInfo(@LoginMember Member member,
+                                                @PathVariable(name = "memberId") String pathVariableMemberId) {
+        Long infoMemberId = checkId(pathVariableMemberId);
+        MemberInfoResponse response = memberService.memberInfoResponse(member, infoMemberId);
+        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, response));
     }
 
 

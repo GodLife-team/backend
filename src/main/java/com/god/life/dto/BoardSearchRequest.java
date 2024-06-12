@@ -24,4 +24,6 @@ public class BoardSearchRequest {
 
     String nickname;
 
+
+
 }

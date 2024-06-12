@@ -5,6 +5,7 @@ import com.god.life.domain.Comment;
 import com.god.life.domain.Member;
 import com.god.life.dto.CommentCreateRequest;
 import com.god.life.dto.CommentResponse;
+import com.god.life.error.ErrorMessage;
 import com.god.life.error.ForbiddenException;
 import com.god.life.error.NotFoundResource;
 import com.god.life.repository.BoardRepository;
@@ -24,9 +25,6 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final BoardRepository boardRepository;
 
-    private static final String INVALID_COMMENT_MESSAGE = "존재하지 않는 댓글입니다.";
-    private static final String FORBIDDEN_COMMENT_MESSAGE = "해당 댓글을 수정 및 삭제 권한이 없습니다.";
-
     public List<CommentResponse> getCommentsForBoard(Long boardId, Member member) {
 
         List<Comment> comments = commentRepository.findByBoardIdWithMember(boardId);
@@ -39,7 +37,7 @@ public class CommentService {
     @Transactional
     public CommentResponse createComment(Long boardId, CommentCreateRequest request, Member member) {
         Board board = boardRepository.findByIdWithMember(boardId)
-                .orElseThrow(() -> new NotFoundResource("존재하지 않는 게시판입니다."));
+                .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_BOARD_MESSAGE.getErrorMessage()));
 
         Comment comment = request.toEntity(board, member);
         commentRepository.save(comment);
@@ -50,10 +48,10 @@ public class CommentService {
     @Transactional
     public CommentResponse updateComment(Long commentId, CommentCreateRequest request, Member member){
         Comment comment = commentRepository.findByIdWithMember(commentId)
-                .orElseThrow(() -> new NotFoundResource(INVALID_COMMENT_MESSAGE));
+                .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_COMMENT_MESSAGE.getErrorMessage()));
 
         if (!comment.getMember().getId().equals(member.getId())) {
-            throw new ForbiddenException(FORBIDDEN_COMMENT_MESSAGE);
+            throw new ForbiddenException(ErrorMessage.FORBIDDEN_ACTION_MESSAGE.getErrorMessage());
         }
 
         comment.updateComment(request.getComment());
@@ -63,10 +61,10 @@ public class CommentService {
     @Transactional
     public void deleteComment(Long commentId, Member member) {
         Comment comment = commentRepository.findByIdWithMember(commentId)
-                .orElseThrow(() -> new NotFoundResource(INVALID_COMMENT_MESSAGE));
+                .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_COMMENT_MESSAGE.getErrorMessage()));
 
         if (!comment.getMember().getId().equals(member.getId())) {
-            throw new ForbiddenException(FORBIDDEN_COMMENT_MESSAGE);
+            throw new ForbiddenException(ErrorMessage.FORBIDDEN_ACTION_MESSAGE.getErrorMessage());
         }
 
         commentRepository.delete(comment);

@@ -45,10 +45,10 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
 
     public CustomBoardRepositoryImpl(EntityManager em){
         queryFactory = new JPAQueryFactory(em);
-
     }
 
     // 1주간 인기 게시글 조회
+    // message에 시간 붙여주기 --> 아직 미구현 XXX
     @Override
     public List<BoardSearchResponse> findWeeklyPopularBoard() {
         LocalDateTime today = LocalDateTime.now(); // 현재 시각
@@ -145,7 +145,8 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
     public Page<Board> findBoardWithSearchRequest(BoardSearchRequest boardSearchRequest, Pageable pageable) {
         List<Board> boards = queryFactory.selectFrom(board)
                 .join(QBoard.board.member, QMember.member).fetchJoin()
-                .where(keywordParam(boardSearchRequest.getKeyword()),tagsParam(boardSearchRequest.getTags()))
+                .where(keywordParam(boardSearchRequest.getKeyword()),tagsParam(boardSearchRequest.getTags()),
+                        nicknameParam(boardSearchRequest.getNickname()))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .orderBy(board.createDate.desc())
@@ -157,6 +158,12 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
                 .fetchOne();
 
         return new PageImpl<>(boards, pageable, count);
+    }
+
+    private BooleanExpression nicknameParam(String nickname) {
+        if(isBlankOrNullKeyword(nickname)) return null;
+
+        return board.member.nickname.eq(nickname);
     }
 
     private BooleanExpression keywordParam(String keyword) {

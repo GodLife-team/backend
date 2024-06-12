@@ -1,8 +1,10 @@
 package com.god.life.service;
 
 import com.god.life.domain.Board;
+import com.god.life.domain.GodLifeScore;
 import com.god.life.domain.Member;
 import com.god.life.dto.*;
+import com.god.life.error.ErrorMessage;
 import com.god.life.error.ForbiddenException;
 import com.god.life.error.NotFoundResource;
 import com.god.life.repository.BoardRepository;
@@ -14,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -46,7 +49,7 @@ public class BoardService {
     @Transactional
     public BoardResponse detailBoard(Long boardId, Member loginMember) {
         Board board = boardRepository.findByIdWithMember(boardId)
-                .orElseThrow(() -> new NotFoundResource("존재하지 않는 게시판입니다."));
+                .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_BOARD_MESSAGE.getErrorMessage()));
 
         board.increaseViewCount();
         boolean isOwner = board.getMember().getId().equals(loginMember.getId()); // 작성자와 현재 로그인한 사람이 동일인인지
@@ -57,7 +60,7 @@ public class BoardService {
 
     public void checkAuthorization(Member member, Long boardId) {
         Board board = boardRepository.findByIdWithMember(boardId)
-                .orElseThrow(() -> new NotFoundResource("존재하지 않는 게시판입니다."));
+                .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_BOARD_MESSAGE.getErrorMessage()));
 
         if (!member.getId().equals(board.getMember().getId())) {
             throw new ForbiddenException("수정 및 삭제 권한이 없습니다.");
@@ -68,6 +71,8 @@ public class BoardService {
     @Transactional
     public BoardResponse updateBoard(Long boardId, List<ImageSaveResponse> uploadResponse, BoardCreateRequest request, Member loginMember) {
         Board board = boardRepository.findById(boardId).get(); //권한 체크 로직에서 게시판이 있는지 확인하므로 바로 꺼내오기
+
+        imageService.deleteImages(boardId); // 이미지 삭제후 다시 저장
 
         for (ImageSaveResponse response : uploadResponse) {
             imageService.saveImage(response, loginMember, board);
@@ -119,17 +124,18 @@ public class BoardService {
                 .forEach(b -> {
                     b.getComments();
                     b.getImages();
+                    b.getGodLifeScores();
                     b.getMember().getImages();
                 });
 
-        boolean SearchQueryContainNickname = (boardSearchRequest.getNickname() != null && !boardSearchRequest.getNickname().isBlank());
-        if (SearchQueryContainNickname) {
-            return boards.stream().
-                    filter(b -> b.getMember().getNickname().equals(boardSearchRequest.getNickname()))
-                    .map(b -> BoardSearchResponse.of(b, false)).toList();
+        List<BoardSearchResponse> response = new ArrayList<>();
+        for (Board board : boards) {
+            BoardSearchResponse dto = BoardSearchResponse.of(board, false);
+            dto.setGodScore(board.getGodLifeScores().stream().mapToInt(GodLifeScore::getScore).sum());
+            response.add(dto);
         }
 
-        return boards.stream().map(b -> BoardSearchResponse.of(b, false)).toList();
+        return response;
     }
 
     public void deleteBoardWrittenByMember(Member deteleMember) {

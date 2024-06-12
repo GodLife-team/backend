@@ -132,6 +132,9 @@ public class BoardController {
     public ResponseEntity<CommonResponse<List<BoardSearchResponse>>> getBoardList(
             @Valid @ModelAttribute BoardSearchRequest boardSearchRequest) {
         log.info("requestDTO = {}", boardSearchRequest);
+        if (boardSearchRequest.getPage() == null) { // 없으면 0번 페이지조회하도록
+            boardSearchRequest.setPage(1);
+        }
 
         List<BoardSearchResponse> boardList = boardService.getBoardList(boardSearchRequest);
 

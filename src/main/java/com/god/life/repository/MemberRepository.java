@@ -7,7 +7,8 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-public interface MemberRepository extends JpaRepository<Member, Long> {
+public interface MemberRepository extends JpaRepository<Member, Long>, CustomMemberRepository {
+
 
 
     Optional<Member> findByRefreshToken(String refreshToken);
@@ -19,7 +20,11 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     boolean existsByProviderId(String id);
 
     @Query("SELECT m from Member m left join fetch m.images where m.id = :memberId")
-    Member findByIdWithImage(@Param("memberId") Long memberId);
+    Optional<Member> findByIdWithImage(@Param("memberId") Long memberId);
 
     Optional<Member> findByProviderId(String providerId);
+
+
+    //@Query("SELECT from Member m left join fetch m.images where m.id = :memberId")
+
 }
