@@ -24,7 +24,7 @@ public class Member {
     @Column(name = "refresh_token", length = 1024)
     private String refreshToken;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String nickname;
 
     @Column(name = "provider_id", nullable = false)
@@ -48,6 +48,7 @@ public class Member {
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     private List<Image> images = new ArrayList<>();
 
+    //private String fcmToken;
 
     @Override
     public String toString() {

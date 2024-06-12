@@ -138,9 +138,32 @@ public class BoardController {
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, boardList));
     }
 
+    @Operation(summary = "한 주간 인기 있는 게시물 조회", description = "한 주간 갓생인정을 가장 많이 받은 인기 게시물 10개를 반환")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "한 주간 인기 게시물 조회",
+                            //content = @Content(schema = @Schema(implementation = List.class)),
+                            useReturnTypeSchema = true)
+            }
+    )
     @GetMapping("/popularBoards")
-    public ResponseEntity<CommonResponse<List<BoardSearchResponse>>> getPopularBoards(){
+    public ResponseEntity<CommonResponse<List<BoardSearchResponse>>> getWeeklyPopularBoard(){
         List<BoardSearchResponse> result = boardService.searchPopularBoardList();
+
+        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, result));
+    }
+
+    @Operation(summary = "전체 인기있는 게시물 조회", description = "전체 기간동안 갓생인정을 가장 많이 받은 인기 게시물 10개를 반환")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "전체 인기있는 게시물 조회",
+                            //content = @Content(schema = @Schema(implementation = List.class)),
+                            useReturnTypeSchema = true)
+            }
+    )
+    @GetMapping("/totalPopularBoards")
+    public ResponseEntity<CommonResponse<List<BoardSearchResponse>>> getTotalPopularBoards(){
+        List<BoardSearchResponse> result = boardService.searchTopPopularBoardList();
 
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, result));
     }

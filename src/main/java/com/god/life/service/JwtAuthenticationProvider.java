@@ -34,7 +34,7 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
     private Authentication processMemberAuthentication(String jwt) {
         Long memberId = Long.valueOf(jwtUtil.getId(jwt));
         Member member = memberService.loadByUsername(memberId);
-        log.info("{} Login!", member);
+        //log.info("{} Login!", member);
         List<GrantedAuthority> authorities = AuthorityUtils.commaSeparatedStringToAuthorityList(jwtUtil.getRole(jwt));
         return new JwtAuthenticationToken(member, "", authorities);
     }

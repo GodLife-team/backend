@@ -45,3 +45,4 @@ dockerenv
 bindMount/
 *.json
 generated
+redis

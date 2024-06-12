@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @AllArgsConstructor
+@ToString(exclude = {"member", "comments", "images"})
 public class Board extends BaseEntity{
 
     @Id

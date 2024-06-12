@@ -14,6 +14,8 @@ public interface CustomBoardRepository {
 
     Page<Board> findBoardWithSearchRequest(BoardSearchRequest boardSearchRequest, Pageable pageable);
 
-    List<BoardSearchResponse> findPopularBoard();
+    List<BoardSearchResponse> findWeeklyPopularBoard();
+
+    List<BoardSearchResponse> findTotalPopularBoard();
 
 }

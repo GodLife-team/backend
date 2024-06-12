@@ -137,8 +137,12 @@ public class BoardService {
     }
 
     @Transactional(readOnly = true)
-    public List<BoardSearchResponse> searchPopularBoardList(){
-        return boardRepository.findPopularBoard();
+    public List<BoardSearchResponse> searchPopularBoardList() {
+        return boardRepository.findWeeklyPopularBoard();
     }
 
+    @Transactional(readOnly = true)
+    public List<BoardSearchResponse> searchTopPopularBoardList(){
+        return boardRepository.findTotalPopularBoard();
+    }
 }

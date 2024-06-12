@@ -1,6 +1,8 @@
-package com.god.life.service;
+package com.god.life.service.scheduler;
 
 
+import com.god.life.service.ImageService;
+import com.god.life.service.ImageUploadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
