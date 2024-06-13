@@ -82,6 +82,7 @@ public class MemberService {
                 .godLifeScore((int) findMember.getGodLifePoint())
                 .backgroundImage("")
                 .whoAmI(findMember.getWhoAmI())
+                .memberId(findMember.getId())
                 .profileImage("").build();
 
         List<Image> memberImages = findMember.getImages();
@@ -141,8 +142,15 @@ public class MemberService {
     }
 
     // memberId의 유저 정보를 조회함
+    @Transactional(readOnly = true)
     public MemberInfoResponse memberInfoResponse(Member member, Long findMemberId) {
         MemberInfoResponse memberInfo = memberRepository.getMemberInfo(findMemberId);
+
+//        MemberInfoResponse memberInfo = memberRepository.getMemberTotalInfo(findMemberId)
+//                .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_MEMBER_MESSAGE.getErrorMessage()));
+
+
+
         memberInfo.setOwner(member.getId().equals(findMemberId));
 
         return memberInfo;

@@ -34,4 +34,11 @@ public class MemberInfoResponse {
     private boolean isOwner;
 
 
+    public MemberInfoResponse(String nickname, String whoAmI, Long memberBoardCount) {
+        this.nickname = nickname;
+        this.whoAmI = whoAmI;
+        this.memberBoardCount = memberBoardCount;
+    }
+
+
 }
