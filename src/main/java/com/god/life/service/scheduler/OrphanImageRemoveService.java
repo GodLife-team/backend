@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 // 모종의 이유로 게시판이나 회원에 붙어있지 않은 사진을 제거하는 Service layer입니다.
@@ -28,7 +29,18 @@ public class OrphanImageRemoveService {
     public void removeImages(){
         log.info("고아 이미지 삭제...");
         List<String> imageNamesInCloud = imageUploadService.getAllImageNames();
-        List<String> imageNamesInDB = imageService.getAllImageNames();
+        List<String> imageNamesInDB = imageService.getAllImageNames()
+                .stream()
+                .map(image -> {
+                    if(image.startsWith("profile")){
+                        return image.replace("profile", "");
+                    } else if (image.startsWith("background")) {
+                        return image.replace("background", "");
+                    }else {
+                        return image;
+                    }
+                }).toList();
+
 
         List<String> removeImageNames = new ArrayList<>();
         // 1. GCS 에 사진들을 저장후
