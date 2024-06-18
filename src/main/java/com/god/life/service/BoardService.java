@@ -161,7 +161,7 @@ public class BoardService {
     @Transactional(readOnly = true)
     public void cachingWeeklyBoard(){
         List<BoardSearchResponse> weeklyPopularBoard = boardRepository.findWeeklyPopularBoard();
-        redisTemplate.opsForValue().set(POPULAR_BOARDS_KEY, weeklyPopularBoard);
+        //redisTemplate.opsForValue().set(POPULAR_BOARDS_KEY, weeklyPopularBoard);
     }
 
 
