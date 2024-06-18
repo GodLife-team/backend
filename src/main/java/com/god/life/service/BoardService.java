@@ -13,7 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,7 +30,7 @@ public class BoardService {
     private final ImageService imageService;
     private final GodLifeScoreService godLifeScoreService;
     //private final WeeklyPopularBoardCacheService weeklyPopularBoardCacheService;
-    private final RedisTemplate<String, Object> redisTemplate;
+    //private final RedisTemplate<String, Object> redisTemplate;
 
     private static final String POPULAR_BOARDS_KEY = "popularBoard";
 
