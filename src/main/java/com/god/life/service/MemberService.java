@@ -83,6 +83,7 @@ public class MemberService {
                 .backgroundImage("")
                 .whoAmI(findMember.getWhoAmI())
                 .memberId(findMember.getId())
+                .fcm(findMember.getFcmToken())
                 .profileImage("").build();
 
         List<Image> memberImages = findMember.getImages();
@@ -149,11 +150,15 @@ public class MemberService {
 //        MemberInfoResponse memberInfo = memberRepository.getMemberTotalInfo(findMemberId)
 //                .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_MEMBER_MESSAGE.getErrorMessage()));
 
-
-
         memberInfo.setOwner(member.getId().equals(findMemberId));
 
         return memberInfo;
+    }
+
+
+    @Transactional
+    public List<PopularMemberResponse> searchWeeklyPopularMember() {
+        return memberRepository.findWeeklyPopularMember();
     }
 
 

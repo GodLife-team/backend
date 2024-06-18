@@ -10,6 +10,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Getter
 @MappedSuperclass
@@ -22,5 +23,9 @@ public class BaseEntity {
 
     @LastModifiedDate
     private LocalDateTime modifiedDate;
+
+    public void updateDate(LocalDateTime time){
+        this.createDate = time;
+    }
 
 }

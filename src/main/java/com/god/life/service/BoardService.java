@@ -8,11 +8,13 @@ import com.god.life.error.ErrorMessage;
 import com.god.life.error.ForbiddenException;
 import com.god.life.error.NotFoundResource;
 import com.god.life.repository.BoardRepository;
+import com.god.life.service.scheduler.WeeklyPopularBoardCacheService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +31,10 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final ImageService imageService;
     private final GodLifeScoreService godLifeScoreService;
+    //private final WeeklyPopularBoardCacheService weeklyPopularBoardCacheService;
+    private final RedisTemplate<String, Object> redisTemplate;
+
+    private static final String POPULAR_BOARDS_KEY = "popularBoard";
 
 
     @Transactional
@@ -145,10 +151,20 @@ public class BoardService {
     @Transactional(readOnly = true)
     public List<BoardSearchResponse> searchPopularBoardList() {
         return boardRepository.findWeeklyPopularBoard();
+        // return (List<BoardSearchResponse>) redisTemplate.opsForValue().get(POPULAR_BOARDS_KEY);
     }
 
     @Transactional(readOnly = true)
     public List<BoardSearchResponse> searchTopPopularBoardList(){
         return boardRepository.findTotalPopularBoard();
     }
+
+
+    @Transactional(readOnly = true)
+    public void cachingWeeklyBoard(){
+        List<BoardSearchResponse> weeklyPopularBoard = boardRepository.findWeeklyPopularBoard();
+        redisTemplate.opsForValue().set(POPULAR_BOARDS_KEY, weeklyPopularBoard);
+    }
+
+
 }

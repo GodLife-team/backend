@@ -4,6 +4,8 @@ package com.god.life.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -45,7 +47,8 @@ public class GodLifeScore extends BaseEntity {
     private Member likedMember;
 
 
-    public static GodLifeScore likeMemberToBoard(Member member, Board board) {
+
+   public static GodLifeScore likeMemberToBoard(Member member, Board board) {
         return GodLifeScore
                 .builder()
                 .board(board)

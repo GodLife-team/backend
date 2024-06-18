@@ -35,6 +35,7 @@ public class SignupRequest {
     private String providerName;
 
 
+
     public static Member toMember(SignupRequest request){
         return Member.builder()
                 .age(request.getAge())

@@ -140,7 +140,7 @@ public class    JwtUtil {
         return new TokenResponse(accessToken, refreshToken);
     }
 
-    public void validateJwt(String jwt) {
+    public void validateRefreshJwt(String jwt) {
         if (jwt == null) {
             throw new JwtInvalidException("refresh 토큰이 존재하지 않습니다.");
         }

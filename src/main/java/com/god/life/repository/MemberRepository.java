@@ -40,21 +40,5 @@ public interface MemberRepository extends JpaRepository<Member, Long>, CustomMem
     Optional<MemberInfoResponse> getMemberTotalInfo(@Param("memberId") Long findMemberId);
 
 
-    //@Query("SELECT from Member m left join fetch m.images where m.id = :memberId")
-//    SELECT m.member_id, m.nickname, m.introduction,
-//    COALESCE(b.board_count, 0) AS board_count,
-//    COALESCE(g.total_likes, 0) AS total_likes
-//    FROM member m
-//    LEFT JOIN (
-//            SELECT b.member_id, COUNT(*) AS board_count
-//    FROM board b
-//    GROUP BY b.member_id
-//) b ON m.member_id = b.member_id
-//    LEFT JOIN (
-//    SELECT b.member_id, COUNT(*) AS total_likes
-//    FROM board b
-//    join god_life_score g ON b.board_id = g.board_id
-//    GROUP BY b.member_id
-//) g ON m.member_id = g.member_id WHERE m.member_id = 7
 
 }

@@ -46,3 +46,4 @@ bindMount/
 *.json
 generated
 redis
+application-test.yaml

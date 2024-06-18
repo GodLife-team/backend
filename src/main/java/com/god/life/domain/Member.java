@@ -48,8 +48,10 @@ public class Member {
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     private List<Image> images = new ArrayList<>();
 
-    //private String fcmToken;
+    @Column(name = "fcm_token")
+    private String fcmToken;
 
+    //private String fcmToken;
     @Override
     public String toString() {
         return "Member{" +

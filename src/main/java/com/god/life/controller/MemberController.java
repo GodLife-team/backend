@@ -29,6 +29,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -154,7 +155,7 @@ public class MemberController {
         }
 
         String jwt = JwtUtil.parseJwt(jwtHeader);
-        jwtUtil.validateJwt(jwt);
+        jwtUtil.validateRefreshJwt(jwt);
 
         // 새로운 Refresh Token과 accessToken 재발급
         TokenResponse response = memberService.updateRefreshToken(jwt);
@@ -263,7 +264,6 @@ public class MemberController {
         MemberInfoResponse response = memberService.memberInfoResponse(member, infoMemberId);
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, response));
     }
-
 
     private Long checkId(String id) {
         Long memberId = null;

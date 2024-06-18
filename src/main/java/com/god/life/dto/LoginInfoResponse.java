@@ -37,4 +37,7 @@ public class LoginInfoResponse {
     @Schema(description = "해당 회원 memberId")
     private Long memberId;
 
+    @Schema
+    private String fcm;
+
 }
