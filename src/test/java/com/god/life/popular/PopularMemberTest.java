@@ -1,0 +1,219 @@
+package com.god.life.popular;
+
+import com.god.life.config.JpaAuditingConfiguration;
+import com.god.life.domain.*;
+import com.god.life.dto.PopularMemberResponse;
+import com.god.life.repository.BoardRepository;
+import com.god.life.repository.GodLifeScoreRepository;
+import com.god.life.repository.ImageRepository;
+import com.god.life.repository.MemberRepository;
+import jakarta.persistence.EntityManager;
+import org.aspectj.lang.annotation.Before;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.Commit;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@ActiveProfiles("test")
+@DataJpaTest
+@TestPropertySource(locations = "classpath:application-test.yaml")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Import(JpaAuditingConfiguration.class)// 생성시간/수정시간 자동 주입 설정파일 임포트
+public class PopularMemberTest {
+
+    @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private BoardRepository boardRepository;
+
+    @Autowired
+    private GodLifeScoreRepository godLifeScoreRepository;
+
+    @Autowired
+    private EntityManager em;
+
+    @Autowired
+    private ImageRepository imageRepository;
+
+
+    @Test
+    @DisplayName("1주간 갓생 받은거 테스트")
+    @Transactional
+    public void 한주간_인기_멤버_테스트(){
+        Member member = createMember("1", "1");
+        createImage(member, "profile1");
+        Member member1 = createMember("2", "2");
+        createImage(member1, "profile2");
+        Member member2 = createMember("3", "3");
+        Member member3 = createMember("4", "4");
+
+        //회원1 -> 게시글 3개 작성
+        Board boardMember1_1 = createBoard(member);
+        Board boardMember1_2 = createBoard(member);
+        Board boardMember1_3 = createBoard(member);
+
+        //회원2 -> 게시글 2개 작성
+        Board boardMember2_1 = createBoard(member1);
+        Board boardMember2_2 = createBoard(member1);
+
+        //회원3 -> 게시글 1개 작성
+        Board boardMember3_1 = createBoard(member2);
+
+        //회원4 --> 게시글 2개 작성
+        Board boardMember4_1 = createBoard(member3);
+        Board boardMember4_2 = createBoard(member3);
+
+        // boardMember1_1에 따봉 3개
+        GodLifeScore like = createLike(member, boardMember1_1);
+        GodLifeScore like1 = createLike(member1, boardMember1_1);
+        GodLifeScore like2 = createLike(member2, boardMember1_1);
+
+        // boardMember1_2에 따봉 2개
+        GodLifeScore like3 = createLike(member1, boardMember1_2);
+        GodLifeScore like4 = createLike(member2, boardMember1_2);
+
+        // boardMember2_1에 따봉 1개
+        GodLifeScore like5 = createLike(member, boardMember2_1);
+
+        // boardMember3_1에 따봉 2개
+        GodLifeScore like6 = createLike(member, boardMember3_1);
+        GodLifeScore like7 = createLike(member1, boardMember3_1);
+
+        em.flush();
+        em.clear();
+
+        // 최종적으로
+        // 회원 1 -> 따봉 5개 ==> 10점,
+        // 회원 3 -> 따봉 2개 ==> 4점,
+        // 회원 2 -> 따봉 1개 받아야함 ==> 2점,
+        List<PopularMemberResponse> weeklyPopularMember = memberRepository.findWeeklyPopularMember();
+
+        Assertions.assertThat(weeklyPopularMember.size()).isEqualTo(3);
+        Assertions.assertThat(weeklyPopularMember.get(0)).isEqualTo(new PopularMemberResponse(1L, "1", 10, "ASDF", "1")); // 10점
+        Assertions.assertThat(weeklyPopularMember.get(1)).isEqualTo(new PopularMemberResponse(3L, "3", 4, "ASDF", "")); // 4점
+        Assertions.assertThat(weeklyPopularMember.get(2)).isEqualTo(new PopularMemberResponse(2L, "2", 2, "ASDF", "2"));; // 2점
+    }
+
+    @Test
+    @DisplayName("전체기간 갓생 받은거 테스트")
+    @Transactional
+    public void 전체_기간_테스트(){
+        Member member = createMember("1", "1");
+        createImage(member, "profile1");
+        Member member1 = createMember("2", "2");
+        createImage(member1, "profile2");
+        Member member2 = createMember("3", "3");
+        Member member3 = createMember("4", "4");
+
+        //회원1 -> 게시글 3개 작성
+        Board boardMember1_1 = createBoard(member);
+        Board boardMember1_2 = createBoard(member);
+        Board boardMember1_3 = createBoard(member);
+
+        //회원2 -> 게시글 2개 작성
+        Board boardMember2_1 = createBoard(member1);
+        Board boardMember2_2 = createBoard(member1);
+
+        //회원3 -> 게시글 1개 작성
+        Board boardMember3_1 = createBoard(member2);
+
+        //회원4 --> 게시글 2개 작성
+        Board boardMember4_1 = createBoard(member3);
+        Board boardMember4_2 = createBoard(member3);
+
+        // boardMember1_1에 따봉 3개
+        GodLifeScore like = createLike(member, boardMember1_1);
+        GodLifeScore like1 = createLike(member1, boardMember1_1);
+        GodLifeScore like2 = createLike(member2, boardMember1_1);
+
+        // boardMember1_2에 따봉 2개
+        GodLifeScore like3 = createLike(member1, boardMember1_2);
+        GodLifeScore like4 = createLike(member2, boardMember1_2);
+
+        // boardMember2_1에 따봉 1개
+        GodLifeScore like5 = createLike(member, boardMember2_1);
+
+        // boardMember3_1에 따봉 2개
+        GodLifeScore like6 = createLike(member, boardMember3_1);
+        GodLifeScore like7 = createLike(member1, boardMember3_1);
+
+        em.flush();
+        em.clear();
+
+        List<PopularMemberResponse> allTimePopularMember = memberRepository.findAllTimePopularMember();
+
+        Assertions.assertThat(allTimePopularMember.size()).isEqualTo(3);
+    }
+
+    private Member createMember(String providerId, String nickname) {
+        Member member = Member
+                .builder()
+                .sex(Sex.MALE)
+                .providerName(ProviderType.KAKAO)
+                .age(18)
+                .nickname(nickname)
+                .email("ASDF@example.com")
+                .providerId(providerId)
+                .whoAmI("ASDF").build();
+
+        memberRepository.save(member);
+        return member;
+    }
+
+    private Board createBoard(Member member){
+        Board board = Board
+                .builder()
+                .title("test")
+                .content("test1")
+                .member(member)
+                .view(0)
+                .totalScore(0)
+                .build();
+        boardRepository.save(board);
+        return board;
+    }
+
+    private GodLifeScore createLike(Member member, Board board) {
+        GodLifeScore god = GodLifeScore.builder()
+                .member(member)
+                .board(board)
+                .score(2)
+                .build();
+
+        GodLifeScore save = godLifeScoreRepository.save(god);
+        return save;
+    }
+
+    private GodLifeScore createLike(Member member, Board board, LocalDateTime when) {
+        GodLifeScore god = GodLifeScore.builder()
+                .member(member)
+                .board(board)
+                .score(2)
+                .build();
+
+        GodLifeScore save = godLifeScoreRepository.save(god);
+        return save;
+    }
+
+    private Image createImage(Member member, String serverName) {
+        Image image = Image.builder()
+                .serverName(serverName)
+                .member(member)
+                .build();
+        return imageRepository.save(image);
+    }
+
+
+}

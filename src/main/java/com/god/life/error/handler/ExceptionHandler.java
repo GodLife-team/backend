@@ -1,6 +1,7 @@
 package com.god.life.error.handler;
 
 import com.god.life.dto.common.CommonResponse;
+import com.god.life.error.BadRequestException;
 import com.god.life.error.ForbiddenException;
 import com.god.life.error.JwtInvalidException;
 import com.god.life.error.NotFoundResource;
@@ -89,5 +90,10 @@ public class ExceptionHandler {
                 .body(new CommonResponse<>(HttpStatus.INTERNAL_SERVER_ERROR, "", "서버 내부 오류입니다."));
     }
 
+    @org.springframework.web.bind.annotation.ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<CommonResponse<String>> badRequestException(BadRequestException badRequestException) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new CommonResponse<>(HttpStatus.BAD_REQUEST, "", badRequestException.getMessage()));
+    }
 
 }

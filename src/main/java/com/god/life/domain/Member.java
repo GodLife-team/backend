@@ -52,6 +52,7 @@ public class Member {
     private String fcmToken;
 
     //private String fcmToken;
+
     @Override
     public String toString() {
         return "Member{" +

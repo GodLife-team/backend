@@ -98,7 +98,7 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository {
         //이번 주 월요일 0시 0분 0초
         LocalDateTime monday = LocalDateTime.of(LocalDate.now().with(DayOfWeek.MONDAY), LocalTime.MIDNIGHT);
 
-        //인기 있는 게시물 번호 조회 (좋아요 수까지)
+        //인기 있는 회원 번호 조회 (받은 좋아요 수까지)
         List<PopularMemberResponse> weeklyPopularMembers = queryFactory.select(Projections.bean(
                         PopularMemberResponse.class,
                         member.id.as("memberId"),
@@ -135,6 +135,56 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository {
                     weeklyPopularMember.setWhoAmI(member.getWhoAmI());
                     List<Image> images = member.getImages();
                     for (Image image : images) {
+                        if (image != null && image.getServerName().contains("profile")) {
+                            weeklyPopularMember.setProfileURL(image.getServerName().substring("profile".length()));
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+
+
+        return weeklyPopularMembers;
+    }
+
+    // 전체 기간 인기있는 회원 반환
+    @Override
+    public List<PopularMemberResponse> findAllTimePopularMember() {
+
+        //인기 있는 회원 번호 조회 (받은 좋아요 수까지)
+        List<PopularMemberResponse> weeklyPopularMembers = queryFactory.select(Projections.bean(
+                        PopularMemberResponse.class,
+                        member.id.as("memberId"),
+                        godLifeScore.score.sum().as("godLifeScore")
+                ))
+                .from(member)
+                .join(board).on(member.id.eq(board.member.id))
+                .join(godLifeScore).on(board.id.eq(godLifeScore.board.id))
+                .groupBy(member.id)
+                .orderBy(godLifeScore.score.sum().desc(), member.id.asc())
+                .offset(0)
+                .limit(10)
+                .fetch(); // 탑 10명만 가져오기
+
+        // 탑 10명의 멤버 정보 및 이미지 URL 조회하기
+        List<Member> popularMember = queryFactory.selectFrom(member)
+                .leftJoin(member.images)
+                .fetchJoin()
+                .where(member.id.in(
+                        weeklyPopularMembers.stream().map(PopularMemberResponse::getMemberId).toList()))
+                .fetch();
+
+        // 조립
+        for (int i = 0; i < weeklyPopularMembers.size(); i++) {
+            var weeklyPopularMember = weeklyPopularMembers.get(i);
+            for (int j = 0; j < popularMember.size(); j++) {
+                Member member = popularMember.get(j);
+                if (weeklyPopularMember.getMemberId().equals(member.getId())) {
+                    weeklyPopularMember.setNickname(member.getNickname());
+                    weeklyPopularMember.setWhoAmI(member.getWhoAmI());
+                    List<Image> images = member.getImages();
+                    for (Image image : images) {
                         if (image.getServerName().contains("profile")) {
                             weeklyPopularMember.setProfileURL(image.getServerName().substring("profile".length()));
                         }
@@ -143,6 +193,7 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository {
                 }
             }
         }
+
 
         return weeklyPopularMembers;
     }
