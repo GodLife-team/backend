@@ -42,6 +42,9 @@ public class PopularController {
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, popularMemberResponses));
     }
 
+
+
+
     @Operation(summary = "한 주간 인기 있는 게시물 조회", description = "한 주간 갓생인정을 가장 많이 받은 인기 게시물 10개를 반환")
     @ApiResponses(
             value = {

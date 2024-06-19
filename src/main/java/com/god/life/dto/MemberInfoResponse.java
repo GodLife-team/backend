@@ -38,6 +38,8 @@ public class MemberInfoResponse {
         this.nickname = nickname;
         this.whoAmI = whoAmI;
         this.memberBoardCount = memberBoardCount;
+        this.profileImageURL = "";
+        this.backgroundImageURL = "";
     }
 
 

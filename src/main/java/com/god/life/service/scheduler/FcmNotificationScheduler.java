@@ -26,8 +26,8 @@ public class FcmNotificationScheduler {
         this.messenger = firebaseMessaging;
     }
 
-    private static final String END_MESSAGE_TITLE = "오늘 하루도 고생하셨어요!";
-    private static final String END_MESSAGE_BODY = "오늘 하루를 정리해 보세요!";
+    private static final String END_MESSAGE_TITLE = "오늘 TODO 까먹지 않으셨죠?";
+    private static final String END_MESSAGE_BODY = "오늘 굿생기록을 정리해 보세요!";
 
 
     // 1분마다
