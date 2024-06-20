@@ -29,7 +29,7 @@ public class PopularController {
     private final MemberService memberService;
     private final BoardService boardService;
 
-    @Operation(summary = "주간 명예의 전당", description = "한 주간 가장 많이 갓생 인정을 받은 회원을 반환합니다.")
+    @Operation(summary = "주간 명예의 전당", description = "한 주간 가장 많이 굿생 인정을 받은 회원 최대 10명을 반환합니다.")
     @GetMapping("/popular/members/weekly")
     @ApiResponses(
             value = {
@@ -42,8 +42,18 @@ public class PopularController {
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, popularMemberResponses));
     }
 
-
-
+    @Operation(summary = "전체 명예의 전당", description = "전체 기간 동안 가장 많이 굿생인정을 받은 최대 회원 10명을 반환합니다.")
+    @GetMapping("/popular/members/all-time")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "전체 기간 동안 가장 많이 인정을 받은 회원",
+                            useReturnTypeSchema = true)
+            }
+    )
+    public ResponseEntity<CommonResponse<List<PopularMemberResponse>>> getGoatPopularMember(){
+        List<PopularMemberResponse> popularMemberResponses = memberService.searchAllTimePopularMember();
+        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, popularMemberResponses));
+    }
 
     @Operation(summary = "한 주간 인기 있는 게시물 조회", description = "한 주간 갓생인정을 가장 많이 받은 인기 게시물 10개를 반환")
     @ApiResponses(
@@ -71,7 +81,6 @@ public class PopularController {
     @GetMapping("/popular/boards/all-time")
     public ResponseEntity<CommonResponse<List<BoardSearchResponse>>> getTotalPopularBoards(){
         List<BoardSearchResponse> result = boardService.searchTopPopularBoardList();
-
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, result));
     }
 

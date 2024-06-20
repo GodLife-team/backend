@@ -8,20 +8,15 @@ import com.god.life.repository.GodLifeScoreRepository;
 import com.god.life.repository.ImageRepository;
 import com.god.life.repository.MemberRepository;
 import jakarta.persistence.EntityManager;
-import org.aspectj.lang.annotation.Before;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.annotation.Commit;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,8 +26,7 @@ import java.util.List;
 @TestPropertySource(locations = "classpath:application-test.yaml")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import(JpaAuditingConfiguration.class)// 생성시간/수정시간 자동 주입 설정파일 임포트
-@Transactional
-public class PopularMemberTest {
+public class PopularMemberRepositoryTest {
 
     @Autowired
     private MemberRepository memberRepository;
@@ -49,6 +43,19 @@ public class PopularMemberTest {
     @Autowired
     private ImageRepository imageRepository;
 
+    @Test
+    @DisplayName("1주간 갓생 받은거 테스트_아무도 없을때")
+    public void 한주간_인기_멤버가_없음(){
+        List<PopularMemberResponse> weeklyPopularMember = memberRepository.findWeeklyPopularMember();
+        Assertions.assertThat(weeklyPopularMember.size()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("전체 기간 받은거 테스트_아무도 없을때")
+    public void 전체기간_인기_멤버가_없음(){
+        List<PopularMemberResponse> weeklyPopularMember = memberRepository.findAllTimePopularMember();
+        Assertions.assertThat(weeklyPopularMember.size()).isEqualTo(0);
+    }
 
     @Test
     @DisplayName("1주간 갓생 받은거 테스트")

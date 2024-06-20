@@ -1,6 +1,7 @@
 package com.god.life.domain;
 
 
+import com.god.life.error.BadRequestException;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,8 +10,8 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Builder
 @AllArgsConstructor
+@Builder
 public class FcmAlarm extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,8 +24,10 @@ public class FcmAlarm extends BaseEntity {
 
     private LocalDateTime sendTime; // 알림 전송 시각 저장
 
-
+    // 알람 시간 변경
     public void updateAlarm(LocalDateTime updateSendTime) {
         this.sendTime = updateSendTime;
     }
+
+
 }

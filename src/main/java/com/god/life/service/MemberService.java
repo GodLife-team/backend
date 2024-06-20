@@ -38,7 +38,6 @@ public class MemberService {
         return response;
     }
 
-    @Transactional(readOnly = true)
     public Member loadByUsername(Long id) {
        return memberRepository.findById(id)
                .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_MEMBER_MESSAGE.getErrorMessage()));
@@ -143,7 +142,6 @@ public class MemberService {
     }
 
     // memberId의 유저 정보를 조회함
-    @Transactional(readOnly = true)
     public MemberInfoResponse memberInfoResponse(Member member, Long findMemberId) {
         MemberInfoResponse memberInfo = memberRepository.getMemberInfo(findMemberId);
 
@@ -156,10 +154,14 @@ public class MemberService {
     }
 
 
-    @Transactional
     public List<PopularMemberResponse> searchWeeklyPopularMember() {
         return memberRepository.findWeeklyPopularMember();
     }
+
+    public List<PopularMemberResponse> searchAllTimePopularMember(){
+        return memberRepository.findAllTimePopularMember();
+    }
+
 
 
 }
