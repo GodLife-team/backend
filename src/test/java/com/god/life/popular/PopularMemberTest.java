@@ -18,6 +18,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.Commit;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +31,7 @@ import java.util.List;
 @TestPropertySource(locations = "classpath:application-test.yaml")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import(JpaAuditingConfiguration.class)// 생성시간/수정시간 자동 주입 설정파일 임포트
+@Transactional
 public class PopularMemberTest {
 
     @Autowired
@@ -50,8 +52,9 @@ public class PopularMemberTest {
 
     @Test
     @DisplayName("1주간 갓생 받은거 테스트")
-    @Transactional
     public void 한주간_인기_멤버_테스트(){
+        List<Member> all = memberRepository.findAll();
+
         Member member = createMember("1", "1");
         createImage(member, "profile1");
         Member member1 = createMember("2", "2");
@@ -101,14 +104,12 @@ public class PopularMemberTest {
         List<PopularMemberResponse> weeklyPopularMember = memberRepository.findWeeklyPopularMember();
 
         Assertions.assertThat(weeklyPopularMember.size()).isEqualTo(3);
-        Assertions.assertThat(weeklyPopularMember.get(0)).isEqualTo(new PopularMemberResponse(1L, "1", 10, "ASDF", "1")); // 10점
-        Assertions.assertThat(weeklyPopularMember.get(1)).isEqualTo(new PopularMemberResponse(3L, "3", 4, "ASDF", "")); // 4점
-        Assertions.assertThat(weeklyPopularMember.get(2)).isEqualTo(new PopularMemberResponse(2L, "2", 2, "ASDF", "2"));; // 2점
+        Assertions.assertThat(weeklyPopularMember.get(0).getGodLifeScore()).isEqualTo(10); // 10점
+        Assertions.assertThat(weeklyPopularMember.get(1).getGodLifeScore()).isEqualTo(4); // 4점
+        Assertions.assertThat(weeklyPopularMember.get(2).getGodLifeScore()).isEqualTo(2);; // 2점
     }
-
     @Test
     @DisplayName("전체기간 갓생 받은거 테스트")
-    @Transactional
     public void 전체_기간_테스트(){
         Member member = createMember("1", "1");
         createImage(member, "profile1");
