@@ -40,9 +40,7 @@ public class FcmAlarmService {
         if (sendTime.isBefore(LocalDateTime.now())) {
             throw new BadRequestException("현재 시간보다 이전의 알람을 등록할 수 없습니다");
         }
-        FcmAlarm fcmAlarm = FcmAlarm.builder()
-                .member(member)
-                .sendTime(sendTime).build();
+        FcmAlarm fcmAlarm = new FcmAlarm(member, sendTime);
         fcmAlarmRepository.save(fcmAlarm);
     }
 
@@ -81,10 +79,6 @@ public class FcmAlarmService {
     @Transactional
     public void updateTodayAlarm(AlarmCreateRequest alarmCreateRequest, Member member) {
         LocalDateTime sendTime = alarmCreateRequest.toTime();
-        // 보내야 하는 시간이 이미 지나간 시간이면
-        if (sendTime.isBefore(LocalDateTime.now())) {
-            throw new BadRequestException("현재 시간보다 이전의 알람을 등록할 수 없습니다");
-        }
 
         FcmAlarm fcmAlarm = fcmAlarmRepository.selectTodayAlarm(member).orElseThrow(() ->
                 new BadRequestException("잘못된 알람 업데이트 요청입니다."));

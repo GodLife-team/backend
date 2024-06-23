@@ -10,8 +10,6 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 public class FcmAlarm extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,8 +22,16 @@ public class FcmAlarm extends BaseEntity {
 
     private LocalDateTime sendTime; // 알림 전송 시각 저장
 
+    public FcmAlarm(Member member, LocalDateTime sendTime) {
+        this.member = member;
+        updateAlarm(sendTime);
+    }
+
     // 알람 시간 변경
     public void updateAlarm(LocalDateTime updateSendTime) {
+        if (updateSendTime.isBefore(LocalDateTime.now())) {
+            throw new BadRequestException("현재 시간보다 이전의 알람을 등록할 수 없습니다");
+        }
         this.sendTime = updateSendTime;
     }
 
