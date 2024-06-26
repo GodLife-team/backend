@@ -5,7 +5,7 @@ import com.god.life.config.JpaAuditingConfiguration;
 import com.god.life.domain.*;
 import com.god.life.dto.BoardSearchResponse;
 import com.god.life.dto.GodLifeStimulationBoardResponse;
-import com.god.life.dto.PopularMemberResponse;
+import com.god.life.error.NotFoundResource;
 import com.god.life.repository.*;
 import jakarta.persistence.EntityManager;
 import org.assertj.core.api.Assertions;
@@ -20,8 +20,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.util.ReflectionTestUtils;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.fail;
@@ -141,6 +141,25 @@ public class BoardRepositoryTest {
 
     @Test
     void 한_주간_인기_게시판_테스트(){
+        createTestCase();
+
+        em.flush();
+        em.clear();
+
+        // 최종적으로
+        // 회원 1 -> 따봉 5개 ==> 10점,
+        // 회원 3 -> 따봉 2개 ==> 4점,
+        // 회원 2 -> 따봉 1개 받아야함 ==> 2점,
+        List<BoardSearchResponse> weeklyPopularBoard = boardRepository.findWeeklyPopularBoard();
+        System.out.println(weeklyPopularBoard.toString());
+
+        Assertions.assertThat(weeklyPopularBoard.size()).isEqualTo(3);
+        Assertions.assertThat(weeklyPopularBoard.get(0).getGodScore()).isEqualTo(6); // 10점
+        Assertions.assertThat(weeklyPopularBoard.get(1).getGodScore()).isEqualTo(4); // 4점
+        Assertions.assertThat(weeklyPopularBoard.get(2).getGodScore()).isEqualTo(2);; // 2점
+    }
+
+    private void createTestCase() {
         Category godPageCategory = categoryRepository.findByCategoryType(CategoryType.GOD_LIFE_PAGE);
         Category godStimulusCategory = categoryRepository.findByCategoryType(CategoryType.GOD_LIFE_STIMULUS);
 
@@ -180,22 +199,6 @@ public class BoardRepositoryTest {
         // boardMember3_1에 따봉 2개
         GodLifeScore like6 = createLike(member, boardMember3_1);
         GodLifeScore like7 = createLike(member1, boardMember3_1);
-
-        em.flush();
-        em.clear();
-
-        // 최종적으로
-        // 회원 1 -> 따봉 5개 ==> 10점,
-        // 회원 3 -> 따봉 2개 ==> 4점,
-        // 회원 2 -> 따봉 1개 받아야함 ==> 2점,
-        List<BoardSearchResponse> weeklyPopularBoard = boardRepository.findWeeklyPopularBoard();
-        System.out.println(weeklyPopularBoard.toString());
-
-        Assertions.assertThat(weeklyPopularBoard.size()).isEqualTo(3);
-        Assertions.assertThat(weeklyPopularBoard.get(0).getGodScore()).isEqualTo(6); // 10점
-        Assertions.assertThat(weeklyPopularBoard.get(1).getGodScore()).isEqualTo(4); // 4점
-        Assertions.assertThat(weeklyPopularBoard.get(2).getGodScore()).isEqualTo(2);; // 2점
-
     }
 
     private Board createBoard(Member member, Category category){
@@ -207,6 +210,7 @@ public class BoardRepositoryTest {
                 .view(0)
                 .totalScore(0)
                 .category(category)
+                .status(BoardStatus.S)
                 .build();
         boardRepository.save(board);
         return board;
@@ -273,21 +277,63 @@ public class BoardRepositoryTest {
         createLike(member1, stimulusBoard1);
         createLike(member2, stimulusBoard1);
 
-        em.flush();
-        em.clear();
-
-        List<Board> boards1 = boardRepository.findAll();
+        //when
         List<GodLifeStimulationBoardResponse> boards =
                 boardRepository.findStimulusBoardPaging(PageRequest.of(0, 10, Sort.by("create_date")))
                         .getContent();
 
+        //then
         Assertions.assertThat(boards.size()).isEqualTo(2);
         Assertions.assertThat(boards.get(0).getBoardId()).isEqualTo(stimulusBoard2.getId());
         Assertions.assertThat(boards.get(0).getGodLifeScore()).isEqualTo(0);
         Assertions.assertThat(boards.get(1).getBoardId()).isEqualTo(stimulusBoard1.getId());
         Assertions.assertThat(boards.get(1).getGodLifeScore()).isEqualTo(4);
-        System.out.println(boards.get(0));
-        System.out.println(boards.get(1));
+    }
+
+    @Test
+    void 현재_임시_작성중인_갓생_자극_게시물은_상세_조회되면_안된다(){
+        //given : boardStatus가 t인 게시판은 조회되면 안됨.
+        Category stimulus = categoryRepository.findByCategoryType(CategoryType.GOD_LIFE_STIMULUS);
+        Member member1 = createMember("1234", "aaaa");
+
+        Board board = createBoard(member1, stimulus);
+        ReflectionTestUtils.setField(
+                board,
+                "status",
+                BoardStatus.T
+        );
+        boardRepository.save(board);
+        em.flush();
+        em.clear();
+
+        //when
+        //게시물이 조회되지 않는 trhow가 반환되어야 함
+        org.junit.jupiter.api.Assertions.assertThrows(NotFoundResource.class, () ->
+                boardRepository.findStimulusBoardEqualsBoardId(board.getId(), member1));
+    }
+
+    @Test
+    void 현재_임시_작성중인_게시물은_갓생자극_리스트에_조회되면안됨(){
+        createTestCase();
+        Category category = categoryRepository.findByCategoryType(CategoryType.GOD_LIFE_STIMULUS);
+        Member member = createMember("213321321", "TESTERER");
+        Board board = createBoard(member, category);
+        ReflectionTestUtils.setField(
+                board,
+                "status",
+                BoardStatus.T
+        );
+        boardRepository.save(board);
+        em.flush();
+        em.clear();
+
+        //when
+        List<GodLifeStimulationBoardResponse> boards =
+                boardRepository.findStimulusBoardPaging(PageRequest.of(0, 10, Sort.by("create_date")))
+                        .getContent();
+
+        //then
+        Assertions.assertThat(boards.size()).isEqualTo(2);
     }
 
     private GodLifeScore createLike(Member member, Board board) {
