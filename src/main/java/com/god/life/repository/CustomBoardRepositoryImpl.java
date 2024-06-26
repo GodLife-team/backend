@@ -167,7 +167,8 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
                 .from(board)
                 .join(member).on(board.member.eq(member))
                 .join(category).on(board.category.categoryId.eq(category.categoryId))
-                .where(board.id.eq(boardId), board.category.categoryType.eq(CategoryType.GOD_LIFE_STIMULUS))
+                .where(board.id.eq(boardId), board.category.categoryType.eq(CategoryType.GOD_LIFE_STIMULUS),
+                        board.status.eq(BoardStatus.S))
                 .fetchOne();
 
         if (godLifeStimulationBoardResponse == null) {
@@ -198,7 +199,8 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
                 .from(board)
                 .join(board.member)
                 .join(board.category)
-                .where(board.category.categoryType.eq(CategoryType.GOD_LIFE_STIMULUS))
+                .where(board.category.categoryType.eq(CategoryType.GOD_LIFE_STIMULUS),
+                        board.status.eq(BoardStatus.S))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .orderBy(board.createDate.desc())
