@@ -37,7 +37,7 @@ public class CommentService {
 
     @Transactional
     public CommentResponse createComment(Long boardId, CommentCreateRequest request, Member member) {
-        Board board = boardRepository.findByIdWithMember(boardId, CategoryType.GOD_LIFE_PAGE)
+        Board board = boardRepository.findByIdAnyBoardType(boardId)
                 .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_BOARD_MESSAGE.getErrorMessage()));
 
         Comment comment = request.toEntity(board, member);

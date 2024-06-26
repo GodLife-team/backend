@@ -21,6 +21,8 @@ public interface BoardRepository extends JpaRepository<Board, Long>, CustomBoard
     @Query("select b from Board b join fetch b.member where b.id = :boardId and b.category.categoryType = :categoryType")
     Optional<Board> findByIdWithMember(@Param("boardId") Long boardId, @Param("categoryType") CategoryType categoryType);
 
+    @Query("select b from Board b where b.id = :boardId")
+    Optional<Board> findByIdAnyBoardType(@Param("boardId") Long boardId);
 
 //    @Query(value = "select b from Board b join fetch b.member where b.category = Category.categoryType", countQuery = "select count(b) from Board b join b.member")
 //    Page<Board> findByBoardfetchjoin(Pageable pageable);
