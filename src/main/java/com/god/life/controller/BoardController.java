@@ -206,7 +206,7 @@ public class BoardController {
     }
 
     @GetMapping("/board/stimulation")
-    @Operation(summary = "갓생 자극 게시물 조회")
+    @Operation(summary = "갓생 자극 게시물 조회 (페이징 처리)")
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode = "200", description = "갓생 자극 게시판 조회",
@@ -214,7 +214,7 @@ public class BoardController {
             }
     )
     public ResponseEntity<CommonResponse<List<GodLifeStimulationBoardResponse>>> viewGodStimulusBoardList(
-            @RequestParam(value = "page", defaultValue = "0") Integer page
+            @Parameter(description = "조회할 갓생 자극 페이징 번호, 0부터 시작")@RequestParam(value = "page", defaultValue = "0") Integer page
     ) {
         List<GodLifeStimulationBoardResponse> response = boardService.getListStimulusBoard(page);
 
