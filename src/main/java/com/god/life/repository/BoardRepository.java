@@ -1,6 +1,7 @@
 package com.god.life.repository;
 
 import com.god.life.domain.Board;
+import com.god.life.domain.CategoryType;
 import com.god.life.domain.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,16 +18,19 @@ import java.util.Optional;
 public interface BoardRepository extends JpaRepository<Board, Long>, CustomBoardRepository {
 
 
+    @Query("select b from Board b join fetch b.member where b.id = :boardId and b.category.categoryType = :categoryType")
+    Optional<Board> findByIdWithMember(@Param("boardId") Long boardId, @Param("categoryType") CategoryType categoryType);
 
-    @Query("select b from Board b join fetch b.member where b.id = :boardId")
-    Optional<Board> findByIdWithMember(@Param("boardId") Long boardId);
 
-
-    @Query(value = "select b from Board b join fetch b.member", countQuery = "select count(b) from Board b join b.member")
-    Page<Board> findByBoardfetchjoin(Pageable pageable);
+//    @Query(value = "select b from Board b join fetch b.member where b.category = Category.categoryType", countQuery = "select count(b) from Board b join b.member")
+//    Page<Board> findByBoardfetchjoin(Pageable pageable);
 
     @Modifying
     void deleteByMember(Member deleteMember);
+
+    @Query(value = "select b from Board b join b.category where b.category.categoryType = :categoryType")
+    List<Board> getBoardsByCategory(@Param("categoryType") CategoryType categoryType);
+
 
 
 //    @Query(

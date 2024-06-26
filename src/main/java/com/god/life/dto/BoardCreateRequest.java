@@ -1,7 +1,6 @@
 package com.god.life.dto;
 
-import com.god.life.domain.Board;
-import com.god.life.domain.Member;
+import com.god.life.domain.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,12 +29,17 @@ public class BoardCreateRequest {
     @Schema(description = "사진리스트")
     private List<MultipartFile> images = new ArrayList<>();
 
-    public Board toBoard(Member loginMember){
+    @Schema(description = "게시판 카테고리")
+    private CategoryType categoryType;
+
+    public Board toBoard(Member loginMember, Category category){
         return Board.builder()
                 .title(title)
                 .content(content)
                 .member(loginMember)
                 .tag(Board.toDBTag(tags))
+                .status(BoardStatus.S)
+                .category(category)
                 .build();
     }
 

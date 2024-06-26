@@ -1,13 +1,12 @@
 package com.god.life.service;
 
-import com.god.life.domain.Board;
-import com.god.life.domain.GodLifeScore;
-import com.god.life.domain.Member;
+import com.god.life.domain.*;
 import com.god.life.dto.*;
 import com.god.life.error.ErrorMessage;
 import com.god.life.error.ForbiddenException;
 import com.god.life.error.NotFoundResource;
 import com.god.life.repository.BoardRepository;
+import com.god.life.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,6 +28,7 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final ImageService imageService;
     private final GodLifeScoreService godLifeScoreService;
+    private final CategoryRepository categoryRepository;
     //private final WeeklyPopularBoardCacheService weeklyPopularBoardCacheService;
     //private final RedisTemplate<String, Object> redisTemplate;
 
@@ -37,9 +37,11 @@ public class BoardService {
 
     @Transactional
     public Long createBoard(BoardCreateRequest request, Member loginMember, List<ImageSaveResponse> uploadResponse) {
+        Category category = categoryRepository.findByCategoryType(CategoryType.GOD_LIFE_PAGE);
         // DB entity 생성
-        Board board = request.toBoard(loginMember);
+        Board board = request.toBoard(loginMember,category);
         boardRepository.save(board);
+
 
         for (ImageSaveResponse response : uploadResponse) {
             imageService.saveImage(response, loginMember, board);
@@ -52,7 +54,7 @@ public class BoardService {
 
     @Transactional
     public BoardResponse detailBoard(Long boardId, Member loginMember) {
-        Board board = boardRepository.findByIdWithMember(boardId)
+        Board board = boardRepository.findByIdWithMember(boardId, CategoryType.GOD_LIFE_PAGE)
                 .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_BOARD_MESSAGE.getErrorMessage()));
 
         board.increaseViewCount();
@@ -62,8 +64,9 @@ public class BoardService {
         return BoardResponse.of(board, isOwner, memberLikedBoard);
     }
 
+
     public void checkAuthorization(Member member, Long boardId) {
-        Board board = boardRepository.findByIdWithMember(boardId)
+        Board board = boardRepository.findByIdWithMember(boardId, CategoryType.GOD_LIFE_PAGE)
                 .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_BOARD_MESSAGE.getErrorMessage()));
 
         if (!member.getId().equals(board.getMember().getId())) {
@@ -165,4 +168,44 @@ public class BoardService {
     }
 
 
+    @Transactional
+    public Long createTemporaryBoard(Member member) {
+        Category category = categoryRepository.findByCategoryType(CategoryType.GOD_LIFE_STIMULUS);
+
+        Board tmpBoard = Board.builder()
+                .title(null)
+                .content(null)
+                .tag("")
+                .thumbnailUrl("")
+                .member(member)
+                .totalScore(0)
+                .view(0)
+                .category(category)
+                .status(BoardStatus.T)
+                .build();
+
+        return boardRepository.save(tmpBoard).getId();
+    }
+
+    @Transactional
+    public Long saveTemporaryBoard(Member member, GodLifeStimulationBoardRequest dto) {
+        Long boardId = dto.getBoardId();
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_BOARD_MESSAGE.getErrorMessage()));
+
+        board.updateBoard(dto);
+        return board.getId();
+    }
+
+
+    public GodLifeStimulationBoardResponse detailStimulusBoard(Long boardId, Member member) {
+        return boardRepository.findStimulusBoardEqualsBoardId(boardId, member);
+    }
+
+    public List<GodLifeStimulationBoardResponse> getListStimulusBoard(Integer page) {
+        Page<GodLifeStimulationBoardResponse> result = boardRepository
+                .findStimulusBoardPaging(PageRequest.of(page, PAGE_SIZE, Sort.by("create_date").descending()));
+
+        return result.getContent();
+    }
 }

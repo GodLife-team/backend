@@ -10,8 +10,7 @@ import com.god.life.service.GodLifeScoreService;
 import com.god.life.service.ImageService;
 import com.god.life.service.ImageUploadService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,8 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -141,7 +140,89 @@ public class BoardController {
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, boardList));
     }
 
+    @PostMapping("/board/image-upload")
+    @Operation(summary = "게시판 작성시 이미지 업로드 API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "이미지 경로 반환",
+                            useReturnTypeSchema = true)
+            }
+    )
+    public ResponseEntity<CommonResponse<String>> postImage(
+            @Parameter(description = "업로드할 이미지") @RequestParam("image") MultipartFile image,
+            @Parameter(description = "업로드할 이미지의 게시판 번호") @RequestParam("tmpBoardId") Long tmpBoardId,
+            @LoginMember Member member) {
+
+        ImageSaveResponse response = imageService.uploadImage(image);
+        imageService.saveImage(response, member, tmpBoardId);
+
+        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, response.getServerName()));
+    }
+
+    @PostMapping("/board/tmp")
+    @Operation(summary = "임시 테이블 생성")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "임시 저장 게시판 PK 값 전달",
+                            useReturnTypeSchema = true)
+            }
+    )
+    public ResponseEntity<CommonResponse<Long>> postTemporaryBoard(@LoginMember Member member) {
+        Long temporaryBoardId = boardService.createTemporaryBoard(member);
+        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, temporaryBoardId));
+    }
+
+    @PostMapping("/board/stimulation")
+    @Operation(summary = "임시 갓생 자극 게시물 저장 처리")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "갓생 자극 게시판 저장처리",
+                            useReturnTypeSchema = true)
+            }
+    )
+    public ResponseEntity<CommonResponse<Long>> postStimulationBoard(@LoginMember Member member,
+                                                                     @Parameter(description = "갓생 자극 게시물 최종 작성") @RequestBody GodLifeStimulationBoardRequest dto) {
+
+        Long savedBoardId = boardService.saveTemporaryBoard(member, dto);
+        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, savedBoardId));
+    }
+
+    @GetMapping("/board/stimulation/{boardId}")
+    @Operation(summary = "갓생 자극 게시물 조회")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "갓생 자극 게시판 조회",
+                            useReturnTypeSchema = true)
+            }
+    )
+    public ResponseEntity<CommonResponse<GodLifeStimulationBoardResponse>> viewGodStimulusBoard(
+            @PathVariable(name = "boardId") String boardId,
+            @LoginMember Member member) {
+
+        GodLifeStimulationBoardResponse response
+                = boardService.detailStimulusBoard(checkId(boardId), member);
+
+        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, response));
+    }
+
+    @GetMapping("/board/stimulation")
+    @Operation(summary = "갓생 자극 게시물 조회")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "갓생 자극 게시판 조회",
+                            useReturnTypeSchema = true)
+            }
+    )
+    public ResponseEntity<CommonResponse<List<GodLifeStimulationBoardResponse>>> viewGodStimulusBoardList(
+            @RequestParam(value = "page", defaultValue = "0") Integer page
+    ) {
+        List<GodLifeStimulationBoardResponse> response = boardService.getListStimulusBoard(page);
+
+        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, response));
+    }
+
     private Long checkId(String id) {
+
         long boardId;
         try {
             boardId = Long.parseLong(id);

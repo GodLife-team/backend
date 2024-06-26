@@ -9,6 +9,7 @@ import com.god.life.error.NotFoundResource;
 import com.god.life.repository.MemberRepository;
 import com.god.life.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,7 @@ import java.util.Optional;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Slf4j
 public class MemberService {
 
     private final JwtUtil jwtUtil;
@@ -48,6 +50,7 @@ public class MemberService {
         // jwt 조회
         Optional<Member> findMember = memberRepository.findByRefreshToken(jwt);
         if (findMember.isEmpty()) {
+            log.info("Refresh token = {}, 인데 못찾음",  jwt);
             throw new JwtInvalidException("잘못된 토큰입니다.");
         }
         Member member = findMember.get();

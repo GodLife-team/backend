@@ -3,22 +3,55 @@ package com.god.life.JwtTest;
 import com.god.life.error.JwtInvalidException;
 import com.god.life.util.JwtUtil;
 import io.jsonwebtoken.Claims;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
 public class JwtTest {
 
-    @Autowired
     private JwtUtil jwtUtil;
-
     private String id = "1";
     private String nickname = "test";
+
+    @BeforeEach
+    public void init(){
+        jwtUtil = new JwtUtil();
+        ReflectionTestUtils.setField(
+                jwtUtil,
+                "secret",
+                "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        );
+        ReflectionTestUtils.setField(
+                jwtUtil,
+                "ISSUER",
+                "tester:8080"
+        );
+        ReflectionTestUtils.setField(
+                jwtUtil,
+                "SUBJECT",
+                "godlife"
+        );
+        ReflectionTestUtils.setField(
+                jwtUtil,
+                "ACCESS_EXPIRATION_TIME",
+                7_200_000
+        );
+        ReflectionTestUtils.setField(
+                jwtUtil,
+                "REFRESH_EXPIRATION_TIME",
+                1_209_600_000
+        );
+        jwtUtil.init();
+    }
+
 
     @Test
     public void create_accessToken_test(){
@@ -50,7 +83,7 @@ public class JwtTest {
 
         long diffTime = (expireTime.getTime() - now.getTime()) / (60 * 1000);
 
-        assertThat(diffTime).isLessThan(20_160); //최대 2주 남았는지 확인
+        assertThat(diffTime).isLessThanOrEqualTo(20_160); //최대 2주 남았는지 확인
     }
 
     @Test

@@ -1,18 +1,17 @@
 package com.god.life.repository;
 
-import com.god.life.domain.Board;
-import com.god.life.domain.QBoard;
-import com.god.life.domain.QGodLifeScore;
-import com.god.life.domain.QMember;
-import com.god.life.dto.BoardResponse;
+import com.god.life.domain.*;
 import com.god.life.dto.BoardSearchRequest;
 import com.god.life.dto.BoardSearchResponse;
+import com.god.life.dto.GodLifeStimulationBoardResponse;
 import com.god.life.dto.PopularBoardQueryDTO;
+import com.god.life.error.ErrorMessage;
+import com.god.life.error.NotFoundResource;
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Ops;
-import com.querydsl.core.types.Projections;
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.*;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
@@ -20,9 +19,9 @@ import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Date;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,10 +30,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.god.life.domain.QBoard.board;
+import static com.god.life.domain.QCategory.category;
 import static com.god.life.domain.QGodLifeScore.godLifeScore;
+import static com.god.life.domain.QMember.member;
 
 @Repository
 @Slf4j
@@ -49,6 +51,7 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
 
     // 1주간 인기 게시글 조회
     // message에 시간 붙여주기 --> 아직 미구현 XXX
+    // 6/26 : 갓생 인증 게시글만 보여줄 것인지?
     @Override
     public List<BoardSearchResponse> findWeeklyPopularBoard() {
         LocalDateTime today = LocalDateTime.now(); // 현재 시각
@@ -62,9 +65,13 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
                         godLifeScore.score.sum().as("sum")
                 ))
                 .from(board)
+                .join(category).on(board.category.categoryId.eq(category.categoryId))
                 .join(godLifeScore).on(board.id.eq(godLifeScore.board.id))
                 .where(
-                        godLifeScore.createDate.between(monday, today) //일주일 간격으로 수행
+                        //일주일 간격으로 수행
+                        godLifeScore.createDate.between(monday, today).and(
+                                category.categoryType.eq(CategoryType.GOD_LIFE_PAGE)
+                        )
                 )
                 .groupBy(board.id)
                 .orderBy(godLifeScore.score.sum().desc(), board.id.asc())
@@ -74,7 +81,7 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
 
         //인기 있는 게시판 정보 조회
         List<Board> boards = queryFactory.selectFrom(board)
-                .join(board.member, QMember.member).fetchJoin()
+                .join(board.member, member).fetchJoin()
                 .where(
                         board.id.in(weeklyPopularBoardDTO.stream()
                                 .map(PopularBoardQueryDTO::getBoardId).collect(Collectors.toList())))
@@ -108,7 +115,9 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
                         godLifeScore.score.sum().as("sum")
                 ))
                 .from(board)
+                .join(category).on(board.category.categoryId.eq(category.categoryId))
                 .join(godLifeScore).on(board.id.eq(godLifeScore.board.id))
+                .where(category.categoryType.eq(CategoryType.GOD_LIFE_PAGE))
                 .groupBy(board.id)
                 .orderBy(godLifeScore.score.sum().desc(), board.id.asc())
                 .offset(0)
@@ -117,7 +126,7 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
 
         //인기 있는 게시판 정보 조회
         List<Board> boards = queryFactory.selectFrom(board)
-                .join(board.member, QMember.member).fetchJoin()
+                .join(board.member, member).fetchJoin()
                 .where(
                         board.id.in(mostPopularBoardDTO.stream()
                                 .map(PopularBoardQueryDTO::getBoardId).collect(Collectors.toList())))
@@ -140,13 +149,80 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
         return result;
     }
 
+    @Override
+    public GodLifeStimulationBoardResponse findStimulusBoardEqualsBoardId(Long boardId, Member loginMember) {
+
+        GodLifeStimulationBoardResponse godLifeStimulationBoardResponse = queryFactory.select(Projections.fields(
+                        GodLifeStimulationBoardResponse.class,
+                        board.title.as("title"),
+                        board.thumbnailUrl.as("thumbnailUrl"),
+                        board.introduction.as("introduction"),
+                        board.id.as("boardId"),
+                        member.nickname.as("nickname"),
+                        member.id.as("writerId"),
+                        ExpressionUtils.as // 해당 갓생 자극 점수 추출
+                                (JPAExpressions.select(godLifeScore.score.sum().coalesce(0)).from(godLifeScore).where(godLifeScore.board.eq(board)),
+                                        "godLifeScore")
+                ))
+                .from(board)
+                .join(member).on(board.member.eq(member))
+                .join(category).on(board.category.categoryId.eq(category.categoryId))
+                .where(board.id.eq(boardId), board.category.categoryType.eq(CategoryType.GOD_LIFE_STIMULUS))
+                .fetchOne();
+
+        if (godLifeStimulationBoardResponse == null) {
+            throw new NotFoundResource(ErrorMessage.INVALID_BOARD_MESSAGE.getErrorMessage());
+        }
+
+        //게시판 주인 확인
+        godLifeStimulationBoardResponse.setOwner(loginMember.getId().equals(godLifeStimulationBoardResponse.getWriterId()));
+
+        return godLifeStimulationBoardResponse;
+    }
+
+    @Override
+    public Page<GodLifeStimulationBoardResponse> findStimulusBoardPaging(Pageable pageable) {
+        List<GodLifeStimulationBoardResponse> content = queryFactory.select(Projections.fields(
+                        GodLifeStimulationBoardResponse.class,
+                        board.title.as("title"),
+                        board.thumbnailUrl.as("thumbnailUrl"),
+                        board.introduction.as("introduction"),
+                        board.id.as("boardId"),
+                        board.member.nickname.as("nickname"),
+                        board.member.id.as("writerId"),
+                        board.content.as("content"),
+                        ExpressionUtils.as // 해당 갓생 자극 점수 추출
+                                (JPAExpressions.select(godLifeScore.score.sum().coalesce(0)).from(godLifeScore).where(godLifeScore.board.eq(board)),
+                                        "godLifeScore")
+                ))
+                .from(board)
+                .join(board.member)
+                .join(board.category)
+                .where(board.category.categoryType.eq(CategoryType.GOD_LIFE_STIMULUS))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .orderBy(board.createDate.desc())
+                .fetch();
+
+        Long count = queryFactory
+                .select(board.count())
+                .from(board)
+                .join(board.category)
+                .where(board.category.categoryType.eq(CategoryType.GOD_LIFE_STIMULUS))
+                .fetchOne();
+
+        return new PageImpl<>(content, pageable, count);
+    }
+
     // 조건 검색에 맞는 갓생글 조회
     @Override
     public Page<Board> findBoardWithSearchRequest(BoardSearchRequest boardSearchRequest, Pageable pageable) {
         List<Board> boards = queryFactory.selectFrom(board)
-                .join(QBoard.board.member, QMember.member).fetchJoin()
+                .join(category).on(board.category.categoryId.eq(category.categoryId))
+                .join(QBoard.board.member, member).fetchJoin()
                 .where(keywordParam(boardSearchRequest.getKeyword()),tagsParam(boardSearchRequest.getTags()),
-                        nicknameParam(boardSearchRequest.getNickname()))
+                        nicknameParam(boardSearchRequest.getNickname()),
+                        board.category.categoryType.eq(CategoryType.GOD_LIFE_PAGE))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .orderBy(board.createDate.desc())
@@ -195,4 +271,19 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
         return bb;
     }
 
+    private OrderSpecifier<?> boardSort(Pageable pageable) {
+        if(pageable == null || pageable.getSort().isEmpty()) return null;
+
+        Sort sort = pageable.getSort();
+        for (Sort.Order order : sort) {
+            Order direction = order.getDirection().isAscending() ? Order.ASC : Order.DESC;
+
+            switch (order.getProperty()) {
+                case "create_date" :
+                    return new OrderSpecifier(direction, board.createDate);
+            }
+        }
+
+        return null;
+    }
 }

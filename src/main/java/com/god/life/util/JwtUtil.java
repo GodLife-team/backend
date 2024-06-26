@@ -10,16 +10,21 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.annotation.PostConstruct;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 
 @Component
-public class    JwtUtil {
+@Slf4j
+@NoArgsConstructor
+public class JwtUtil {
 
 
     @Value("${jwt.secret.key}")
@@ -122,7 +127,7 @@ public class    JwtUtil {
     // Jwt 의 만료 시간 확인
     // 현재 시간보다 before 값이 참이라면 만료된 Jwt 임.
     public boolean validateExpiredJwt(String jwt) {
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(jwt).getPayload().getExpiration().before(new Date());
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(jwt).getPayload().getExpiration().before(new Date(System.currentTimeMillis()));
     }
 
     public static String parseJwt(String authorizeHeader) {
@@ -146,14 +151,21 @@ public class    JwtUtil {
         }
 
         // jwt 만료 확인
-        if (validateExpiredJwt(jwt)) {
-            throw new JwtInvalidException("토큰이 만료되었습니다.");
+        try {
+            validateExpiredJwt(jwt);
+        } catch (ExpiredJwtException ex) {
+            throw new JwtInvalidException("토큰이 만료됐습니다. 다시 로그인해 주세요.");
         }
 
         // jwt 토큰 종류 확인
         if (!getTokenType(jwt).equals(JwtUtil.REFRESH)) {
+            log.info("잘못된 토큰!!! getTokenType(jwt).equals(JwtUtil.REFRESH) ");
             throw new JwtInvalidException("잘못된 토큰입니다.");
         }
     }
 
+    public Date getExpirationTime(String accessToken) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(accessToken).getPayload()
+                .getExpiration();
+    }
 }

@@ -29,6 +29,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -151,6 +153,7 @@ public class MemberController {
     public ResponseEntity<CommonResponse<TokenResponse>> reissueToken(HttpServletRequest request) {
         String jwtHeader = request.getHeader(JwtUtil.AUTHORIZE_HEADER);
         if (jwtHeader == null) {
+            log.info("미인증...!!!");
             throw new JwtInvalidException("refresh 토큰이 존재하지 않습니다.");
         }
 
@@ -159,7 +162,6 @@ public class MemberController {
 
         // 새로운 Refresh Token과 accessToken 재발급
         TokenResponse response = memberService.updateRefreshToken(jwt);
-
         return ResponseEntity
                 .ok(new CommonResponse<>(HttpStatus.OK, response));
     }
@@ -202,7 +204,7 @@ public class MemberController {
         ImageSaveResponse response = imageUploadService.upload(uploadRequest.getImage());
         response.setServerName(uploadRequest.getImageType() + response.getServerName());
         imageService.deleteTypeImage(uploadRequest.getImageType() + "%", loginMember.getId());
-        imageService.saveImage(response, loginMember, null);
+        imageService.saveUserImage(response, loginMember);
         response.setServerName(response.getServerName().substring(uploadRequest.imageType.length()));
 
         return ResponseEntity.ok((new CommonResponse<>(HttpStatus.OK, response)));

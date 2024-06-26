@@ -1,17 +1,14 @@
 package com.god.life.domain;
 
 
-import com.god.life.domain.converter.ListToStringConverter;
 import com.god.life.dto.BoardCreateRequest;
-import com.querydsl.core.annotations.PropertyType;
-import com.querydsl.core.annotations.QueryType;
+import com.god.life.dto.GodLifeStimulationBoardRequest;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -28,6 +25,7 @@ public class Board extends BaseEntity{
 
     private String title;
 
+    @Column(columnDefinition = "text")
     private String content;
 
     // 굳이 별도의 entity를 둘 필요가 없다고 판단 1: 어떤 태그가 들어올지 모름, 2. 단순히 조회용
@@ -38,9 +36,23 @@ public class Board extends BaseEntity{
     private Member member; //작성자
 
     @Column(name = "total_score")
-    private int totalScore;
+    private Integer totalScore;
 
     private int view;
+
+    @Column
+    private String thumbnailUrl;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private BoardStatus status;
+
+    @Column(name = "introduction")
+    private String introduction;
 
     @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
     private List<Comment> comments = new ArrayList<>();
@@ -55,6 +67,15 @@ public class Board extends BaseEntity{
         this.title = request.getTitle();
         this.content = request.getContent();
         this.tag = toDBTag(request.getTags());
+    }
+
+    public void updateBoard(GodLifeStimulationBoardRequest request) {
+        this.title = request.getTitle();
+        this.content = request.getContent();
+        this.thumbnailUrl = request.getThumbnailUrl();
+        this.introduction = request.getIntroduction();
+        this.tag = "";
+        this.status = BoardStatus.S;
     }
 
     public static String toDBTag(List<String> tags) {

@@ -5,6 +5,7 @@ import com.god.life.dto.common.CommonResponse;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -33,6 +34,5 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         PrintWriter writer = response.getWriter();
         writer.write(responseMessage);
         writer.close();
-
     }
 }

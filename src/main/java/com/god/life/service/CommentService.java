@@ -1,6 +1,7 @@
 package com.god.life.service;
 
 import com.god.life.domain.Board;
+import com.god.life.domain.CategoryType;
 import com.god.life.domain.Comment;
 import com.god.life.domain.Member;
 import com.god.life.dto.CommentCreateRequest;
@@ -36,7 +37,7 @@ public class CommentService {
 
     @Transactional
     public CommentResponse createComment(Long boardId, CommentCreateRequest request, Member member) {
-        Board board = boardRepository.findByIdWithMember(boardId)
+        Board board = boardRepository.findByIdWithMember(boardId, CategoryType.GOD_LIFE_PAGE)
                 .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_BOARD_MESSAGE.getErrorMessage()));
 
         Comment comment = request.toEntity(board, member);

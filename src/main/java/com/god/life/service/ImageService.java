@@ -5,6 +5,9 @@ import com.god.life.domain.Board;
 import com.god.life.domain.Image;
 import com.god.life.domain.Member;
 import com.god.life.dto.ImageSaveResponse;
+import com.god.life.error.ErrorMessage;
+import com.god.life.error.NotFoundResource;
+import com.god.life.repository.BoardRepository;
 import com.god.life.repository.ImageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,18 +28,19 @@ public class ImageService {
     private final ImageUploadService imageUploadService;
     private final ImageRepository imageRepository;
     private final ObjectProvider<ImageService> imageServiceProvider;
+    private final BoardRepository boardRepository;
 
-    public List<ImageSaveResponse> uploadImages(List<MultipartFile> images, Member member) {
+    public List<ImageSaveResponse> uploadImages(List<MultipartFile> images) {
         List<ImageSaveResponse> responses = new ArrayList<>();
         for (MultipartFile image : images) {
-           responses.add(uploadImage(image, member));
+           responses.add(uploadImage(image));
         }
 
         return responses;
     }
 
 
-    public ImageSaveResponse uploadImage(MultipartFile file, Member member) {
+    public ImageSaveResponse uploadImage(MultipartFile file) {
         ImageSaveResponse response = null;
 
         try {
@@ -44,11 +48,6 @@ public class ImageService {
         } catch (IOException ex) {
             throw new IllegalArgumentException("서버 내부 오류입니다. 다시 시도해 주세요.");
         }
-
-//        // 여기까지 트랜잭션을 걸 필요가 있을까?
-//        // ??????????????
-//        ImageService imageService = imageServiceProvider.getObject();
-//        imageService.saveImage(response, member);
 
         return response;
     }
@@ -63,6 +62,32 @@ public class ImageService {
 
         imageRepository.save(image);
     }
+
+    @Transactional
+    public void saveUserImage(ImageSaveResponse response, Member member) {
+        Image image = Image.builder().member(member)
+                .originalName(response.getOriginalName())
+                .serverName(response.getServerName())
+                .board(null)
+                .build();
+
+        imageRepository.save(image);
+    }
+
+    @Transactional
+    public void saveImage(ImageSaveResponse response, Member member, Long boardId) {
+        Board board = boardRepository.findById(boardId).orElseThrow(
+                () -> new NotFoundResource(ErrorMessage.INVALID_BOARD_MESSAGE.getErrorMessage()));
+
+        Image image = Image.builder().member(member)
+                .originalName(response.getOriginalName())
+                .serverName(response.getServerName())
+                .board(board)
+                .build();
+
+        imageRepository.save(image);
+    }
+
 
     public List<ImageSaveResponse> findImages(Long boardId) {
         List<Image> images = imageRepository.findByBoardId(boardId);

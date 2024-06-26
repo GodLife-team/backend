@@ -6,9 +6,11 @@ import com.god.life.dto.ImageSaveResponse;
 import com.god.life.error.ForbiddenException;
 import com.god.life.mockuser.MockUserCustom;
 import com.god.life.repository.BoardRepository;
+import com.god.life.repository.CategoryRepository;
 import com.god.life.repository.ImageRepository;
 import com.god.life.repository.MemberRepository;
 import com.god.life.service.ImageUploadService;
+import com.google.firebase.messaging.FirebaseMessaging;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,9 +20,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -42,6 +47,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ExtendWith(MockitoExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ActiveProfiles("test")
+@TestPropertySource(locations = "classpath:application-test.yaml")
 public class BoardControllerTest {
 
     @Autowired
@@ -62,6 +69,11 @@ public class BoardControllerTest {
     @Autowired
     private ImageRepository imageRepository;
 
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    @MockBean
+    private FirebaseMessaging firebaseMessaging;
 
     @BeforeAll
     public void init(){
@@ -74,6 +86,8 @@ public class BoardControllerTest {
                 .nickname("TESTER")
                 .build();
         memberRepository.save(member);
+        categoryRepository.save(new Category(CategoryType.GOD_LIFE_PAGE));
+        categoryRepository.save(new Category(CategoryType.GOD_LIFE_STIMULUS));
     }
 
     @BeforeEach
@@ -83,6 +97,7 @@ public class BoardControllerTest {
                 .webAppContextSetup(context)
                 .apply(springSecurity())
                 .build();
+
     }
 
     @Test
@@ -105,7 +120,7 @@ public class BoardControllerTest {
         // then
         perform.andExpect(status().isOk());
         perform.andDo(print());
-        List<Board> boards = boardRepository.findAll();
+        List<Board> boards = boardRepository.getBoardsByCategory(CategoryType.GOD_LIFE_PAGE);
         List<Image> images = imageRepository.findAll();
         Assertions.assertThat(boards.size()).isEqualTo(1);
         Assertions.assertThat(images.size()).isEqualTo(1);
@@ -133,7 +148,7 @@ public class BoardControllerTest {
         // then
         perform.andExpect(status().isOk());
         perform.andDo(print());
-        List<Board> boards = boardRepository.findAll();
+        List<Board> boards = boardRepository.getBoardsByCategory(CategoryType.GOD_LIFE_PAGE);
         List<Image> images = imageRepository.findAll();
         Assertions.assertThat(boards.size()).isEqualTo(1);
         Assertions.assertThat(images.size()).isEqualTo(2);

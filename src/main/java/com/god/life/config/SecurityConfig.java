@@ -40,9 +40,9 @@ public class SecurityConfig {
                         });
 
         http.authorizeHttpRequests(request -> {
-            request.requestMatchers("/signup", "/check/**", "/fcm/**").permitAll();
+            request.requestMatchers("/signup", "/check/**", "/fcm/**", "/reissue").permitAll();
             request.requestMatchers("/example/**").permitAll();
-            request.requestMatchers("/reissue").permitAll();
+            //request.requestMatchers("/reissue").permitAll();
             request.requestMatchers("/admin").hasRole("ADMIN");
             request.anyRequest().authenticated();
         });
