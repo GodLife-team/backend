@@ -22,6 +22,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.fail;
@@ -50,7 +51,6 @@ public class BoardRepositoryTest {
 
     @Autowired
     private MemberRepository memberRepository;
-
 
     @BeforeEach
     void init(){
@@ -201,35 +201,6 @@ public class BoardRepositoryTest {
         GodLifeScore like7 = createLike(member1, boardMember3_1);
     }
 
-    private Board createBoard(Member member, Category category){
-        Board board = Board
-                .builder()
-                .title("test")
-                .content("test1")
-                .member(member)
-                .view(0)
-                .totalScore(0)
-                .category(category)
-                .status(BoardStatus.S)
-                .build();
-        boardRepository.save(board);
-        return board;
-    }
-
-    private Member createMember(String providerId, String nickname) {
-        Member member = Member
-                .builder()
-                .sex(Sex.MALE)
-                .providerName(ProviderType.KAKAO)
-                .age(18)
-                .nickname(nickname)
-                .email("ASDF@example.com")
-                .providerId(providerId)
-                .whoAmI("ASDF").build();
-
-        memberRepository.save(member);
-        return member;
-    }
 
     @Test
     void 갓생_자극_게시판_세부_내용_조회_테스트(){
@@ -336,6 +307,39 @@ public class BoardRepositoryTest {
         Assertions.assertThat(boards.size()).isEqualTo(2);
     }
 
+    @Test
+    void 미완료_게시믈_삭제_테스트() {
+        Category category = categoryRepository.findByCategoryType(CategoryType.GOD_LIFE_STIMULUS);
+        //given
+        Member member = createMember("1234", "aaaa");
+        createBoard(member, category); //완료된 게시물
+
+        //현재 작성중인 게시물 (30분 전에 작성하기 시작 ==> 삭제되면 XX)
+        LocalDateTime createAt30minute = LocalDateTime.now().minusMinutes(30);
+        Board incompleteBoardWrittenWithinOneHour = createBoard(member, category);
+        em.createNativeQuery("update Board b set b.create_date = :createAt, b.status = 'T' where b.board_id = :boardId")
+                .setParameter("createAt", createAt30minute)
+                .setParameter("boardId", incompleteBoardWrittenWithinOneHour.getId()).executeUpdate();
+
+        //하루 전에 작성하다가 취소한 게시물
+        LocalDateTime createAt = LocalDateTime.now().minusDays(1).minusHours(1).minusMinutes(30);
+        Board incompleteBoardWrittenWithinOneDay = createBoard(member, category);
+        em.createNativeQuery("update Board b set b.create_date = :createAt, b.status = 'T' where b.board_id = :boardId")
+                .setParameter("createAt", createAt)
+                .setParameter("boardId", incompleteBoardWrittenWithinOneDay.getId()).executeUpdate();
+
+        em.flush();
+        em.clear();
+
+        //when : 하루 이전까지 작성 중단된 게시물 사져옴
+        LocalDateTime deleteBoardBeforeDate = LocalDateTime.now().minusDays(1);
+        List<Long> incompleteBoardsBeforeDate = boardRepository
+                .findIncompleteBoardsBeforeDate(deleteBoardBeforeDate, BoardStatus.T, CategoryType.GOD_LIFE_STIMULUS);
+
+        //then
+        Assertions.assertThat(incompleteBoardsBeforeDate.size()).isEqualTo(1);
+    }
+
     private GodLifeScore createLike(Member member, Board board) {
         GodLifeScore god = GodLifeScore.builder()
                 .member(member)
@@ -347,7 +351,7 @@ public class BoardRepositoryTest {
         return save;
     }
 
-    private Image createImage(Member member, String serverName) {
+    private Image createImage(Member member, Board board, String serverName) {
         Image image = Image.builder()
                 .serverName(serverName)
                 .member(member)
@@ -356,5 +360,34 @@ public class BoardRepositoryTest {
     }
 
 
+    private Board createBoard(Member member, Category category){
+        Board board = Board
+                .builder()
+                .title("test")
+                .content("test1")
+                .member(member)
+                .view(0)
+                .totalScore(0)
+                .category(category)
+                .status(BoardStatus.S)
+                .build();
+        boardRepository.save(board);
+        return board;
+    }
+
+    private Member createMember(String providerId, String nickname) {
+        Member member = Member
+                .builder()
+                .sex(Sex.MALE)
+                .providerName(ProviderType.KAKAO)
+                .age(18)
+                .nickname(nickname)
+                .email("ASDF@example.com")
+                .providerId(providerId)
+                .whoAmI("ASDF").build();
+
+        memberRepository.save(member);
+        return member;
+    }
 
 }

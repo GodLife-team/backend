@@ -116,4 +116,9 @@ public class ImageService {
     public void deleteTypeImage(String imageType, Long memberId) {
         imageRepository.deleteImageType(imageType, memberId);
     }
+
+    @Transactional
+    public void deleteImages(List<Long> boardIds) {
+        imageRepository.deleteByBoardIds(boardIds);
+    }
 }

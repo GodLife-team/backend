@@ -15,6 +15,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -190,8 +192,13 @@ public class BoardService {
     @Transactional
     public Long saveTemporaryBoard(Member member, GodLifeStimulationBoardRequest dto) {
         Long boardId = dto.getBoardId();
-        Board board = boardRepository.findById(boardId)
+        Board board = boardRepository.findTemporaryBoardByIdAndBoardStatus(boardId, BoardStatus.T)
                 .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_BOARD_MESSAGE.getErrorMessage()));
+
+        //권한 체크 ==> 최종적으로 마무리할 수 있는지
+        if (!board.getMember().getId().equals(member.getId())) {
+            throw new ForbiddenException(ErrorMessage.FORBIDDEN_ACTION_MESSAGE.getErrorMessage());
+        }
 
         board.updateBoard(dto);
         return board.getId();
@@ -207,5 +214,14 @@ public class BoardService {
                 .findStimulusBoardPaging(PageRequest.of(page, PAGE_SIZE, Sort.by("create_date").descending()));
 
         return result.getContent();
+    }
+
+    @Transactional
+    public List<Long> getIncompleteWriteBoardIds(LocalDateTime date) {
+        List<Long> incompleteBoardsBeforeDate = boardRepository.findIncompleteBoardsBeforeDate(date,BoardStatus.T, CategoryType.GOD_LIFE_STIMULUS);
+        //List<Long> incompleteBoardsBeforeDate = boardRepository.findIncompleteBoardsBeforeDate(date);
+        imageService.deleteImages(incompleteBoardsBeforeDate);
+        boardRepository.deleteAllById(incompleteBoardsBeforeDate);
+        return incompleteBoardsBeforeDate;
     }
 }

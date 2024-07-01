@@ -1,7 +1,6 @@
 package com.god.life.service;
 
 import com.god.life.domain.Board;
-import com.god.life.domain.CategoryType;
 import com.god.life.domain.Comment;
 import com.god.life.domain.Member;
 import com.god.life.dto.CommentCreateRequest;
@@ -47,7 +46,7 @@ public class CommentService {
     }
 
     @Transactional
-    public CommentResponse updateComment(Long commentId, CommentCreateRequest request, Member member){
+    public CommentResponse updateComment(Long commentId, CommentCreateRequest request, Member member) {
         Comment comment = commentRepository.findByIdWithMember(commentId)
                 .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_COMMENT_MESSAGE.getErrorMessage()));
 
@@ -75,3 +74,4 @@ public class CommentService {
         commentRepository.deleteByMember(deleteMember);
     }
 }
+
