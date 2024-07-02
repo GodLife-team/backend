@@ -1,10 +1,7 @@
 package com.god.life.repository;
 
 import com.god.life.domain.*;
-import com.god.life.dto.BoardSearchRequest;
-import com.god.life.dto.BoardSearchResponse;
-import com.god.life.dto.GodLifeStimulationBoardResponse;
-import com.god.life.dto.PopularBoardQueryDTO;
+import com.god.life.dto.*;
 import com.god.life.error.ErrorMessage;
 import com.god.life.error.NotFoundResource;
 import com.querydsl.core.BooleanBuilder;
@@ -157,6 +154,7 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
                         board.title.as("title"),
                         board.thumbnailUrl.as("thumbnailUrl"),
                         board.introduction.as("introduction"),
+                        board.content.as("content"),
                         board.id.as("boardId"),
                         member.nickname.as("nickname"),
                         member.id.as("writerId"),
@@ -216,6 +214,41 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
         return new PageImpl<>(content, pageable, count);
     }
 
+    //검색 조건에 맞는 갓생 자극 페이지 조회
+    @Override
+    public List<GodLifeStimulationBoardResponse> findStimulusBoardSearchCondition(GodStimulationBoardSearchRequest request) {
+        List<GodLifeStimulationBoardResponse> content = queryFactory.select(Projections.fields(
+                        GodLifeStimulationBoardResponse.class,
+                        board.title.as("title"),
+                        board.thumbnailUrl.as("thumbnailUrl"),
+                        board.introduction.as("introduction"),
+                        board.id.as("boardId"),
+                        board.member.nickname.as("nickname"),
+                        board.member.id.as("writerId"),
+                        board.content.as("content"),
+                        ExpressionUtils.as // 해당 갓생 자극 점수 추출
+                                (JPAExpressions.select(godLifeScore.score.sum().coalesce(0)).from(godLifeScore).where(godLifeScore.board.eq(board)),
+                                        "godLifeScore")
+                ))
+                .from(board)
+                .join(board.member)
+                .join(board.category)
+                .where(board.category.categoryType.eq(CategoryType.GOD_LIFE_STIMULUS),
+                        board.status.eq(BoardStatus.S), nicknameParam(request.getNickname()),
+                                doesTitleContainParam(request.getTitle()),
+                                doesIntroductionContainParam(request.getIntroduction()))
+                .orderBy(board.createDate.desc())
+                .fetch();
+
+        return content;
+    }
+
+    private BooleanExpression doesIntroductionContainParam(String introduction) {
+        if(isBlankOrNullKeyword(introduction)) return null;
+
+        return board.introduction.contains(introduction);
+    }
+
     // 조건 검색에 맞는 갓생글 조회
     @Override
     public Page<Board> findBoardWithSearchRequest(BoardSearchRequest boardSearchRequest, Pageable pageable) {
@@ -244,10 +277,23 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
         return board.member.nickname.eq(nickname);
     }
 
+    private BooleanExpression contentParm(String param) {
+        if(isBlankOrNullKeyword(param)) return null;
+
+        return board.content.contains(param);
+    }
+
+    private BooleanExpression doesTitleContainParam(String param) {
+        if(isBlankOrNullKeyword(param)) return null;
+
+        return board.title.contains(param);
+    }
+
     private BooleanExpression keywordParam(String keyword) {
         if (isBlankOrNullKeyword(keyword)) return null;
 
-        return board.content.contains(keyword).or(board.title.contains(keyword));
+        //return board.content.contains(keyword).or(board.title.contains(keyword));
+        return contentParm(keyword).or(doesTitleContainParam(keyword));
     }
 
     private boolean isBlankOrNullKeyword(String keyword) {
