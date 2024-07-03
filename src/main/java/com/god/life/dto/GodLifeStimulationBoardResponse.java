@@ -67,7 +67,7 @@ public class GodLifeStimulationBoardResponse {
         this.writerId = writerId;
         this.view = view;
         this.godLifeScore = godLifeScore;
-        this.date = DateUtil.formattingTimeDifference(createDate);
+        this.createDate = DateUtil.formattingTimeDifference(createDate);
     }
 
 
