@@ -3,7 +3,6 @@ package com.god.life.service;
 import com.god.life.domain.FcmAlarm;
 import com.god.life.domain.Member;
 import com.god.life.dto.AlarmCreateRequest;
-import com.god.life.dto.fcm.FcmSendDto;
 import com.god.life.error.BadRequestException;
 import com.god.life.repository.FcmAlarmRepository;
 import com.google.firebase.messaging.*;
@@ -47,27 +46,27 @@ public class FcmAlarmService {
     /**
      * sendDTO에 token값에 대응되는 기기에 DTO 값 전송
      */
-    public String sendNotification(FcmSendDto fcmSendDto) {
-        String sendToUser = fcmSendDto.getToken();
-
-        Notification notification = Notification.builder()
-                .setTitle(fcmSendDto.getTitle())
-                .setBody(fcmSendDto.getBody())
-                .build();
-
-        MulticastMessage multicastMessage =
-                MulticastMessage.builder()
-                        .setNotification(notification)
-                        .addAllTokens(List.of(fcmSendDto.getToken()))
-                        .build();
-        try{
-            messenger.sendEachForMulticast(multicastMessage);
-            return "TokenValue : " + sendToUser + "fcm 메세지 전송 성공!";
-        } catch (FirebaseMessagingException e) {
-            e.printStackTrace();
-            return "메세지 전송 실패.. 로그 확인";
-        }
-    }
+//    public String sendNotification(FcmSendDto fcmSendDto) {
+//        String sendToUser = fcmSendDto.getToken();
+//
+//        Notification notification = Notification.builder()
+//                .setTitle(fcmSendDto.getTitle())
+//                .setBody(fcmSendDto.getBody())
+//                .build();
+//
+//        MulticastMessage multicastMessage =
+//                MulticastMessage.builder()
+//                        .setNotification(notification)
+//                        .addAllTokens(List.of(fcmSendDto.getToken()))
+//                        .build();
+//        try{
+//            messenger.sendEachForMulticast(multicastMessage);
+//            return "TokenValue : " + sendToUser + "fcm 메세지 전송 성공!";
+//        } catch (FirebaseMessagingException e) {
+//            e.printStackTrace();
+//            return "메세지 전송 실패.. 로그 확인";
+//        }
+//    }
 
     //금일 생성된 알람을 제거합니다
     @Transactional

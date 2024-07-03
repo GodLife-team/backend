@@ -7,7 +7,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface CustomBoardRepository {
 
@@ -20,7 +19,7 @@ public interface CustomBoardRepository {
 
     GodLifeStimulationBoardResponse findStimulusBoardEqualsBoardId(Long boardId, Member member);
 
-    Page<GodLifeStimulationBoardResponse> findStimulusBoardPaging(Pageable pageable);
+    Page<GodLifeStimulationBoardBriefResponse> findStimulusBoardPaging(Pageable pageable);
 
-    List<GodLifeStimulationBoardResponse> findStimulusBoardSearchCondition(GodStimulationBoardSearchRequest request);
+    List<GodLifeStimulationBoardBriefResponse> findStimulusBoardSearchCondition(StimulationBoardSearchCondition request);
 }

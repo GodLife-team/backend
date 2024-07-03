@@ -5,7 +5,6 @@ import com.god.life.annotation.LoginMember;
 import com.god.life.domain.Member;
 import com.god.life.dto.AlarmCreateRequest;
 import com.god.life.dto.common.CommonResponse;
-import com.god.life.dto.fcm.FcmSendDto;
 import com.god.life.service.FcmAlarmService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -24,11 +23,11 @@ public class FcmController {
 
     private final FcmAlarmService fcmAlarmService;
 
-    @PostMapping("/send")
-    @Operation(summary = "메세지 보내기 테스트")
-    public ResponseEntity<CommonResponse<String>> sendNotificationByToken(@RequestBody FcmSendDto fcmSendDto) {
-        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, fcmAlarmService.sendNotification(fcmSendDto)));
-    }
+//    @PostMapping("/send")
+//    @Operation(summary = "메세지 보내기 테스트")
+//    public ResponseEntity<CommonResponse<String>> sendNotificationByToken(@RequestBody FcmSendDto fcmSendDto) {
+//        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, fcmAlarmService.sendNotification(fcmSendDto)));
+//    }
 
     @PostMapping("/alarm")
     @ApiResponses(

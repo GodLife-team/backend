@@ -47,3 +47,6 @@ bindMount/
 generated
 redis
 application-test.yaml
+
+RedisConfig.java
+WeeklyPopularBoardCacheService.java

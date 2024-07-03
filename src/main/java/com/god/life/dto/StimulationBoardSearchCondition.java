@@ -11,7 +11,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @Data
 @ToString
-public class GodStimulationBoardSearchRequest {
+public class StimulationBoardSearchCondition {
 
 
     @Schema(description = "제목")

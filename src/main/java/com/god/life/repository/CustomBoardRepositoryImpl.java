@@ -5,7 +5,6 @@ import com.god.life.dto.*;
 import com.god.life.error.ErrorMessage;
 import com.god.life.error.NotFoundResource;
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.Tuple;
 import com.querydsl.core.types.*;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
@@ -27,7 +26,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.god.life.domain.QBoard.board;
@@ -46,9 +44,10 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
         queryFactory = new JPAQueryFactory(em);
     }
 
-    // 1주간 인기 게시글 조회
-    // message에 시간 붙여주기 --> 아직 미구현 XXX
-    // 6/26 : 갓생 인증 게시글만 보여줄 것인지?
+    /**
+     * 한주간 갓생 인정을 가장 많이 받은 갓생 인정 게시물 10개를 반환합니다.
+     * @return 갓생 인정 리스트 10개
+     */
     @Override
     public List<BoardSearchResponse> findWeeklyPopularBoard() {
         LocalDateTime today = LocalDateTime.now(); // 현재 시각
@@ -101,10 +100,12 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
         return result;
     }
 
-    // 전체 인기 있는 게시물 조회
+
+    /**
+     * 전체 기간에서 갓생 인정을 가장 많이 받은 게시물 10개를 반환합니다.
+     */
     @Override
     public List<BoardSearchResponse> findTotalPopularBoard() {
-
         // 전체 기간 인기 있는 게시물 조회
         List<PopularBoardQueryDTO> mostPopularBoardDTO = queryFactory.select(Projections.bean(
                         PopularBoardQueryDTO.class,
@@ -146,6 +147,12 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
         return result;
     }
 
+    /**
+     * 갓생 자극 페이지 상세 조회 메소드
+     * @param boardId - 상세조회할 게시판 번호
+     * @param loginMember - 현재 로그인한 유저 정보
+     * @return 갓생 정보 상세 조회 DTO 반환
+     */
     @Override
     public GodLifeStimulationBoardResponse findStimulusBoardEqualsBoardId(Long boardId, Member loginMember) {
 
@@ -179,20 +186,19 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
         return godLifeStimulationBoardResponse;
     }
 
+    /**
+     * @param pageable : 조회할 페이지 번호
+     * @return 해당 페이지 번호에 포함되는 갓생 자극 게시판 간략 정보
+     */
     @Override
-    public Page<GodLifeStimulationBoardResponse> findStimulusBoardPaging(Pageable pageable) {
-        List<GodLifeStimulationBoardResponse> content = queryFactory.select(Projections.fields(
-                        GodLifeStimulationBoardResponse.class,
+    public Page<GodLifeStimulationBoardBriefResponse> findStimulusBoardPaging(Pageable pageable) {
+        List<GodLifeStimulationBoardBriefResponse> content = queryFactory.select(Projections.fields(
+                        GodLifeStimulationBoardBriefResponse.class,
                         board.title.as("title"),
                         board.thumbnailUrl.as("thumbnailUrl"),
                         board.introduction.as("introduction"),
                         board.id.as("boardId"),
-                        board.member.nickname.as("nickname"),
-                        board.member.id.as("writerId"),
-                        board.content.as("content"),
-                        ExpressionUtils.as // 해당 갓생 자극 점수 추출
-                                (JPAExpressions.select(godLifeScore.score.sum().coalesce(0)).from(godLifeScore).where(godLifeScore.board.eq(board)),
-                                        "godLifeScore")
+                        board.member.nickname.as("nickname")
                 ))
                 .from(board)
                 .join(board.member)
@@ -201,7 +207,7 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
                         board.status.eq(BoardStatus.S))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .orderBy(board.createDate.desc())
+                .orderBy(board.createDate.desc()) //내림 차순으로 정렬
                 .fetch();
 
         Long count = queryFactory
@@ -214,21 +220,19 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
         return new PageImpl<>(content, pageable, count);
     }
 
-    //검색 조건에 맞는 갓생 자극 페이지 조회
+    /**
+     * @param request : 검색 조건
+     * @return 검색 조건에 맞는 갓생 자극 페이지 전체 리스트 반환
+     */
     @Override
-    public List<GodLifeStimulationBoardResponse> findStimulusBoardSearchCondition(GodStimulationBoardSearchRequest request) {
-        List<GodLifeStimulationBoardResponse> content = queryFactory.select(Projections.fields(
-                        GodLifeStimulationBoardResponse.class,
+    public List<GodLifeStimulationBoardBriefResponse> findStimulusBoardSearchCondition(StimulationBoardSearchCondition request) {
+        List<GodLifeStimulationBoardBriefResponse> content = queryFactory.select(Projections.fields(
+                        GodLifeStimulationBoardBriefResponse.class,
                         board.title.as("title"),
                         board.thumbnailUrl.as("thumbnailUrl"),
                         board.introduction.as("introduction"),
                         board.id.as("boardId"),
-                        board.member.nickname.as("nickname"),
-                        board.member.id.as("writerId"),
-                        board.content.as("content"),
-                        ExpressionUtils.as // 해당 갓생 자극 점수 추출
-                                (JPAExpressions.select(godLifeScore.score.sum().coalesce(0)).from(godLifeScore).where(godLifeScore.board.eq(board)),
-                                        "godLifeScore")
+                        board.member.nickname.as("nickname")
                 ))
                 .from(board)
                 .join(board.member)

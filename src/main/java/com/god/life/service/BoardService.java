@@ -15,7 +15,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -209,8 +208,8 @@ public class BoardService {
         return boardRepository.findStimulusBoardEqualsBoardId(boardId, member);
     }
 
-    public List<GodLifeStimulationBoardResponse> getListStimulusBoard(Integer page) {
-        Page<GodLifeStimulationBoardResponse> result = boardRepository
+    public List<GodLifeStimulationBoardBriefResponse> getListStimulusBoard(Integer page) {
+        Page<GodLifeStimulationBoardBriefResponse> result = boardRepository
                 .findStimulusBoardPaging(PageRequest.of(page, PAGE_SIZE, Sort.by("create_date").descending()));
 
         return result.getContent();
@@ -223,5 +222,9 @@ public class BoardService {
         imageService.deleteImages(incompleteBoardsBeforeDate);
         boardRepository.deleteAllById(incompleteBoardsBeforeDate);
         return incompleteBoardsBeforeDate;
+    }
+
+    public List<GodLifeStimulationBoardBriefResponse> getListStimulusBoardUsingSearchCondition(StimulationBoardSearchCondition request) {
+        return boardRepository.findStimulusBoardSearchCondition(request);
     }
 }

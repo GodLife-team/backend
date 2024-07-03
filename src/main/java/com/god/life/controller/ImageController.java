@@ -1,8 +1,13 @@
 package com.god.life.controller;
 
+import com.god.life.dto.ImageSaveResponse;
+import com.god.life.service.ImageService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -29,6 +34,11 @@ public class ImageController {
 //        return ResponseEntity.ok((new CommonResponse<>(HttpStatus.OK, save)));
 //    }
 
+    private final ImageService imageService;
 
+    @GetMapping("/html/test")
+    public void test(@RequestParam("body") String html){
+        imageService.deleteUnusedImageInHtml(html, 123123L);
+    }
 
 }

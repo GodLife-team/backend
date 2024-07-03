@@ -120,7 +120,7 @@ public class BoardController {
 
 
     @GetMapping("/boards")
-    @Operation(summary = "검색 조건에 따른 최신 게시물 조회")
+    @Operation(summary = "검색 조건에 따른 갓생 인증 게시물 조회")
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode = "200", description = "최신 게시판 검색 조회",
@@ -184,11 +184,12 @@ public class BoardController {
                                                                      @Parameter(description = "갓생 자극 게시물 최종 작성") @RequestBody GodLifeStimulationBoardRequest dto) {
 
         Long savedBoardId = boardService.saveTemporaryBoard(member, dto);
+        imageService.deleteUnusedImageInHtml(dto.getContent(), savedBoardId);
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, savedBoardId));
     }
 
     @GetMapping("/board/stimulation/{boardId}")
-    @Operation(summary = "갓생 자극 게시물 조회")
+    @Operation(summary = "갓생 자극 게시물 상세 조회")
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode = "200", description = "갓생 자극 게시판 조회",
@@ -205,24 +206,39 @@ public class BoardController {
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, response));
     }
 
-    @GetMapping("/board/stimulation")
+    @GetMapping("/boards/stimulation")
     @Operation(summary = "갓생 자극 게시물 조회 (페이징 처리)")
     @ApiResponses(
             value = {
-                    @ApiResponse(responseCode = "200", description = "갓생 자극 게시판 조회",
+                    @ApiResponse(responseCode = "200", description = "갓생 자극 게시판 필터링 조회",
                             useReturnTypeSchema = true)
             }
     )
-    public ResponseEntity<CommonResponse<List<GodLifeStimulationBoardResponse>>> viewGodStimulusBoardList(
-            @Parameter(description = "조회할 갓생 자극 페이징 번호, 0부터 시작")@RequestParam(value = "page", defaultValue = "0") Integer page
+    public ResponseEntity<CommonResponse<List<GodLifeStimulationBoardBriefResponse>>> viewGodStimulusBoardListUsingPaging(
+            @Parameter(description = "갓생 자극 게시물 페이징 검색 번호 0부터 시작") Integer page
     ) {
-        List<GodLifeStimulationBoardResponse> response = boardService.getListStimulusBoard(page);
-
+        List<GodLifeStimulationBoardBriefResponse> response = boardService.getListStimulusBoard(page);
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, response));
     }
 
-    private Long checkId(String id) {
+    // 추후 api 통합이 페이징처리와 필요해보임
+    @GetMapping("/boards/stimulation/filter")
+    @Operation(summary = "검색 조건에 맞는 갓생 자극 게시물 조회")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "조건 검색에 맞는 게시물 조회, 맞는 게시물이 없다면 빈 리스트 반환",
+                    useReturnTypeSchema = true)
+            }
+    )
+    public ResponseEntity<CommonResponse<List<GodLifeStimulationBoardBriefResponse>>> viewGodStimulusBoardListUsingFilter(
+            @Parameter(description = "검색 조건") StimulationBoardSearchCondition request
+    ) {
+        List<GodLifeStimulationBoardBriefResponse> response = boardService.getListStimulusBoardUsingSearchCondition(request);
+        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, response));
+    }
 
+
+    private Long checkId(String id) {
         long boardId;
         try {
             boardId = Long.parseLong(id);

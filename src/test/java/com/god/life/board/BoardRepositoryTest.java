@@ -4,7 +4,9 @@ package com.god.life.board;
 import com.god.life.config.JpaAuditingConfiguration;
 import com.god.life.domain.*;
 import com.god.life.dto.BoardSearchResponse;
+import com.god.life.dto.GodLifeStimulationBoardBriefResponse;
 import com.god.life.dto.GodLifeStimulationBoardResponse;
+import com.god.life.dto.StimulationBoardSearchCondition;
 import com.god.life.error.NotFoundResource;
 import com.god.life.repository.*;
 import jakarta.persistence.EntityManager;
@@ -249,16 +251,14 @@ public class BoardRepositoryTest {
         createLike(member2, stimulusBoard1);
 
         //when
-        List<GodLifeStimulationBoardResponse> boards =
+        List<GodLifeStimulationBoardBriefResponse> boards =
                 boardRepository.findStimulusBoardPaging(PageRequest.of(0, 10, Sort.by("create_date")))
                         .getContent();
 
         //then
         Assertions.assertThat(boards.size()).isEqualTo(2);
         Assertions.assertThat(boards.get(0).getBoardId()).isEqualTo(stimulusBoard2.getId());
-        Assertions.assertThat(boards.get(0).getGodLifeScore()).isEqualTo(0);
         Assertions.assertThat(boards.get(1).getBoardId()).isEqualTo(stimulusBoard1.getId());
-        Assertions.assertThat(boards.get(1).getGodLifeScore()).isEqualTo(4);
     }
 
     @Test
@@ -299,7 +299,7 @@ public class BoardRepositoryTest {
         em.clear();
 
         //when
-        List<GodLifeStimulationBoardResponse> boards =
+        List<GodLifeStimulationBoardBriefResponse> boards =
                 boardRepository.findStimulusBoardPaging(PageRequest.of(0, 10, Sort.by("create_date")))
                         .getContent();
 
@@ -338,6 +338,81 @@ public class BoardRepositoryTest {
 
         //then
         Assertions.assertThat(incompleteBoardsBeforeDate.size()).isEqualTo(1);
+    }
+
+    @Test
+    void 갓생_자극_게시물_제목으로만_조건_검색_테스트() {
+        createGodStimulateBoard();
+
+        //when
+        StimulationBoardSearchCondition request = new StimulationBoardSearchCondition("test1", null, null);
+        List<GodLifeStimulationBoardBriefResponse> responses = boardRepository.findStimulusBoardSearchCondition(request);
+
+        //then
+        // test1, test11 ==> 2개
+//        for (GodLifeStimulationBoardResponse response : responses) {
+//            System.out.println(response);
+//        }
+        Assertions.assertThat(responses).size().isEqualTo(12);
+    }
+
+    @Test
+    void 갓생_자극_게시물_제목과닉네임으로_조건검색_테스트() {
+        createGodStimulateBoard();
+
+        //when
+        StimulationBoardSearchCondition request = new StimulationBoardSearchCondition("test1", "tester", null);
+        List<GodLifeStimulationBoardBriefResponse> responses = boardRepository.findStimulusBoardSearchCondition(request);
+
+        Assertions.assertThat(responses).size().isEqualTo(12);
+    }
+
+    @Test
+    void 갓생_자극_게시물_모든조건으로__조건검색_테스트() {
+        createGodStimulateBoard();
+
+        //when
+        StimulationBoardSearchCondition request =
+                new StimulationBoardSearchCondition("title test1", "tester", "introduction test1");
+        List<GodLifeStimulationBoardBriefResponse> responses = boardRepository.findStimulusBoardSearchCondition(request);
+
+        Assertions.assertThat(responses).size().isEqualTo(12);
+    }
+
+    @Test
+    void 갓생_자극_게시물_검색조건에_맞는_게시물이_없는_경우() {
+        createGodStimulateBoard();
+
+        //when
+        StimulationBoardSearchCondition request =
+                new StimulationBoardSearchCondition("asdf", "asdf", "asdf");
+        List<GodLifeStimulationBoardBriefResponse> responses = boardRepository.findStimulusBoardSearchCondition(request);
+
+        Assertions.assertThat(responses).size().isEqualTo(0);
+    }
+
+    private void createGodStimulateBoard() {
+        Category category = categoryRepository.findByCategoryType(CategoryType.GOD_LIFE_STIMULUS);
+        //given
+        Member member = createMember("1234", "tester");
+        int idx = 1;
+        for (int i = 1; i <= 10; i++) {
+            for (int j = 1; j <= 10; j++) {
+                Board board = Board
+                        .builder()
+                        .title("title test" + idx)
+                        .content("content test" +  idx)
+                        .introduction("introduction test" + idx++)
+                        .member(member)
+                        .view(0)
+                        .totalScore(0)
+                        .category(category)
+                        .status(BoardStatus.S)
+                        .category(category)
+                        .build();
+                boardRepository.save(board);
+            }
+        }
     }
 
     private GodLifeScore createLike(Member member, Board board) {

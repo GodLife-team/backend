@@ -11,6 +11,10 @@ import com.god.life.repository.BoardRepository;
 import com.god.life.repository.ImageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +31,6 @@ public class ImageService {
 
     private final ImageUploadService imageUploadService;
     private final ImageRepository imageRepository;
-    private final ObjectProvider<ImageService> imageServiceProvider;
     private final BoardRepository boardRepository;
 
     public List<ImageSaveResponse> uploadImages(List<MultipartFile> images) {
@@ -120,5 +123,26 @@ public class ImageService {
     @Transactional
     public void deleteImages(List<Long> boardIds) {
         imageRepository.deleteByBoardIds(boardIds);
+    }
+
+    // 내일 테스트!
+    @Transactional
+    public void deleteUnusedImageInHtml(String html, Long boardId) {
+        Document document = Jsoup.parse(html);
+        Elements imgs = document.getElementsByTag("img");
+
+        List<String> usedImageName = new ArrayList<>();
+        for (Element img : imgs) {
+            String imageServerPath = img.attr("src");
+            int imageNameStartIdx = imageServerPath.lastIndexOf('/');
+            if(imageNameStartIdx == -1) continue;
+
+            String imageName = imageServerPath.substring(imageNameStartIdx + 1);
+            usedImageName.add(imageName);
+        }
+
+        if(!usedImageName.isEmpty()){
+            imageRepository.deleteUnusedImageOnBoard(usedImageName, boardId);
+        }
     }
 }
