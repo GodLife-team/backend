@@ -339,7 +339,7 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
     private BooleanExpression nicknameParam(String nickname) {
         if(isBlankOrNullKeyword(nickname)) return null;
 
-        return board.member.nickname.eq(nickname);
+        return board.member.nickname.contains(nickname);
     }
 
     private BooleanExpression contentParm(String param) {
