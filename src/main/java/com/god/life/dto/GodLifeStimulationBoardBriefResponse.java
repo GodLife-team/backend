@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,4 +27,9 @@ public class GodLifeStimulationBoardBriefResponse {
     @Schema(description = "작성자 nickname")
     private String nickname;
 
+    @Schema(description = "해당 게시판의 갓생 점수")
+    private Integer godLifeScore = 0;
+
+    @Schema(description = "해당 게시판의 조회 수")
+    private Integer view = 0;
 }

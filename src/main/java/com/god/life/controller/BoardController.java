@@ -11,12 +11,14 @@ import com.god.life.service.ImageService;
 import com.god.life.service.ImageUploadService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -231,7 +233,7 @@ public class BoardController {
             }
     )
     public ResponseEntity<CommonResponse<List<GodLifeStimulationBoardBriefResponse>>> viewGodStimulusBoardListUsingFilter(
-            @Parameter(description = "검색 조건") StimulationBoardSearchCondition request
+           @Parameter(in = ParameterIn.QUERY, description = "조건 검색") StimulationBoardSearchCondition request
     ) {
         List<GodLifeStimulationBoardBriefResponse> response = boardService.getListStimulusBoardUsingSearchCondition(request);
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, response));

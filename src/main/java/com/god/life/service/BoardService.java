@@ -151,7 +151,7 @@ public class BoardService {
     }
 
     @Transactional(readOnly = true)
-    public List<BoardSearchResponse> searchPopularBoardList() {
+    public List<BoardSearchResponse> searchWeeklyPopularBoardList() {
         return boardRepository.findWeeklyPopularBoard();
         // return (List<BoardSearchResponse>) redisTemplate.opsForValue().get(POPULAR_BOARDS_KEY);
     }
@@ -205,6 +205,7 @@ public class BoardService {
 
 
     public GodLifeStimulationBoardResponse detailStimulusBoard(Long boardId, Member member) {
+
         return boardRepository.findStimulusBoardEqualsBoardId(boardId, member);
     }
 
@@ -226,5 +227,13 @@ public class BoardService {
 
     public List<GodLifeStimulationBoardBriefResponse> getListStimulusBoardUsingSearchCondition(StimulationBoardSearchCondition request) {
         return boardRepository.findStimulusBoardSearchCondition(request);
+    }
+
+    public List<GodLifeStimulationBoardBriefResponse> getAllTimePopularStimulusBoardList(){
+        return boardRepository.findAllTimePopularStimulusBoardList();
+    }
+
+    public List<GodLifeStimulationBoardBriefResponse> getMostViewedStimulusBoardList(){
+        return boardRepository.findMostViewedBoardList();
     }
 }

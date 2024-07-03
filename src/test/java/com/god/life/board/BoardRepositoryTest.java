@@ -26,6 +26,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -377,6 +378,10 @@ public class BoardRepositoryTest {
         List<GodLifeStimulationBoardBriefResponse> responses = boardRepository.findStimulusBoardSearchCondition(request);
 
         Assertions.assertThat(responses).size().isEqualTo(12);
+        Assertions.assertThat(responses.stream().mapToInt(GodLifeStimulationBoardBriefResponse::getGodLifeScore).sum())
+                .isEqualTo(0);
+        Assertions.assertThat(responses.stream().mapToInt(GodLifeStimulationBoardBriefResponse::getView).sum())
+                .isEqualTo(0);
     }
 
     @Test
@@ -389,6 +394,47 @@ public class BoardRepositoryTest {
         List<GodLifeStimulationBoardBriefResponse> responses = boardRepository.findStimulusBoardSearchCondition(request);
 
         Assertions.assertThat(responses).size().isEqualTo(0);
+    }
+
+    @Test
+    void 전체기간_갓생자극_베스트_게시물_조회() {
+        //given
+        createTestCase();
+
+        //when
+        List<GodLifeStimulationBoardBriefResponse> result = boardRepository.findAllTimePopularStimulusBoardList();
+
+        //then
+        Assertions.assertThat(result).size().isEqualTo(2);
+        Assertions.assertThat(result.get(0).getGodLifeScore()).isEqualTo(4);
+        Assertions.assertThat(result.get(1).getGodLifeScore()).isEqualTo(0);
+    }
+
+    @Test
+    void 전체기간_갓생자극_최대조회수_게시물_조회(){
+        //given
+        Category category = categoryRepository.findByCategoryType(CategoryType.GOD_LIFE_STIMULUS);
+        Member member = createMember("1234", "tester");
+        createBoard(member, category);
+        createBoard(member, category);
+        createBoard(member, category);
+        createBoard(member, category);
+        em.createNativeQuery("update board set board.view = board.board_id * 10").executeUpdate();
+        em.flush();
+        em.clear();
+
+        //when
+        List<GodLifeStimulationBoardBriefResponse> mostViewedBoardList = boardRepository.findMostViewedBoardList();
+
+        //then
+        List<Integer> expectedViewCount = mostViewedBoardList.stream()
+                .map(GodLifeStimulationBoardBriefResponse::getBoardId)
+                .map(a -> (int)(a * 10))
+                .toList();
+
+        Assertions.assertThat(mostViewedBoardList).size().isEqualTo(4);
+        Assertions.assertThat(mostViewedBoardList.stream().map(GodLifeStimulationBoardBriefResponse::getView).toList())
+                .containsExactlyElementsOf(expectedViewCount);
     }
 
     private void createGodStimulateBoard() {

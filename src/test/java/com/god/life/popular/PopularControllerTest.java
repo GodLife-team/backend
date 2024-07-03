@@ -2,6 +2,7 @@ package com.god.life.popular;
 
 
 import com.god.life.controller.PopularController;
+import com.god.life.dto.GodLifeStimulationBoardBriefResponse;
 import com.god.life.dto.PopularMemberResponse;
 import com.god.life.mockuser.MockUserCustom;
 import com.god.life.service.BoardService;
@@ -118,6 +119,77 @@ public class PopularControllerTest
         result.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.body").isArray())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.body").isEmpty());
+    }
+
+    @Test
+    @WithMockUser
+    void 전체기간_갓생_자극_페이지_API_조회() throws Exception {
+        //given
+        List<GodLifeStimulationBoardBriefResponse> responses = new ArrayList<>();
+        for (int i = 1; i <= 5; i++) {
+            responses.add(new GodLifeStimulationBoardBriefResponse("title" + i, Integer.toUnsignedLong(i), "thumb" + i, "intro" + i, "nick" + i,
+                    i * 10, 0));
+        }
+        responses.sort(Comparator.comparing(GodLifeStimulationBoardBriefResponse::getGodLifeScore).reversed());
+        BDDMockito.given(boardService.getAllTimePopularStimulusBoardList()).willReturn(responses);
+
+        //when
+        ResultActions result = mockMvc.perform(get("/popular/stimulus/boards/all-time"));
+
+
+        //then
+        result.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.body").isArray())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.body.length()").value(5));
+
+        for (int i = 0; i < 5; i++) {
+            result.andExpect(MockMvcResultMatchers.jsonPath("$.body[" + i + "].godLifeScore").value(50 - (i * 10)));
+            result.andExpect(MockMvcResultMatchers.jsonPath("$.body[" + i + "].view").value(0));
+        }
+    }
+
+    @Test
+    @WithMockUser
+    void 전체기간_갓생_자극_페이지_API_조회_조회결과가_없는_경우() throws Exception {
+        //given
+        List<GodLifeStimulationBoardBriefResponse> responses = new ArrayList<>();
+        BDDMockito.given(boardService.getAllTimePopularStimulusBoardList()).willReturn(responses);
+
+        //when
+        ResultActions result = mockMvc.perform(get("/popular/stimulus/boards/all-time"));
+
+
+        //then
+        result.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.body").isArray())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.body.length()").value(0));
+    }
+
+    @Test
+    @WithMockUser
+    void 전체기간_갓생_자극_페이지_조회수가_많음() throws Exception {
+        //given
+        List<GodLifeStimulationBoardBriefResponse> responses = new ArrayList<>();
+        for (int i = 1; i <= 5; i++) {
+            responses.add(new GodLifeStimulationBoardBriefResponse("title" + i, Integer.toUnsignedLong(i), "thumb" + i, "intro" + i, "nick" + i,
+                    0, i * 10));
+        }
+        responses.sort(Comparator.comparing(GodLifeStimulationBoardBriefResponse::getView).reversed());
+        BDDMockito.given(boardService.getMostViewedStimulusBoardList()).willReturn(responses);
+
+        //when
+        ResultActions result = mockMvc.perform(get("/popular/stimulus/boards/view"));
+
+
+        //then
+        result.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.body").isArray())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.body.length()").value(5));
+
+        for (int i = 0; i < 5; i++) {
+            result.andExpect(MockMvcResultMatchers.jsonPath("$.body[" + i + "].view").value(50 - (i * 10)));
+            result.andExpect(MockMvcResultMatchers.jsonPath("$.body[" + i + "].godLifeScore").value(0));
+        }
     }
 
 }

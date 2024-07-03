@@ -76,6 +76,7 @@ public class Board extends BaseEntity{
         this.introduction = request.getIntroduction();
         this.tag = "";
         this.status = BoardStatus.S;
+        this.view = 0;
     }
 
     public static String toDBTag(List<String> tags) {

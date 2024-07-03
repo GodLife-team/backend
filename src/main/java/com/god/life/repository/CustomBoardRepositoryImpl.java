@@ -7,6 +7,8 @@ import com.god.life.error.NotFoundResource;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.*;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
@@ -147,112 +149,6 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
         return result;
     }
 
-    /**
-     * 갓생 자극 페이지 상세 조회 메소드
-     * @param boardId - 상세조회할 게시판 번호
-     * @param loginMember - 현재 로그인한 유저 정보
-     * @return 갓생 정보 상세 조회 DTO 반환
-     */
-    @Override
-    public GodLifeStimulationBoardResponse findStimulusBoardEqualsBoardId(Long boardId, Member loginMember) {
-
-        GodLifeStimulationBoardResponse godLifeStimulationBoardResponse = queryFactory.select(Projections.fields(
-                        GodLifeStimulationBoardResponse.class,
-                        board.title.as("title"),
-                        board.thumbnailUrl.as("thumbnailUrl"),
-                        board.introduction.as("introduction"),
-                        board.content.as("content"),
-                        board.id.as("boardId"),
-                        member.nickname.as("nickname"),
-                        member.id.as("writerId"),
-                        ExpressionUtils.as // 해당 갓생 자극 점수 추출
-                                (JPAExpressions.select(godLifeScore.score.sum().coalesce(0)).from(godLifeScore).where(godLifeScore.board.eq(board)),
-                                        "godLifeScore")
-                ))
-                .from(board)
-                .join(member).on(board.member.eq(member))
-                .join(category).on(board.category.categoryId.eq(category.categoryId))
-                .where(board.id.eq(boardId), board.category.categoryType.eq(CategoryType.GOD_LIFE_STIMULUS),
-                        board.status.eq(BoardStatus.S))
-                .fetchOne();
-
-        if (godLifeStimulationBoardResponse == null) {
-            throw new NotFoundResource(ErrorMessage.INVALID_BOARD_MESSAGE.getErrorMessage());
-        }
-
-        //게시판 주인 확인
-        godLifeStimulationBoardResponse.setOwner(loginMember.getId().equals(godLifeStimulationBoardResponse.getWriterId()));
-
-        return godLifeStimulationBoardResponse;
-    }
-
-    /**
-     * @param pageable : 조회할 페이지 번호
-     * @return 해당 페이지 번호에 포함되는 갓생 자극 게시판 간략 정보
-     */
-    @Override
-    public Page<GodLifeStimulationBoardBriefResponse> findStimulusBoardPaging(Pageable pageable) {
-        List<GodLifeStimulationBoardBriefResponse> content = queryFactory.select(Projections.fields(
-                        GodLifeStimulationBoardBriefResponse.class,
-                        board.title.as("title"),
-                        board.thumbnailUrl.as("thumbnailUrl"),
-                        board.introduction.as("introduction"),
-                        board.id.as("boardId"),
-                        board.member.nickname.as("nickname")
-                ))
-                .from(board)
-                .join(board.member)
-                .join(board.category)
-                .where(board.category.categoryType.eq(CategoryType.GOD_LIFE_STIMULUS),
-                        board.status.eq(BoardStatus.S))
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .orderBy(board.createDate.desc()) //내림 차순으로 정렬
-                .fetch();
-
-        Long count = queryFactory
-                .select(board.count())
-                .from(board)
-                .join(board.category)
-                .where(board.category.categoryType.eq(CategoryType.GOD_LIFE_STIMULUS))
-                .fetchOne();
-
-        return new PageImpl<>(content, pageable, count);
-    }
-
-    /**
-     * @param request : 검색 조건
-     * @return 검색 조건에 맞는 갓생 자극 페이지 전체 리스트 반환
-     */
-    @Override
-    public List<GodLifeStimulationBoardBriefResponse> findStimulusBoardSearchCondition(StimulationBoardSearchCondition request) {
-        List<GodLifeStimulationBoardBriefResponse> content = queryFactory.select(Projections.fields(
-                        GodLifeStimulationBoardBriefResponse.class,
-                        board.title.as("title"),
-                        board.thumbnailUrl.as("thumbnailUrl"),
-                        board.introduction.as("introduction"),
-                        board.id.as("boardId"),
-                        board.member.nickname.as("nickname")
-                ))
-                .from(board)
-                .join(board.member)
-                .join(board.category)
-                .where(board.category.categoryType.eq(CategoryType.GOD_LIFE_STIMULUS),
-                        board.status.eq(BoardStatus.S), nicknameParam(request.getNickname()),
-                                doesTitleContainParam(request.getTitle()),
-                                doesIntroductionContainParam(request.getIntroduction()))
-                .orderBy(board.createDate.desc())
-                .fetch();
-
-        return content;
-    }
-
-    private BooleanExpression doesIntroductionContainParam(String introduction) {
-        if(isBlankOrNullKeyword(introduction)) return null;
-
-        return board.introduction.contains(introduction);
-    }
-
     // 조건 검색에 맞는 갓생글 조회
     @Override
     public Page<Board> findBoardWithSearchRequest(BoardSearchRequest boardSearchRequest, Pageable pageable) {
@@ -274,6 +170,171 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
 
         return new PageImpl<>(boards, pageable, count);
     }
+
+
+    /**
+     * 갓생 자극 페이지 상세 조회 메소드
+     * @param boardId - 상세조회할 게시판 번호
+     * @param loginMember - 현재 로그인한 유저 정보
+     * @return 갓생 정보 상세 조회 DTO 반환
+     */
+    @Override
+    public GodLifeStimulationBoardResponse findStimulusBoardEqualsBoardId(Long boardId, Member loginMember) {
+
+        GodLifeStimulationBoardResponse godLifeStimulationBoardResponse = queryFactory.select(Projections.constructor(
+                        GodLifeStimulationBoardResponse.class,
+                        board.title.as("title"),
+                        board.thumbnailUrl.as("thumbnailUrl"),
+                        board.introduction.as("introduction"),
+                        board.content.as("content"),
+                        board.id.as("boardId"),
+                        member.nickname.as("nickname"),
+                        member.id.as("writerId"),
+                        board.view.as("view"),
+                        board.createDate,
+                        ExpressionUtils.as // 해당 갓생 자극 점수 추출
+                                (JPAExpressions.select(godLifeScore.score.sum().coalesce(0)).from(godLifeScore).where(godLifeScore.board.eq(board)),
+                                        "godLifeScore")
+                ))
+                .from(board)
+                .join(member).on(board.member.eq(member))
+                .join(category).on(board.category.categoryId.eq(category.categoryId))
+                .where(board.id.eq(boardId), board.category.categoryType.eq(CategoryType.GOD_LIFE_STIMULUS),
+                        board.status.eq(BoardStatus.S))
+                .fetchOne();
+
+        if (godLifeStimulationBoardResponse == null) {
+            throw new NotFoundResource(ErrorMessage.INVALID_BOARD_MESSAGE.getErrorMessage());
+        }
+
+        queryFactory.update(board)
+                .set(board.view, board.view.add(1))
+                .where(board.id.eq(boardId)).execute();
+
+        //게시판 주인 확인
+        godLifeStimulationBoardResponse.setOwner(loginMember.getId().equals(godLifeStimulationBoardResponse.getWriterId()));
+
+        return godLifeStimulationBoardResponse;
+    }
+
+    /**
+     * @param pageable : 조회할 페이지 번호
+     * @return 해당 페이지 번호에 포함되는 갓생 자극 게시판 간략 정보
+     */
+    @Override
+    public Page<GodLifeStimulationBoardBriefResponse> findStimulusBoardPaging(Pageable pageable) {
+        List<GodLifeStimulationBoardBriefResponse> content = queryFactory.select(Projections.fields(
+                        GodLifeStimulationBoardBriefResponse.class,
+                        board.title.as("title"),
+                        board.thumbnailUrl.as("thumbnailUrl"),
+                        board.introduction.as("introduction"),
+                        board.id.as("boardId"),
+                        board.member.nickname.as("nickname"),
+                        Expressions.as(Expressions.constant(0), "godLifeScore")
+                ))
+                .from(board)
+                .join(board.member)
+                .join(board.category)
+                .where(board.category.categoryType.eq(CategoryType.GOD_LIFE_STIMULUS),
+                        board.status.eq(BoardStatus.S))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .orderBy(board.createDate.desc()) //내림 차순으로 정렬
+                .fetch();
+
+        Long count = queryFactory
+                .select(board.count())
+                .from(board)
+                .join(board.category)
+                .where(board.category.categoryType.eq(CategoryType.GOD_LIFE_STIMULUS), board.status.eq(BoardStatus.S))
+                .fetchOne();
+
+        return new PageImpl<>(content, pageable, count);
+    }
+
+    /**
+     * @param request : 검색 조건
+     * @return 검색 조건에 맞는 갓생 자극 페이지 전체 리스트 반환
+     */
+    @Override
+    public List<GodLifeStimulationBoardBriefResponse> findStimulusBoardSearchCondition(StimulationBoardSearchCondition request) {
+        List<GodLifeStimulationBoardBriefResponse> content = queryFactory.select(Projections.fields(
+                        GodLifeStimulationBoardBriefResponse.class,
+                        board.title.as("title"),
+                        board.thumbnailUrl.as("thumbnailUrl"),
+                        board.introduction.as("introduction"),
+                        board.id.as("boardId"),
+                        board.member.nickname.as("nickname"),
+                        Expressions.as(Expressions.constant(0), "godLifeScore")
+                ))
+                .from(board)
+                .join(board.member)
+                .join(board.category)
+                .where(board.category.categoryType.eq(CategoryType.GOD_LIFE_STIMULUS),
+                        board.status.eq(BoardStatus.S), nicknameParam(request.getNickname()),
+                                doesTitleContainParam(request.getTitle()),
+                                doesIntroductionContainParam(request.getIntroduction()))
+                .orderBy(board.createDate.desc())
+                .fetch();
+
+        return content;
+    }
+
+    /**
+     * 전체기간 가장 인기 있는 갓생 자극 게시물 조회
+     * @return 가장 인기있는 순으로 갓생 자극 게시물 리스트 최대 10개 반환
+     */
+    @Override
+    public List<GodLifeStimulationBoardBriefResponse> findAllTimePopularStimulusBoardList() {
+
+        NumberPath<Integer> sum = Expressions.numberPath(Integer.class, "godLifeScore");
+
+        List<GodLifeStimulationBoardBriefResponse> result = queryFactory
+                .select(Projections.fields(
+                        GodLifeStimulationBoardBriefResponse.class,
+                        board.title.as("title"),
+                        board.thumbnailUrl.as("thumbnail"),
+                        board.introduction.as("introduction"),
+                        board.id.as("boardId"),
+                        board.member.nickname.as("nickname"),
+                        Expressions.as(
+                                JPAExpressions.select(godLifeScore.score.sum().coalesce(0))
+                                        .from(godLifeScore).where(godLifeScore.board.id.eq(board.id))
+                                ,sum)))
+                .from(board)
+                .join(board.member)
+                .join(board.category)
+                .where(board.category.categoryType.eq(CategoryType.GOD_LIFE_STIMULUS),
+                        board.status.eq(BoardStatus.S))
+                .orderBy(sum.desc())
+                .offset(0)
+                .limit(10)
+                .fetch();
+
+        return result;
+    }
+
+    @Override
+    public List<GodLifeStimulationBoardBriefResponse> findMostViewedBoardList(){
+        return queryFactory.select(Projections.fields(
+                GodLifeStimulationBoardBriefResponse.class,
+                board.title.as("title"),
+                board.thumbnailUrl.as("thumbnail"),
+                board.introduction.as("introduction"),
+                board.id.as("boardId"),
+                board.member.nickname.as("nickname"),
+                board.view.as("view")))
+                .from(board)
+                .join(board.member)
+                .join(board.category)
+                .where(board.category.categoryType.eq(CategoryType.GOD_LIFE_STIMULUS),
+                        board.status.eq(BoardStatus.S))
+                .orderBy(board.view.desc(), board.createDate.desc()) //조회수가 같으면 나중에 생성된 것부터
+                .offset(0)
+                .limit(10)
+                .fetch();
+    }
+
 
     private BooleanExpression nicknameParam(String nickname) {
         if(isBlankOrNullKeyword(nickname)) return null;
@@ -322,6 +383,13 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
 
         return bb;
     }
+
+    private BooleanExpression doesIntroductionContainParam(String introduction) {
+        if(isBlankOrNullKeyword(introduction)) return null;
+
+        return board.introduction.contains(introduction);
+    }
+
 
     private OrderSpecifier<?> boardSort(Pageable pageable) {
         if(pageable == null || pageable.getSort().isEmpty()) return null;

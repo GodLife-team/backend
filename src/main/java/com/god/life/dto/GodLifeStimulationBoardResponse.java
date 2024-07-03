@@ -1,9 +1,12 @@
 package com.god.life.dto;
 
+import com.god.life.util.DateUtil;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -37,13 +40,34 @@ public class GodLifeStimulationBoardResponse {
     @Schema(description = "갓생 자극 작성자 ID")
     private Long writerId;
 
-    public GodLifeStimulationBoardResponse(String title, String thumbnailUrl, String introduction, String nickname, Integer godLifeScore, boolean owner) {
+    @Schema(description = "조회수")
+    private int view;
+
+    @Schema(description = "작성 일자")
+    private String createDate;
+
+    public GodLifeStimulationBoardResponse(
+            String title,
+            String thumbnailUrl,
+            String introduction,
+            String content,
+            Long boardId,
+            String nickname,
+            Long writerId,
+            Integer view,
+            LocalDateTime createDate,
+            Integer godLifeScore
+    ){
         this.title = title;
-        this.thumbnailUrl = thumbnailUrl;
+        this.thumbnailUrl =thumbnailUrl;
         this.introduction = introduction;
+        this.content = content;
+        this.boardId = boardId;
         this.nickname = nickname;
+        this.writerId = writerId;
+        this.view = view;
         this.godLifeScore = godLifeScore;
-        this.owner = owner;
+        this.date = DateUtil.formattingTimeDifference(createDate);
     }
 
 
