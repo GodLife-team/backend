@@ -203,7 +203,7 @@ public class BoardService {
         return board.getId();
     }
 
-
+    @Transactional
     public GodLifeStimulationBoardResponse detailStimulusBoard(Long boardId, Member member) {
 
         return boardRepository.findStimulusBoardEqualsBoardId(boardId, member);
