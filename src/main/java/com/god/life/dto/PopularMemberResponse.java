@@ -2,15 +2,13 @@ package com.god.life.dto;
 
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class PopularMemberResponse {
 
     @Schema(description = "해당 회원 MEMBER_ID")

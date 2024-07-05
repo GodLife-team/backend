@@ -1,14 +1,25 @@
 package com.god.life.controller;
 
+import com.god.life.annotation.LoginMember;
+import com.god.life.domain.Member;
 import com.god.life.dto.ImageSaveResponse;
+import com.god.life.dto.common.CommonResponse;
 import com.god.life.service.ImageService;
+import com.god.life.service.ImageUploadService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @Slf4j
@@ -16,29 +27,52 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "이미지 업로드 관련 API", description = "이미지 업로드시 사용되는 API 입니다.")
 public class ImageController {
 
-//    private final ImageService imageService;
-//
-//    @Operation(summary = "이미지 업로드", description = "요청된 타입에 따른 사진을 저장합니다. (프로필:profile, 배경:background)")
-//    @PostMapping("/image-upload")
-//    @Parameter(name="Authorization", description = "Bearer {Access Token}형태", required = true)
-//    @ApiResponses(
-//            value = {
-//                    @ApiResponse(responseCode = "200", description = "Body에 이미지 저장 주소반환",
-//                            useReturnTypeSchema = true),
-//            }
-//    )
-//    public ResponseEntity<CommonResponse<ImageSaveResponse>> uploadTest(ImageUploadRequest file
-//            , @LoginUser Member loginMember) {
-//        ImageSaveResponse save = imageService.saveImage(file.getImage(), loginMember, null);
-//
-//        return ResponseEntity.ok((new CommonResponse<>(HttpStatus.OK, save)));
-//    }
-
     private final ImageService imageService;
+    private final ImageUploadService imageUploadService;
 
     @GetMapping("/html/test")
     public void test(@RequestParam("body") String html){
         imageService.deleteUnusedImageInHtml(html, 123123L);
     }
+
+    @Operation(summary = "회원 프로필 이미지 업데이트", description = "전송한 이미지를 해당 회원의 프로필 사진으로 저장 및 등록합니다.")
+    @PostMapping(value = "/member/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Parameter(name="Authorization", description = "Bearer {Access Token}형태", required = true)
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "프로필 이미지 반환",
+                            useReturnTypeSchema = true),
+            }
+    )
+    public ResponseEntity<CommonResponse<ImageSaveResponse>> profileImageUpload(
+            @RequestParam(name = "image") MultipartFile image,
+            @LoginMember Member loginMember) throws IOException {
+
+        ImageSaveResponse response = imageUploadService.upload(image);
+        imageService.updateMemberProfileImage(response, loginMember);
+
+        return ResponseEntity.ok((new CommonResponse<>(HttpStatus.OK, response)));
+    }
+
+    @Operation(summary = "회원 배경 화면 업데이트", description = "전송한 이미지를 해당 회원의 배경 사진으로 저장 및 등록합니다.")
+    @PostMapping(value = "/member/background", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Parameter(name="Authorization", description = "Bearer {Access Token}형태", required = true)
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "배경 이미지 주소 반환",
+                            useReturnTypeSchema = true),
+            }
+    )
+    public ResponseEntity<CommonResponse<ImageSaveResponse>> backgroundImageUpload(
+            @RequestParam(name = "image") MultipartFile image,
+            @LoginMember Member loginMember) throws IOException {
+
+        ImageSaveResponse response = imageUploadService.upload(image);
+        imageService.updateMemberBackgroundImage(response, loginMember);
+
+        return ResponseEntity.ok((new CommonResponse<>(HttpStatus.OK, response)));
+    }
+
+
 
 }

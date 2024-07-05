@@ -71,8 +71,6 @@ public class MemberService {
         return memberRepository.existsByProviderId(id);
     }
 
-    // jwt에서 DB 정보 불러올때 사진도 같이?? 아니면 유저정보가 필요할 때만???
-    // 일단 DB에서 조회하는 것오르 하자.
     public LoginInfoResponse getUserInfo(Long loginMember) {
         Member findMember = memberRepository.findByIdWithImage(loginMember)
                 .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_MEMBER_MESSAGE.getErrorMessage()));
@@ -82,20 +80,11 @@ public class MemberService {
                 .sex(findMember.getSex().getSex())
                 .nickname(findMember.getNickname())
                 .godLifeScore((int) findMember.getGodLifePoint())
-                .backgroundImage("")
+                .backgroundImage(findMember.getBackgroundName() == null ? "" : findMember.getBackgroundName())
                 .whoAmI(findMember.getWhoAmI())
                 .memberId(findMember.getId())
                 .fcm(findMember.getFcmToken())
-                .profileImage("").build();
-
-        List<Image> memberImages = findMember.getImages();
-        for (Image image : memberImages) {
-            if (image.getServerName().startsWith("profile")) {
-                response.setProfileImage(image.getServerName().substring("profile".length()));
-            } else if (image.getServerName().startsWith("background")) {
-                response.setBackgroundImage(image.getServerName().substring("background".length()));
-            }
-        }
+                .profileImage(findMember.getProfileName() == null ? "" : findMember.getProfileName()).build();
 
         return response;
     }

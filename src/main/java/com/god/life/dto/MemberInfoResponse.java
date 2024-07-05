@@ -25,7 +25,7 @@ public class MemberInfoResponse {
     private String backgroundImageURL;
 
     @Schema(description = "해당 회원이 받은 갓생 점수")
-    private int godLifeScore;
+    private Integer godLifeScore;
 
     @Schema(description = "해당 회원이 작성한 게시물 수")
     private Long memberBoardCount;

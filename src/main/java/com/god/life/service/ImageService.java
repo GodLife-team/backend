@@ -9,6 +9,7 @@ import com.god.life.error.ErrorMessage;
 import com.god.life.error.NotFoundResource;
 import com.god.life.repository.BoardRepository;
 import com.god.life.repository.ImageRepository;
+import com.god.life.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
@@ -23,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +34,7 @@ public class ImageService {
     private final ImageUploadService imageUploadService;
     private final ImageRepository imageRepository;
     private final BoardRepository boardRepository;
+    private final MemberRepository memberRepository; // dao만 단순히 접근하므로 repo를 사용
 
     public List<ImageSaveResponse> uploadImages(List<MultipartFile> images) {
         List<ImageSaveResponse> responses = new ArrayList<>();
@@ -125,7 +128,6 @@ public class ImageService {
         imageRepository.deleteByBoardIds(boardIds);
     }
 
-    // 내일 테스트!
     @Transactional
     public void deleteUnusedImageInHtml(String html, Long boardId) {
         Document document = Jsoup.parse(html);
@@ -145,4 +147,35 @@ public class ImageService {
             imageRepository.deleteUnusedImageOnBoard(usedImageName, boardId);
         }
     }
+
+    @Transactional
+    public void updateMemberProfileImage(ImageSaveResponse response, Member loginMember) {
+        //이미지 정보 생성 혹은 업데이트
+        createOrUpdateImage(response, loginMember);
+
+        //회원의 profile 업데이트
+        Member findMember = memberRepository.findById(loginMember.getId()).get();
+        findMember.updateProfileImageName(response.getServerName());
+    }
+
+    @Transactional
+    public void updateMemberBackgroundImage(ImageSaveResponse response, Member loginMember) {
+        //이미지 정보 생성 혹은 업데이트
+        createOrUpdateImage(response, loginMember);
+
+        //회원의 profile 업데이트
+        Member findMember = memberRepository.findById(loginMember.getId()).get();
+        findMember.updateBackgroundImageName(response.getServerName());
+    }
+
+    private void createOrUpdateImage(ImageSaveResponse response, Member loginMember) {
+        Image image = imageRepository
+                .findByMemberAndServerName(loginMember, response.getServerName()).orElseGet(Image::new);
+        image.updateImagesName(response);
+        if (image.getId() == null) { //기존 프로필 정보가 없으면 저장 or 더티 체킹
+            imageRepository.save(image);
+        }
+    }
+
+
 }

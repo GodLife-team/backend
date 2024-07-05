@@ -1,11 +1,12 @@
 package com.god.life.domain;
 
+import com.god.life.dto.ImageSaveResponse;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @Builder
 @AllArgsConstructor
 public class Image {
@@ -32,5 +33,10 @@ public class Image {
 
     public void updateUploader(Member member) {
         this.member = member;
+    }
+
+    public void updateImagesName(ImageSaveResponse response) {
+        this.serverName = response.getServerName();
+        this.originalName = response.getOriginalName();
     }
 }

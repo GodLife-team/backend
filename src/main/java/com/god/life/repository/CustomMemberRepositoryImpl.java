@@ -9,9 +9,13 @@ import com.god.life.dto.PopularMemberResponse;
 import com.god.life.error.ErrorMessage;
 import com.god.life.error.NotFoundResource;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.OptimisticLockException;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.OptimisticLock;
 import org.springframework.stereotype.Repository;
 
 import java.time.DayOfWeek;
@@ -19,6 +23,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 import static com.god.life.domain.QBoard.board;
 import static com.god.life.domain.QGodLifeScore.godLifeScore;
@@ -41,53 +46,35 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository {
     public MemberInfoResponse getMemberInfo(Long findMemberId) {
 
         // 해당 회원의 닉네임, 자기소개, 작성한 게시물 수 계산
-        List<MemberInfoResponse> responses = queryFactory
-                .select(Projections.bean(
+        Optional<MemberInfoResponse> hasResponse = queryFactory
+                .select(Projections.fields(
                         MemberInfoResponse.class,
                         member.nickname.as("nickname"),
                         member.whoAmI.as("whoAmI"),
-                        board.count().as("memberBoardCount")))
+                        member.profileName.as("profileImageURL"),
+                        member.backgroundName.as("backgroundImageURL"),
+                        Expressions.as(JPAExpressions //게시판 수 계산
+                                .select(board.count().coalesce(0L))
+                                .from(board)
+                                .where(board.member.id.eq(findMemberId)), "memberBoardCount"))
+                )
                 .from(member)
-                .leftJoin(board)
-                .on(member.id.eq(board.member.id))
                 .where(member.id.eq(findMemberId))
-                .groupBy(member.id)
-                .fetch();
+                .stream().findFirst();
 
-        if (responses.size() == 0) { //조인 결과가 없는 경우 --> 회원  XXX
+        if (hasResponse.isEmpty()) { //찾는 회원 정보가 없는 경우
             throw new NotFoundResource(ErrorMessage.INVALID_MEMBER_MESSAGE.getErrorMessage());
         }
+        MemberInfoResponse response = hasResponse.get();
 
-        MemberInfoResponse response = responses.get(0);
+        //갓생 점수 계산
+        Integer score = queryFactory.select(godLifeScore.score.sum().coalesce(0))
+                .from(godLifeScore)
+                .join(godLifeScore.board)
+                .on(godLifeScore.board.id.eq(board.id).and(board.member.id.eq(findMemberId)))
+                .fetchOne();
 
-        // 이미지 조회
-        List<String> images =
-                queryFactory.select(image.serverName)
-                        .from(image)
-                        .where(image.member.id.eq(findMemberId))
-                        .fetch();
-        for (String image : images) {
-            if (image.startsWith("profile")) {
-                response.setProfileImageURL(image.substring("profile".length()));
-            } else if (image.startsWith("background")) {
-                response.setBackgroundImageURL(image.substring("background".length()));
-            }
-        }
-
-        // 받은 갓생 점수 계산
-        List<Integer> totalGodLife = queryFactory.select(godLifeScore.score.sum())
-                .from(board)
-                .leftJoin(godLifeScore)
-                .on(board.id.eq(godLifeScore.board.id))
-                .where(board.member.id.eq(findMemberId))
-                .groupBy(board.member.id)
-                .fetch();
-
-        if (totalGodLife.size() == 0 || totalGodLife.get(0) == null) {
-            response.setGodLifeScore(0);
-        }else{
-            response.setGodLifeScore(totalGodLife.get(0));
-        }
+        response.setGodLifeScore(score);
 
         return response;
     }
@@ -95,6 +82,7 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository {
     @Override
     public List<PopularMemberResponse> findWeeklyPopularMember() {
         LocalDateTime today = LocalDateTime.now(); // 현재 시각
+
         //이번 주 월요일 0시 0분 0초
         LocalDateTime monday = LocalDateTime.of(LocalDate.now().with(DayOfWeek.MONDAY), LocalTime.MIDNIGHT);
 
@@ -106,7 +94,7 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository {
                 ))
                 .from(member)
                 .join(board).on(member.id.eq(board.member.id))
-                .join(godLifeScore).on(board.id.eq(godLifeScore.board.id))
+                .join(godLifeScore).on(board.id.eq(godLifeScore.board.id)) //점수 못받은 회원은 표시 X
                 .where(
                         godLifeScore.createDate.between(monday, today) //일주일 간격으로 수행
                 )
@@ -118,8 +106,6 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository {
 
         // 탑 10명의 멤버 정보 및 이미지 URL 조회하기
         List<Member> popularMember = queryFactory.selectFrom(member)
-                .leftJoin(member.images)
-                .fetchJoin()
                 .where(member.id.in(
                         weeklyPopularMembers.stream().map(PopularMemberResponse::getMemberId).toList()))
                 .fetch();
@@ -133,13 +119,7 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository {
                 if (weeklyPopularMember.getMemberId().equals(member.getId())) {
                     weeklyPopularMember.setNickname(member.getNickname());
                     weeklyPopularMember.setWhoAmI(member.getWhoAmI());
-                    List<Image> images = member.getImages();
-                    for (Image image : images) {
-                        if (image != null && image.getServerName().contains("profile")) {
-                            weeklyPopularMember.setProfileURL(image.getServerName().substring("profile".length()));
-                        }
-                    }
-                    break;
+                    weeklyPopularMember.setProfileURL(member.getProfileName() == null ? "" : member.getProfileName());
                 }
             }
         }
@@ -169,12 +149,11 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository {
 
         // 탑 10명의 멤버 정보 및 이미지 URL 조회하기
         List<Member> popularMember = queryFactory.selectFrom(member)
-                .leftJoin(member.images)
-                .fetchJoin()
                 .where(member.id.in(
                         weeklyPopularMembers.stream().map(PopularMemberResponse::getMemberId).toList()))
                 .fetch();
 
+        // 조립
         // 조립
         for (int i = 0; i < weeklyPopularMembers.size(); i++) {
             var weeklyPopularMember = weeklyPopularMembers.get(i);
@@ -183,13 +162,7 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository {
                 if (weeklyPopularMember.getMemberId().equals(member.getId())) {
                     weeklyPopularMember.setNickname(member.getNickname());
                     weeklyPopularMember.setWhoAmI(member.getWhoAmI());
-                    List<Image> images = member.getImages();
-                    for (Image image : images) {
-                        if (image.getServerName().contains("profile")) {
-                            weeklyPopularMember.setProfileURL(image.getServerName().substring("profile".length()));
-                        }
-                    }
-                    break;
+                    weeklyPopularMember.setProfileURL(member.getProfileName() == null ? "" : member.getProfileName());
                 }
             }
         }

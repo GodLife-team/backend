@@ -53,6 +53,12 @@ public class Member {
 
     //private String fcmToken;
 
+    @Column(name = "profile_name")
+    private String profileName;
+
+    @Column(name = "background_name")
+    private String backgroundName;
+
     @Override
     public String toString() {
         return "Member{" +
@@ -72,5 +78,13 @@ public class Member {
 
     public void inValidateRefreshToken() {
         this.refreshToken = "";
+    }
+
+    public void updateProfileImageName(String profileName) {
+        this.profileName = profileName;
+    }
+
+    public void updateBackgroundImageName(String backgroundName) {
+        this.backgroundName = backgroundName;
     }
 }

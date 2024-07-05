@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ImageRepository extends JpaRepository<Image, Long> {
@@ -36,4 +37,6 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     @Modifying
     @Query("delete from Image i where i.board.id = :boardId and i.serverName not in :imageNames")
     void deleteUnusedImageOnBoard(@Param("imageNames") List<String> usedImageNames, @Param("boardId") Long boardId);
+
+    Optional<Image> findByMemberAndServerName(Member member, String serverName);
 }
