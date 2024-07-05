@@ -187,28 +187,28 @@ public class MemberController {
     }
 
 
-    @Operation(summary = "이미지 업로드", description = "요청된 타입에 따른 사진을 저장합니다. (프로필:profile, 배경:background)")
-    @PostMapping(value = "/image-upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Parameter(name="Authorization", description = "Bearer {Access Token}형태", required = true)
-    @ApiResponses(
-            value = {
-                    @ApiResponse(responseCode = "200", description = "Body에 이미지 저장 주소반환",
-                            useReturnTypeSchema = true),
-            }
-    )
-    public ResponseEntity<CommonResponse<ImageSaveResponse>> profileUpload(
-            @ModelAttribute ImageUploadRequest uploadRequest,
-            @LoginMember Member loginMember) throws IOException {
-
-        //ImageSaveResponse save = imageService.uploadImage(file.getImage(), loginMember);
-        ImageSaveResponse response = imageUploadService.upload(uploadRequest.getImage());
-        response.setServerName(response.getServerName());
-        imageService.deleteTypeImage(uploadRequest.getImageType() + "%", loginMember.getId());
-        imageService.saveUserImage(response, loginMember);
-        response.setServerName(response.getServerName().substring(uploadRequest.imageType.length()));
-
-        return ResponseEntity.ok((new CommonResponse<>(HttpStatus.OK, response)));
-    }
+//    @Operation(summary = "이미지 업로드", description = "요청된 타입에 따른 사진을 저장합니다. (프로필:profile, 배경:background)")
+//    @PostMapping(value = "/image-upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    @Parameter(name="Authorization", description = "Bearer {Access Token}형태", required = true)
+//    @ApiResponses(
+//            value = {
+//                    @ApiResponse(responseCode = "200", description = "Body에 이미지 저장 주소반환",
+//                            useReturnTypeSchema = true),
+//            }
+//    )
+//    public ResponseEntity<CommonResponse<ImageSaveResponse>> profileUpload(
+//            @ModelAttribute ImageUploadRequest uploadRequest,
+//            @LoginMember Member loginMember) throws IOException {
+//
+//        //ImageSaveResponse save = imageService.uploadImage(file.getImage(), loginMember);
+//        ImageSaveResponse response = imageUploadService.upload(uploadRequest.getImage());
+//        response.setServerName(response.getServerName());
+//        imageService.deleteTypeImage(uploadRequest.getImageType() + "%", loginMember.getId());
+//        imageService.saveUserImage(response, loginMember);
+//        response.setServerName(response.getServerName().substring(uploadRequest.imageType.length()));
+//
+//        return ResponseEntity.ok((new CommonResponse<>(HttpStatus.OK, response)));
+//    }
 
     @Operation(summary = "자기소개 변경")
     @PatchMapping("/member")

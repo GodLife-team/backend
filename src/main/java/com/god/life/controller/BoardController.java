@@ -142,24 +142,24 @@ public class BoardController {
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, boardList));
     }
 
-    @PostMapping("/board/image-upload")
-    @Operation(summary = "게시판 작성시 이미지 업로드 API")
-    @ApiResponses(
-            value = {
-                    @ApiResponse(responseCode = "200", description = "이미지 경로 반환",
-                            useReturnTypeSchema = true)
-            }
-    )
-    public ResponseEntity<CommonResponse<String>> postImage(
-            @Parameter(description = "업로드할 이미지") @RequestParam("image") MultipartFile image,
-            @Parameter(description = "업로드할 이미지의 게시판 번호") @RequestParam("tmpBoardId") Long tmpBoardId,
-            @LoginMember Member member) {
-
-        ImageSaveResponse response = imageService.uploadImage(image);
-        imageService.saveImage(response, member, tmpBoardId);
-
-        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, response.getServerName()));
-    }
+//    @PostMapping("/board/image-upload")
+//    @Operation(summary = "게시판 작성시 이미지 업로드 API")
+//    @ApiResponses(
+//            value = {
+//                    @ApiResponse(responseCode = "200", description = "이미지 경로 반환",
+//                            useReturnTypeSchema = true)
+//            }
+//    )
+//    public ResponseEntity<CommonResponse<String>> postImage(
+//            @Parameter(description = "업로드할 이미지") @RequestParam("image") MultipartFile image,
+//            @Parameter(description = "업로드할 이미지의 게시판 번호") @RequestParam("tmpBoardId") Long tmpBoardId,
+//            @LoginMember Member member) {
+//
+//        ImageSaveResponse response = imageService.uploadImage(image);
+//        imageService.saveImage(response, member, tmpBoardId);
+//
+//        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, response.getServerName()));
+//    }
 
     @PostMapping("/board/tmp")
     @Operation(summary = "임시 테이블 생성")

@@ -30,10 +30,10 @@ public class ImageController {
     private final ImageService imageService;
     private final ImageUploadService imageUploadService;
 
-    @GetMapping("/html/test")
-    public void test(@RequestParam("body") String html){
-        imageService.deleteUnusedImageInHtml(html, 123123L);
-    }
+//    @GetMapping("/html/test")
+//    public void test(@RequestParam("body") String html){
+//        imageService.deleteUnusedImageInHtml(html, 123123L);
+//    }
 
     @Operation(summary = "회원 프로필 이미지 업데이트", description = "전송한 이미지를 해당 회원의 프로필 사진으로 저장 및 등록합니다.")
     @PostMapping(value = "/member/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -73,6 +73,23 @@ public class ImageController {
         return ResponseEntity.ok((new CommonResponse<>(HttpStatus.OK, response)));
     }
 
+    @PostMapping("/board/image-upload")
+    @Operation(summary = "게시판 작성시 이미지 업로드 API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "이미지 경로 반환",
+                            useReturnTypeSchema = true)
+            }
+    )
+    public ResponseEntity<CommonResponse<String>> postImage(
+            @Parameter(description = "업로드할 이미지") @RequestParam("image") MultipartFile image,
+            @Parameter(description = "업로드할 이미지의 게시판 번호") @RequestParam("tmpBoardId") Long tmpBoardId,
+            @LoginMember Member member) {
 
+        ImageSaveResponse response = imageService.uploadImage(image);
+        imageService.saveImage(response, member, tmpBoardId);
+
+        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, response.getServerName()));
+    }
 
 }
