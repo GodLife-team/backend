@@ -25,6 +25,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final BoardRepository boardRepository;
 
+    @Transactional(readOnly = true)
     public List<CommentResponse> getCommentsForBoard(Long boardId, Member member) {
 
         List<Comment> comments = commentRepository.findByBoardIdWithMember(boardId);

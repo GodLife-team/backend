@@ -35,7 +35,7 @@ public class Comment extends BaseEntity{
     @JoinColumn(name = "parent_id", referencedColumnName = "comment_id")
     private Comment parent;
 
-    @OneToMany(mappedBy = "parent")
+    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
     private List<Comment> child = new ArrayList<>();
 
 

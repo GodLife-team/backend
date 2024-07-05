@@ -47,8 +47,6 @@ public class CommentResponse {
     @Schema(description = "수정/삭제 유무")
     private boolean isCommentOwner;
 
-    @Schema(description = "해당 유저 프로필 이미지 이름")
-    private String profileUrl;
 
     public static CommentResponse of(Comment comment, Long loginMemberId) {
         return CommentResponse
@@ -58,9 +56,9 @@ public class CommentResponse {
                 .nickname(comment.getMember().getNickname())
                 .comment(comment.getReplyContent())
                 .aboutMe(comment.getMember().getWhoAmI())
-                .writtenAt(DateUtil.formattingTimeDifference(comment.getCreateDate()))
+                .writtenAt(formattingTimeDifference(comment.getCreateDate()))
                 .isCommentOwner(comment.getMember().getId().equals(loginMemberId))
-                .profileUrl(comment.getMember().getProfileName())
+                .profileURL(comment.getMember().getProfileName() == null ? "" : comment.getMember().getProfileName())
                 .build();
     }
 
