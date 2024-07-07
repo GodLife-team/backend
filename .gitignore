@@ -50,3 +50,4 @@ application-test.yaml
 
 WeeklyPopularBoardCacheService.java
 nginx
+deploy/BlueGreen.sh
