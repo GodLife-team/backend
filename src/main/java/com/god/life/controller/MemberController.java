@@ -81,16 +81,16 @@ public class MemberController {
             }
     )
     @GetMapping("/check/id")
-    public ResponseEntity<CommonResponse<AlreadySignUpResponse>> checkAlreadySignup(@RequestParam(value = "memberId") String memberId) {
+    public ResponseEntity<CommonResponse<AlreadySignUpResponse>> checkAlreadySignup(@RequestParam(value = "memberId") String kakaoId) {
         AlreadySignUpResponse response = new AlreadySignUpResponse("", "", "false");
 
-        if (!StringUtils.hasText(memberId)) {
+        if (!StringUtils.hasText(kakaoId)) {
             return ResponseEntity.ok().body(new CommonResponse<>(HttpStatus.BAD_REQUEST, response));
         }
 
-        boolean alreadySignup = memberService.checkAlreadySignup(memberId);
+        boolean alreadySignup = memberService.checkAlreadySignup(kakaoId);
         if (alreadySignup) {
-            TokenResponse token = memberService.reissueToken(memberId);
+            TokenResponse token = memberService.reissueToken(kakaoId);
             response.updateResponse(token, "true");
             return ResponseEntity.ok().body(new CommonResponse<>(HttpStatus.OK, response));
         }

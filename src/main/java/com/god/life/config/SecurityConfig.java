@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.god.life.error.handler.CustomAccessDeniedHandler;
 import com.god.life.error.handler.CustomAuthenticationEntryPoint;
 import com.god.life.service.JwtAuthenticationProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -13,6 +14,11 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -22,8 +28,19 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 public class SecurityConfig {
 
 
+    // SWaggerPatterns
+    private static final String[] SwaggerPatterns = {
+            "/swagger-resources/**", "/swagger-ui/**", "/v3/api-docs/**", "/v3/api-docs", "/api/**"
+    };
+
     private final ObjectMapper objectMapper;
     private final AuthenticationManagerBuilder builder;
+
+    @Value("${swagger.username}")
+    private String swaggerUser;
+
+    @Value("${swagger.password}")
+    private String swaggerPassword;
 
     public SecurityConfig(ObjectMapper objectMapper,
                           JwtAuthenticationProvider provider, AuthenticationManagerBuilder builder) {
@@ -47,6 +64,7 @@ public class SecurityConfig {
             request.anyRequest().authenticated();
         });
 
+
         http.formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable);
@@ -69,6 +87,22 @@ public class SecurityConfig {
     @Bean
     public AuthenticationEntryPoint customAuthenticationEntryPoint(){
         return new CustomAuthenticationEntryPoint(objectMapper);
+    }
+
+    @Bean
+    public InMemoryUserDetailsManager userDetailsManager(){
+        UserDetails user =
+                User.withUsername(swaggerUser)
+                        .password(passwordEncoder().encode(swaggerPassword))
+                        .roles("SWAGGER")
+                        .build();
+
+        return new InMemoryUserDetailsManager(user);
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
     }
 
     @Bean

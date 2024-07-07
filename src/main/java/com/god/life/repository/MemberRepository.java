@@ -13,7 +13,8 @@ public interface MemberRepository extends JpaRepository<Member, Long>, CustomMem
 
 
 
-    Optional<Member> findByRefreshToken(String refreshToken);
+    @Query("select m from Member m where m.refreshToken = :refreshToken")
+    Optional<Member> findByRefreshToken(@Param("refreshToken") String refreshToken);
 
     boolean existsByNickname(String nickname);
 

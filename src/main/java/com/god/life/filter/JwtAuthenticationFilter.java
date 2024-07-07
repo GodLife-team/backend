@@ -67,7 +67,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         response.setCharacterEncoding("utf-8");
         PrintWriter writer = response.getWriter();
         writer.write(responseMessage);
-        writer.close();
+        //writer.close();
         SecurityContextHolder.clearContext();
     }
 

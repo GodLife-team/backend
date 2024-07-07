@@ -141,8 +141,12 @@ public class JwtUtil {
 
     public TokenResponse createToken(String id, String nickname){
         String accessToken = createAccessToken(id, nickname);
-        String refreshToken = createRefreshToken();
+        String refreshToken = createRefreshToken(id);
         return new TokenResponse(accessToken, refreshToken);
+    }
+
+    private String createRefreshToken(String id) {
+        return createJWT(id, "refresh", REFRESH_EXPIRATION_TIME, REFRESH);
     }
 
     public void validateRefreshJwt(String jwt) {

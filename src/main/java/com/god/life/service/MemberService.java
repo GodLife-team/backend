@@ -10,11 +10,16 @@ import com.god.life.repository.MemberRepository;
 import com.god.life.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.temporal.Temporal;
+import java.time.temporal.TemporalUnit;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Transactional(readOnly = true)
@@ -28,6 +33,10 @@ public class MemberService {
     private final CommentService commentService;
     private final GodLifeScoreService godLifeScoreService;
     private final ImageService imageService;
+    private final RedisService redisService;
+
+    @Value("${jwt.secret.expire.refresh}")
+    private int REFRESH_EXPIRATION_TIME;
 
     @Transactional
     public TokenResponse signUp(SignupRequest signUpRequest) {
@@ -35,6 +44,9 @@ public class MemberService {
         Member savedMember = memberRepository.save(member);
 
         TokenResponse response = jwtUtil.createToken(String.valueOf(savedMember.getId()), savedMember.getNickname());
+        //redis에 refresh token 저장
+        redisService.setValue(String.valueOf(savedMember.getId()), response.getRefreshToken(),
+                REFRESH_EXPIRATION_TIME);
         savedMember.updateRefreshToken(response.getRefreshToken()); // refresh 토큰 업데이트
 
         return response;
@@ -47,15 +59,22 @@ public class MemberService {
 
     @Transactional
     public TokenResponse updateRefreshToken(String jwt) {
-        // jwt 조회
-        Optional<Member> findMember = memberRepository.findByRefreshToken(jwt);
-        if (findMember.isEmpty()) {
-            log.info("Refresh token = {}, 인데 못찾음",  jwt);
-            throw new JwtInvalidException("잘못된 토큰입니다.");
+        String id = jwtUtil.getId(jwt);
+        String refreshInRedis = redisService.getValues(id);
+
+        //만약 해커가 refresh 토큰으로 access token으로 재발급 받음
+        //근데 추후 유저가 refresh 토큰으로 access token으로 재발급 시도시
+        // redis에 있는 두개의 값이 다름 ==> 해킹이라 판단 후 재 로그인
+        if (refreshInRedis.equals(RedisService.NO_VALUE) || !jwt.equals(refreshInRedis)) {
+            redisService.deleteValue(id);
+            throw new JwtInvalidException("재 로그인 해주세요.");
         }
-        Member member = findMember.get();
-        TokenResponse token = jwtUtil.createToken(String.valueOf(member.getId()), member.getNickname());
-        member.updateRefreshToken(token.getRefreshToken());
+
+        //Token 생성
+        TokenResponse token = jwtUtil.createToken(String.valueOf(id), "nickname");
+        redisService.setValue(String.valueOf(id), token.getRefreshToken(),
+                REFRESH_EXPIRATION_TIME);
+
         return token;
     }
 
@@ -91,12 +110,14 @@ public class MemberService {
 
     // 토큰 재발급 ==> RTT 방식으로 리프레시 토큰도 재발급
     @Transactional
-    public TokenResponse reissueToken(String memberId) {
-        Member member = memberRepository.findByProviderId(memberId)
+    public TokenResponse reissueToken(String providerId) {
+        Member member = memberRepository.findByProviderId(providerId)
                 .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_MEMBER_MESSAGE.getErrorMessage()));
 
         TokenResponse response = jwtUtil.createToken(String.valueOf(member.getId()), member.getNickname());
-        member.updateRefreshToken(response.getRefreshToken()); // refresh 토큰 업데이트
+        redisService.setValue(String.valueOf(member.getId()), response.getRefreshToken(), REFRESH_EXPIRATION_TIME);
+        //member.updateRefreshToken(response.getRefreshToken()); // refresh 토큰 업데이트
+
 
         return response;
     }
