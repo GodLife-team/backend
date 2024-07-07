@@ -59,8 +59,9 @@ public class BoardService {
         board.increaseViewCount();
         boolean isOwner = board.getMember().getId().equals(loginMember.getId()); // 작성자와 현재 로그인한 사람이 동일인인지
         boolean memberLikedBoard = godLifeScoreService.isMemberLikedBoard(board, loginMember);
+        int godLifeScore = godLifeScoreService.calculateGodLifeScoreBoard(board.getId());
 
-        return BoardResponse.of(board, isOwner, memberLikedBoard);
+        return BoardResponse.of(board, isOwner, memberLikedBoard, godLifeScore);
     }
 
 

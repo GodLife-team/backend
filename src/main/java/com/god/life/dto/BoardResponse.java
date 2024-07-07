@@ -76,19 +76,31 @@ public class BoardResponse {
                 .whoAmI(board.getMember().getWhoAmI())
                 .writtenAt(board.getCreateDate().toLocalDate())
                 .tier("브론즈")
-                .godScore(board.getTotalScore())
+                .godScore(0)
                 .writerId(board.getMember().getId())
+                .profileURL(board.getMember().getProfileName() == null ? "" : board.getMember().getProfileName())
                 .memberLikedBoard(likedBoard).build();
 
-        String profileURL = "";
-        List<Image> memberImages = board.getMember().getImages();
-        for (Image image : memberImages) {
-            if (image.getServerName().startsWith("profile")) {
-                profileURL = image.getServerName().substring("profile".length());
-            }
-        }
+        return response;
+    }
 
-        response.setProfileURL(profileURL);
+    public static BoardResponse of(Board board, boolean isOwner, boolean likedBoard, int godLifeScore) {
+        BoardResponse response = BoardResponse.builder()
+                .board_id(board.getId())
+                .body(board.getContent())
+                .isBoardOwner(isOwner)
+                .views(board.getView())
+                .title(board.getTitle())
+                .tags(board.toListTag())
+                .nickname(board.getMember().getNickname())
+                .whoAmI(board.getMember().getWhoAmI())
+                .writtenAt(board.getCreateDate().toLocalDate())
+                .tier("브론즈")
+                .godScore(godLifeScore)
+                .writerId(board.getMember().getId())
+                .profileURL(board.getMember().getProfileName() == null ? "" : board.getMember().getProfileName())
+                .memberLikedBoard(likedBoard).build();
+
         return response;
     }
 }
