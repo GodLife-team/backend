@@ -30,8 +30,6 @@ public class BoardService {
     private final ImageService imageService;
     private final GodLifeScoreService godLifeScoreService;
     private final CategoryRepository categoryRepository;
-    //private final WeeklyPopularBoardCacheService weeklyPopularBoardCacheService;
-    //private final RedisTemplate<String, Object> redisTemplate;
 
     private static final String POPULAR_BOARDS_KEY = "popularBoard";
 
@@ -97,27 +95,6 @@ public class BoardService {
         boardRepository.deleteById(boardId);
         return true;
     }
-
-//    @Transactional(readOnly = true)
-//    public List<BoardSearchResponse> getBoardList(BoardSearchRequest boardSearchRequest) {
-//        Pageable pageable =
-//                PageRequest
-//                        .of((boardSearchRequest.getPage() - 1), 10, Sort.by("createDate").descending());
-//
-//        Page<Board> pagingBoard = boardRepository.findByBoardfetchjoin(pageable);
-//
-//        List<Board> boards = pagingBoard.getContent();
-//
-//        boards.stream()
-//                .forEach(b -> {
-//                    b.getComments();
-//                    b.getImages();
-//                    b.getMember().getImages();
-//                });
-//
-//
-//        return boards.stream().map(b -> BoardSearchResponse.of(b, false)).toList();
-//    }
 
     @Transactional(readOnly = true)
     public List<BoardSearchResponse> getBoardList(BoardSearchRequest boardSearchRequest) {

@@ -66,7 +66,7 @@ public class BoardSearchResponse {
                 .title(board.getTitle())
                 .tags(board.toListTag())
                 .writtenAt(DateUtil.formattingTimeDifference(board.getCreateDate()))
-                .godScore(board.getTotalScore())
+                .godScore(0)
                 .imagesURL(board.getImages().stream().map(Image::getServerName).toList())
                 .commentCount(board.getComments().size())
                 .nickname(board.getMember().getNickname())

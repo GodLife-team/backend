@@ -40,6 +40,7 @@ public class BoardCreateRequest {
                 .tag(Board.toDBTag(tags))
                 .status(BoardStatus.S)
                 .category(category)
+                .totalScore(0)
                 .build();
     }
 
