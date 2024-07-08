@@ -120,6 +120,7 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository {
                     weeklyPopularMember.setNickname(member.getNickname());
                     weeklyPopularMember.setWhoAmI(member.getWhoAmI());
                     weeklyPopularMember.setProfileURL(member.getProfileName() == null ? "" : member.getProfileName());
+                    weeklyPopularMember.setBackgroundUrl(member.getBackgroundName() == null ? "" : member.getBackgroundName());
                 }
             }
         }
@@ -163,6 +164,7 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository {
                     weeklyPopularMember.setNickname(member.getNickname());
                     weeklyPopularMember.setWhoAmI(member.getWhoAmI());
                     weeklyPopularMember.setProfileURL(member.getProfileName() == null ? "" : member.getProfileName());
+                    weeklyPopularMember.setBackgroundUrl(member.getBackgroundName() == null ? "" : member.getBackgroundName());
                 }
             }
         }

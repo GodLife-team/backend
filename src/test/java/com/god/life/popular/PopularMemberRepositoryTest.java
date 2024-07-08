@@ -119,7 +119,8 @@ public class PopularMemberRepositoryTest {
     @DisplayName("전체기간 갓생 받은거 테스트")
     public void 전체_기간_테스트(){
         Member member = createMember("1", "1");
-        createImage(member, "profile1");
+        createImage(member, "profile" + member.getProfileName());
+        createImage(member, "background" + member.getBackgroundName());
         Member member1 = createMember("2", "2");
         createImage(member1, "profile2");
         Member member2 = createMember("3", "3");
@@ -163,6 +164,8 @@ public class PopularMemberRepositoryTest {
         List<PopularMemberResponse> allTimePopularMember = memberRepository.findAllTimePopularMember();
 
         Assertions.assertThat(allTimePopularMember.size()).isEqualTo(3);
+        Assertions.assertThat(allTimePopularMember.get(0).getProfileURL()).isEqualTo("profile" + member.getProviderId());
+        Assertions.assertThat(allTimePopularMember.get(0).getBackgroundUrl()).isEqualTo("background" + member.getProviderId());
     }
 
     private Member createMember(String providerId, String nickname) {
@@ -174,6 +177,8 @@ public class PopularMemberRepositoryTest {
                 .nickname(nickname)
                 .email("ASDF@example.com")
                 .providerId(providerId)
+                .profileName("profile" + providerId)
+                .backgroundName("background" + providerId)
                 .whoAmI("ASDF").build();
 
         memberRepository.save(member);

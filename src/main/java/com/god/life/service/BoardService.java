@@ -111,7 +111,6 @@ public class BoardService {
                     b.getComments();
                     b.getImages();
                     b.getGodLifeScores();
-                    b.getMember().getImages();
                 });
 
         List<BoardSearchResponse> response = new ArrayList<>();

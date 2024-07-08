@@ -41,7 +41,7 @@ public class PopularControllerTest
         //given
         List<PopularMemberResponse> responses = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
-            responses.add(new PopularMemberResponse((i + 1L), "nickname" + i, (i + 1) * 2, "HI IM TESTER " + i, "profile" + i));
+            responses.add(new PopularMemberResponse((i + 1L), "nickname" + i, (i + 1) * 2, "HI IM TESTER " + i, "profile" + i, "background" + i));
         }
         responses.sort(Comparator.comparing(PopularMemberResponse::getGodLifeScore).reversed());
         BDDMockito.given(memberService.searchWeeklyPopularMember()).willReturn(
@@ -66,7 +66,7 @@ public class PopularControllerTest
         //given
         List<PopularMemberResponse> responses = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
-            responses.add(new PopularMemberResponse((i + 1L), "nickname" + i, (i + 1) * 2, "HI IM TESTER " + i, "profile" + i));
+            responses.add(new PopularMemberResponse((i + 1L), "nickname" + i, (i + 1) * 2, "HI IM TESTER " + i, "profile" + i, "background" + i));
         }
         responses.sort(Comparator.comparing(PopularMemberResponse::getGodLifeScore).reversed());
         BDDMockito.given(memberService.searchAllTimePopularMember()).willReturn(
@@ -82,6 +82,8 @@ public class PopularControllerTest
 
         for (int i = 0; i < 10; i++) {
             result.andExpect(MockMvcResultMatchers.jsonPath("$.body[" + i + "].godLifeScore").value(20 - (i * 2)));
+            result.andExpect(MockMvcResultMatchers.jsonPath("$.body[" + i + "].backgroundUrl").value("background" + (9-i)));
+            result.andExpect(MockMvcResultMatchers.jsonPath("$.body[" + i + "].profileURL").value("profile" + (9-i)));
         }
     }
 

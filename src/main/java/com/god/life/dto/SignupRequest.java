@@ -45,6 +45,8 @@ public class SignupRequest {
                 .providerName(ProviderType.KAKAO)
                 .providerId(request.getProviderId())
                 .whoAmI("") //가입할땐 빈 문자열로 전달
+                .profileName("")
+                .backgroundName("")
                 .nickname(request.getNickname()).build();
     }
 

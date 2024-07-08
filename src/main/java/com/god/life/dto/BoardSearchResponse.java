@@ -70,18 +70,10 @@ public class BoardSearchResponse {
                 .imagesURL(board.getImages().stream().map(Image::getServerName).toList())
                 .commentCount(board.getComments().size())
                 .nickname(board.getMember().getNickname())
+                .profileURL(board.getMember().getProfileName())
                 .tier("브론즈")
                 .build();
 
-        String profileURL = "";
-        List<Image> memberImages = board.getMember().getImages();
-        for (Image image : memberImages) {
-            if (image.getServerName().startsWith("profile")) {
-                profileURL = image.getServerName().substring("profile".length());
-            }
-        }
-        
-        response.setProfileURL(profileURL);
         return response;
     }
 }

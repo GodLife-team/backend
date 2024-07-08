@@ -23,7 +23,9 @@ public class PopularMemberResponse {
     @Schema(description = "자기소개")
     private String whoAmI;
 
-    @Schema(description = "프로필 이미지 URL")
+    @Schema(description = "프로필 이미지 이름")
     private String profileURL = "";
 
+    @Schema(description = "백그라운드 이미지 이름")
+    private String backgroundUrl = "";
 }
