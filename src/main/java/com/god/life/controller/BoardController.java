@@ -186,7 +186,7 @@ public class BoardController {
                                                                      @Parameter(description = "갓생 자극 게시물 최종 작성") @RequestBody GodLifeStimulationBoardRequest dto) {
 
         Long savedBoardId = boardService.saveTemporaryBoard(member, dto);
-        imageService.deleteUnusedImageInHtml(dto.getContent(), savedBoardId);
+        imageService.deleteUnusedImageInHtml(dto.getContent(), savedBoardId, dto.getThumbnailUrl());
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, savedBoardId));
     }
 

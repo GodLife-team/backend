@@ -128,12 +128,17 @@ public class ImageService {
         imageRepository.deleteByBoardIds(boardIds);
     }
 
+
     @Transactional
-    public void deleteUnusedImageInHtml(String html, Long boardId) {
+    public void deleteUnusedImageInHtml(String html, Long boardId, String thumbnail) {
         Document document = Jsoup.parse(html);
         Elements imgs = document.getElementsByTag("img");
 
         List<String> usedImageName = new ArrayList<>();
+        if(thumbnail != null && !thumbnail.isBlank()){ //썸네일 이미지가 있다면
+            usedImageName.add(thumbnail); // 썸내일 이미지 삭제 방지
+        }
+
         for (Element img : imgs) {
             String imageServerPath = img.attr("src");
             int imageNameStartIdx = imageServerPath.lastIndexOf('/');

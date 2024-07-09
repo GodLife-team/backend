@@ -41,7 +41,7 @@ out/
 application.*
 Dockerfile
 docker-compose.yaml
-dockerenv
+mysql/dockerenv
 bindMount/
 *.json
 generated
@@ -50,4 +50,5 @@ application-test.yaml
 
 WeeklyPopularBoardCacheService.java
 nginx
-deploy/BlueGreen.sh
+deploy/**
+mysql/**
