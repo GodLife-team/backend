@@ -40,18 +40,19 @@ import static com.god.life.domain.QMember.member;
 public class CustomBoardRepositoryImpl implements CustomBoardRepository {
 
     private final JPAQueryFactory queryFactory;
-    private static final DateTimeFormatter timeFomatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     public CustomBoardRepositoryImpl(EntityManager em){
         queryFactory = new JPAQueryFactory(em);
     }
 
     /**
-     * 한주간 갓생 인정을 가장 많이 받은 갓생 인정 게시물 10개를 반환합니다.
-     * @return 갓생 인정 리스트 10개
+     * 한주간 갓생 인정을 가장 많이 받은 갓생 인증 게시물 10개를 반환합니다.
+     * @return 갓생 인증 리스트 10개
      */
     @Override
     public List<BoardSearchResponse> findWeeklyPopularBoard() {
+        long start = System.currentTimeMillis();
+        log.info("한주간 인기 있는 갓생 인정 게시물 조회 시작");
         LocalDateTime today = LocalDateTime.now(); // 현재 시각
         //이번 주 월요일 0시 0분 0초
         LocalDateTime monday = LocalDateTime.of(LocalDate.now().with(DayOfWeek.MONDAY), LocalTime.MIDNIGHT);
@@ -73,6 +74,7 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
                 )
                 .groupBy(board.id)
                 .orderBy(godLifeScore.score.sum().desc(), board.id.asc())
+                .having(godLifeScore.score.sum().gt(2))
                 .offset(0)
                 .limit(10) // 10개만 fetch
                 .fetch();
@@ -86,10 +88,9 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
                 .orderBy(board.id.asc())
                 .fetch();
 
-        // In 절 쿼리 -> 1:N 여러번을 할 수 없으므로
+        // In 절 쿼리
         boards.stream().map(Board::getComments).forEach(Hibernate::initialize); // 댓글 fetch 조인
         boards.stream().map(Board::getImages).forEach(Hibernate::initialize); // 이미지 fetch 조인
-        boards.forEach(b -> b.getMember().getImages().forEach(Hibernate::initialize));
 
         //조립
         List<BoardSearchResponse> result = new ArrayList<>();
@@ -98,6 +99,9 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
             dto.setGodScore(weeklyPopularBoardDTO.get(i).getSum());
             result.add(dto);
         }
+
+        long end = System.currentTimeMillis();
+        log.info("한 주간 인기 있는 갓생 인정 게시물 조회 종료 시간 = {}", (end-start)/(double)1000);
 
         return result;
     }
@@ -108,48 +112,38 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
      */
     @Override
     public List<BoardSearchResponse> findTotalPopularBoard() {
-        // 전체 기간 인기 있는 게시물 조회
-        List<PopularBoardQueryDTO> mostPopularBoardDTO = queryFactory.select(Projections.bean(
-                        PopularBoardQueryDTO.class,
-                        board.id.as("boardId"),
-                        godLifeScore.score.sum().as("sum")
-                ))
-                .from(board)
-                .join(category).on(board.category.categoryId.eq(category.categoryId))
-                .join(godLifeScore).on(board.id.eq(godLifeScore.board.id))
-                .where(category.categoryType.eq(CategoryType.GOD_LIFE_PAGE))
-                .groupBy(board.id)
-                .orderBy(godLifeScore.score.sum().desc(), board.id.asc())
-                .offset(0)
-                .limit(10) // 10개만 fetch
-                .fetch();
-
-        //인기 있는 게시판 정보 조회
+        long start = System.currentTimeMillis();
+        log.info("전체 기간 인기 있는 갓생 인정 게시물 조회 시작");
         List<Board> boards = queryFactory.selectFrom(board)
                 .join(board.member, member).fetchJoin()
-                .where(
-                        board.id.in(mostPopularBoardDTO.stream()
-                                .map(PopularBoardQueryDTO::getBoardId).collect(Collectors.toList())))
-                .orderBy(board.id.asc())
+                .where(category.categoryType.eq(CategoryType.GOD_LIFE_PAGE), board.totalScore.gt(2)) //게시글 작성으로 받은 점수는 제외
+                .orderBy(board.totalScore.desc(), board.id.asc())
+                .offset(0)
+                .limit(10)
                 .fetch();
 
         // In 절 쿼리 -> 1:N 여러번을 할 수 없으므로
-        boards.stream().map(Board::getComments).forEach(Hibernate::initialize); // 댓글 fetch 조인
+        boards.stream().map(Board::getComments).forEach(Hibernate::initialize); // 댓글 fetch 조인 --> 서브쿼리로 빼기
         boards.stream().map(Board::getImages).forEach(Hibernate::initialize); // 이미지 fetch 조인
-        boards.forEach(b -> b.getMember().getImages().forEach(Hibernate::initialize));
 
         //조립
         List<BoardSearchResponse> result = new ArrayList<>();
         for (int i = 0; i < boards.size(); i++) {
             BoardSearchResponse dto = BoardSearchResponse.of(boards.get(i), false);
-            dto.setGodScore(mostPopularBoardDTO.get(i).getSum());
             result.add(dto);
         }
 
+
+        long end = System.currentTimeMillis();
+        log.info("전체 기간 인기 있는 갓생 인정 게시물 조회 종료 시간 = {}", (end-start)/(double)1000);
         return result;
     }
 
-    // 조건 검색에 맞는 갓생글 조회
+    /**
+     * @param boardSearchRequest 검색 조건
+     * @param pageable 페이징 번호 및 정렬 깆누
+     * @return 요청에 적합한 게시물 리스트 반환
+     */
     @Override
     public Page<Board> findBoardWithSearchRequest(BoardSearchRequest boardSearchRequest, Pageable pageable) {
         List<Board> boards = queryFactory.selectFrom(board)
@@ -192,9 +186,7 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
                         member.id.as("writerId"),
                         board.view.as("view"),
                         board.createDate,
-                        ExpressionUtils.as // 해당 갓생 자극 점수 추출
-                                (JPAExpressions.select(godLifeScore.score.sum().coalesce(0)).from(godLifeScore).where(godLifeScore.board.eq(board)),
-                                        "godLifeScore")
+                        board.totalScore.as("godLifeScore")
                 ))
                 .from(board)
                 .join(member).on(board.member.eq(member))
@@ -230,7 +222,7 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
                         board.introduction.as("introduction"),
                         board.id.as("boardId"),
                         board.member.nickname.as("nickname"),
-                        Expressions.as(Expressions.constant(0), "godLifeScore")
+                        board.totalScore.as("godLifeScore")
                 ))
                 .from(board)
                 .join(board.member)
@@ -265,7 +257,7 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
                         board.introduction.as("introduction"),
                         board.id.as("boardId"),
                         board.member.nickname.as("nickname"),
-                        Expressions.as(Expressions.constant(0), "godLifeScore")
+                        board.totalScore.as("godLifeScore")
                 ))
                 .from(board)
                 .join(board.member)
@@ -286,9 +278,8 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
      */
     @Override
     public List<GodLifeStimulationBoardBriefResponse> findAllTimePopularStimulusBoardList() {
-
-        NumberPath<Integer> sum = Expressions.numberPath(Integer.class, "godLifeScore");
-
+        long start = System.currentTimeMillis();
+        log.info("전체 기간 인기 있는 갓생 자극 게시물 조회 시작");
         List<GodLifeStimulationBoardBriefResponse> result = queryFactory
                 .select(Projections.fields(
                         GodLifeStimulationBoardBriefResponse.class,
@@ -297,23 +288,25 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
                         board.introduction.as("introduction"),
                         board.id.as("boardId"),
                         board.member.nickname.as("nickname"),
-                        Expressions.as(
-                                JPAExpressions.select(godLifeScore.score.sum().coalesce(0))
-                                        .from(godLifeScore).where(godLifeScore.board.id.eq(board.id))
-                                ,sum)))
+                        board.totalScore.as("godLifeScore")))
                 .from(board)
                 .join(board.member)
                 .join(board.category)
                 .where(board.category.categoryType.eq(CategoryType.GOD_LIFE_STIMULUS),
                         board.status.eq(BoardStatus.S))
-                .orderBy(sum.desc())
+                .orderBy(board.totalScore.desc())
                 .offset(0)
                 .limit(10)
                 .fetch();
 
+        long end = System.currentTimeMillis();
+        log.info("전체 기간 인기 있는 갓생 자극 게시물 조회 종료 시간 = {}", (end-start)/(double)1000);
         return result;
     }
 
+    /**
+     * 조회수가 가장 많은 갓생 자극 게시물을 조회합니다.
+     */
     @Override
     public List<GodLifeStimulationBoardBriefResponse> findMostViewedBoardList(){
         return queryFactory.select(Projections.fields(

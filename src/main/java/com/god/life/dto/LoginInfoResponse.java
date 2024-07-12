@@ -1,5 +1,6 @@
 package com.god.life.dto;
 
+import com.god.life.domain.Member;
 import com.god.life.domain.Sex;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -40,4 +41,16 @@ public class LoginInfoResponse {
     @Schema
     private String fcm;
 
+    public static LoginInfoResponse from(Member findMember) {
+        return LoginInfoResponse.builder()
+                .age(findMember.getAge())
+                .sex(findMember.getSex().getSex())
+                .nickname(findMember.getNickname())
+                .godLifeScore((int) findMember.getGodLifePoint())
+                .backgroundImage(findMember.getBackgroundName() == null ? "" : findMember.getBackgroundName())
+                .whoAmI(findMember.getWhoAmI())
+                .memberId(findMember.getId())
+                .fcm(findMember.getFcmToken())
+                .profileImage(findMember.getProfileName() == null ? "" : findMember.getProfileName()).build();
+    }
 }

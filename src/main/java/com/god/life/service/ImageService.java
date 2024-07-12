@@ -36,16 +36,6 @@ public class ImageService {
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository; // dao만 단순히 접근하므로 repo를 사용
 
-    public List<ImageSaveResponse> uploadImages(List<MultipartFile> images) {
-        List<ImageSaveResponse> responses = new ArrayList<>();
-        for (MultipartFile image : images) {
-           responses.add(uploadImage(image));
-        }
-
-        return responses;
-    }
-
-
     public ImageSaveResponse uploadImage(MultipartFile file) {
         ImageSaveResponse response = null;
 
@@ -60,23 +50,13 @@ public class ImageService {
 
     @Transactional
     public void saveImage(ImageSaveResponse response, Member member, Board board) {
-        Image image = Image.builder().member(member)
-                .originalName(response.getOriginalName())
-                .serverName(response.getServerName())
-                .board(board)
-                .build();
-
+        Image image = response.toEntity(member, board);
         imageRepository.save(image);
     }
 
     @Transactional
     public void saveUserImage(ImageSaveResponse response, Member member) {
-        Image image = Image.builder().member(member)
-                .originalName(response.getOriginalName())
-                .serverName(response.getServerName())
-                .board(null)
-                .build();
-
+        Image image = response.toEntity(member);
         imageRepository.save(image);
     }
 

@@ -163,9 +163,9 @@ public class BoardRepositoryTest {
         System.out.println(weeklyPopularBoard.toString());
 
         Assertions.assertThat(weeklyPopularBoard.size()).isEqualTo(3);
-        Assertions.assertThat(weeklyPopularBoard.get(0).getGodScore()).isEqualTo(6); // 10점
-        Assertions.assertThat(weeklyPopularBoard.get(1).getGodScore()).isEqualTo(4); // 4점
-        Assertions.assertThat(weeklyPopularBoard.get(2).getGodScore()).isEqualTo(2);; // 2점
+        Assertions.assertThat(weeklyPopularBoard.get(0).getGodScore()-Board.WRITE_POINT).isEqualTo(6); // 10점
+        Assertions.assertThat(weeklyPopularBoard.get(1).getGodScore()-Board.WRITE_POINT).isEqualTo(4); // 4점
+        Assertions.assertThat(weeklyPopularBoard.get(2).getGodScore()-Board.WRITE_POINT).isEqualTo(2);; // 2점
     }
 
     private void createTestCase() {
@@ -187,6 +187,7 @@ public class BoardRepositoryTest {
         Board boardMember2_2 = createBoard(member1, godPageCategory);
 
         //회원3 -> 게시글 1개 작성
+        //갓생 자극 게시물은 포인트 부여 X
         Board boardMember3_1 = createBoard(member2, godStimulusCategory);
 
         //회원4 --> 게시글 2개 작성
@@ -197,17 +198,25 @@ public class BoardRepositoryTest {
         GodLifeScore like = createLike(member, boardMember1_1);
         GodLifeScore like1 = createLike(member1, boardMember1_1);
         GodLifeScore like2 = createLike(member2, boardMember1_1);
+        boardRepository.incrementGodLifeScore(boardMember1_1.getId());
+        boardRepository.incrementGodLifeScore(boardMember1_1.getId());
+        boardRepository.incrementGodLifeScore(boardMember1_1.getId());
 
         // boardMember1_2에 따봉 2개
         GodLifeScore like3 = createLike(member1, boardMember1_2);
         GodLifeScore like4 = createLike(member2, boardMember1_2);
+        boardRepository.incrementGodLifeScore(boardMember1_2.getId());
+        boardRepository.incrementGodLifeScore(boardMember1_2.getId());
 
         // boardMember2_1에 따봉 1개
         GodLifeScore like5 = createLike(member, boardMember2_1);
+        boardRepository.incrementGodLifeScore(boardMember2_1.getId());
 
         // boardMember3_1에 따봉 2개
         GodLifeScore like6 = createLike(member, boardMember3_1);
         GodLifeScore like7 = createLike(member1, boardMember3_1);
+        boardRepository.incrementGodLifeScore(boardMember3_1.getId());
+        boardRepository.incrementGodLifeScore(boardMember3_1.getId());
     }
 
 
@@ -224,6 +233,8 @@ public class BoardRepositoryTest {
 
         createLike(member1, stimulusBoard);
         createLike(member2, stimulusBoard);
+        boardRepository.incrementGodLifeScore(stimulusBoard.getId());
+        boardRepository.incrementGodLifeScore(stimulusBoard.getId());
 
         // when : stimulusboard 조회
         GodLifeStimulationBoardResponse findBoard = null;
@@ -236,7 +247,7 @@ public class BoardRepositoryTest {
 
         Assertions.assertThat(findBoard.getBoardId()).isEqualTo(stimulusBoard.getId());
         Assertions.assertThat(findBoard.getNickname()).isEqualTo(member1.getNickname());
-        Assertions.assertThat(findBoard.getGodLifeScore()).isEqualTo(4);
+        Assertions.assertThat(findBoard.getGodLifeScore()-2).isEqualTo(4);
         Assertions.assertThat(findBoard.getWriterId()).isEqualTo(member1.getId());
         System.out.println(findBoard);
     }
@@ -412,8 +423,8 @@ public class BoardRepositoryTest {
 
         //then
         Assertions.assertThat(result).size().isEqualTo(2);
-        Assertions.assertThat(result.get(0).getGodLifeScore()).isEqualTo(4);
-        Assertions.assertThat(result.get(1).getGodLifeScore()).isEqualTo(0);
+        Assertions.assertThat(result.get(0).getGodLifeScore()-Board.WRITE_POINT).isEqualTo(4);
+        Assertions.assertThat(result.get(1).getGodLifeScore()-Board.WRITE_POINT).isEqualTo(0);
     }
 
     @Test
@@ -494,11 +505,13 @@ public class BoardRepositoryTest {
                 .content("test1")
                 .member(member)
                 .view(0)
-                .totalScore(0)
+                .totalScore(2)
                 .category(category)
                 .status(BoardStatus.S)
                 .build();
         boardRepository.save(board);
+        GodLifeScore godLifeScore = GodLifeScore.likeMemberToBoard(member, board);
+        godLifeScoreRepository.save(godLifeScore);
         return board;
     }
 

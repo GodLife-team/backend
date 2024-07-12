@@ -1,7 +1,9 @@
 package com.god.life.dto;
 
 
+import com.god.life.domain.Board;
 import com.god.life.domain.Image;
+import com.god.life.domain.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,4 +25,19 @@ public class ImageSaveResponse {
         return new ImageSaveResponse(image.getOriginalName(), image.getServerName());
     }
 
+    public Image toEntity(Member member) {
+        return Image.builder().member(member)
+                .originalName(this.getOriginalName())
+                .serverName(this.getServerName())
+                .board(null)
+                .build();
+    }
+
+    public Image toEntity(Member member, Board board) {
+        return Image.builder().member(member)
+                .originalName(this.getOriginalName())
+                .serverName(this.getServerName())
+                .board(board)
+                .build();
+    }
 }

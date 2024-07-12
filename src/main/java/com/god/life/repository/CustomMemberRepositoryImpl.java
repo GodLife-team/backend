@@ -56,8 +56,10 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository {
                         Expressions.as(JPAExpressions //게시판 수 계산
                                 .select(board.count().coalesce(0L))
                                 .from(board)
-                                .where(board.member.id.eq(findMemberId)), "memberBoardCount"))
-                )
+                                .where(board.member.id.eq(findMemberId)), "memberBoardCount"),
+                        Expressions.as(JPAExpressions.select(board.totalScore.sum().coalesce(0))
+                                .from(board).where(board.member.id.eq(findMemberId)), "godLifeScore")
+                ))
                 .from(member)
                 .where(member.id.eq(findMemberId))
                 .stream().findFirst();
@@ -67,22 +69,12 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository {
         }
         MemberInfoResponse response = hasResponse.get();
 
-        //갓생 점수 계산
-        Integer score = queryFactory.select(godLifeScore.score.sum().coalesce(0))
-                .from(godLifeScore)
-                .join(godLifeScore.board)
-                .on(godLifeScore.board.id.eq(board.id).and(board.member.id.eq(findMemberId)))
-                .fetchOne();
-
-        response.setGodLifeScore(score);
-
         return response;
     }
 
     @Override
     public List<PopularMemberResponse> findWeeklyPopularMember() {
         LocalDateTime today = LocalDateTime.now(); // 현재 시각
-
         //이번 주 월요일 0시 0분 0초
         LocalDateTime monday = LocalDateTime.of(LocalDate.now().with(DayOfWeek.MONDAY), LocalTime.MIDNIGHT);
 
@@ -104,12 +96,12 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository {
                 .limit(10)
                 .fetch(); // 탑 10명만 가져오기
 
+
         // 탑 10명의 멤버 정보 및 이미지 URL 조회하기
         List<Member> popularMember = queryFactory.selectFrom(member)
                 .where(member.id.in(
                         weeklyPopularMembers.stream().map(PopularMemberResponse::getMemberId).toList()))
                 .fetch();
-
 
         // 조립
         for (int i = 0; i < weeklyPopularMembers.size(); i++) {

@@ -105,15 +105,17 @@ public class PopularMemberRepositoryTest {
         em.clear();
 
         // 최종적으로
-        // 회원 1 -> 따봉 5개 ==> 10점,
-        // 회원 3 -> 따봉 2개 ==> 4점,
-        // 회원 2 -> 따봉 1개 받아야함 ==> 2점,
+        // 회원 1 -> 게시판 3개 : 따봉 5개 ==> 16점,
+        // 회원 2 -> 게시판 2개 : 따봉 1개 ==> 6점,
+        // 회원 3 -> 게시판 1개 : 따봉 2개 받아야함 ==> 6점,
+        // 회원 4 -> 게시판 2개 ==> 4점
         List<PopularMemberResponse> weeklyPopularMember = memberRepository.findWeeklyPopularMember();
 
-        Assertions.assertThat(weeklyPopularMember.size()).isEqualTo(3);
-        Assertions.assertThat(weeklyPopularMember.get(0).getGodLifeScore()).isEqualTo(10); // 10점
-        Assertions.assertThat(weeklyPopularMember.get(1).getGodLifeScore()).isEqualTo(4); // 4점
-        Assertions.assertThat(weeklyPopularMember.get(2).getGodLifeScore()).isEqualTo(2);; // 2점
+        Assertions.assertThat(weeklyPopularMember.size()).isEqualTo(4);
+        Assertions.assertThat(weeklyPopularMember.get(0).getGodLifeScore()).isEqualTo(16); // 10점
+        Assertions.assertThat(weeklyPopularMember.get(1).getGodLifeScore()).isEqualTo(6); // 4점
+        Assertions.assertThat(weeklyPopularMember.get(2).getGodLifeScore()).isEqualTo(6);; // 2점
+        Assertions.assertThat(weeklyPopularMember.get(3).getGodLifeScore()).isEqualTo(4);; // 2점
     }
     @Test
     @DisplayName("전체기간 갓생 받은거 테스트")
@@ -163,7 +165,11 @@ public class PopularMemberRepositoryTest {
 
         List<PopularMemberResponse> allTimePopularMember = memberRepository.findAllTimePopularMember();
 
-        Assertions.assertThat(allTimePopularMember.size()).isEqualTo(3);
+        Assertions.assertThat(allTimePopularMember.size()).isEqualTo(4);
+        Assertions.assertThat(allTimePopularMember.get(0).getGodLifeScore()).isEqualTo(16); // 10점
+        Assertions.assertThat(allTimePopularMember.get(1).getGodLifeScore()).isEqualTo(6); // 4점
+        Assertions.assertThat(allTimePopularMember.get(2).getGodLifeScore()).isEqualTo(6);; // 2점
+        Assertions.assertThat(allTimePopularMember.get(3).getGodLifeScore()).isEqualTo(4);; // 2점
         Assertions.assertThat(allTimePopularMember.get(0).getProfileURL()).isEqualTo("profile" + member.getProviderId());
         Assertions.assertThat(allTimePopularMember.get(0).getBackgroundUrl()).isEqualTo("background" + member.getProviderId());
     }
@@ -192,9 +198,11 @@ public class PopularMemberRepositoryTest {
                 .content("test1")
                 .member(member)
                 .view(0)
-                .totalScore(0)
+                .totalScore(Board.WRITE_POINT)
                 .build();
         boardRepository.save(board);
+        GodLifeScore godLifeScore = GodLifeScore.likeMemberToBoard(member, board);
+        godLifeScoreRepository.save(godLifeScore);
         return board;
     }
 

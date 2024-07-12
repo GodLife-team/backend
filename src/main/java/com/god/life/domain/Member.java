@@ -21,9 +21,6 @@ public class Member {
     @Enumerated(value = EnumType.STRING)
     private ProviderType providerName;
 
-    @Column(name = "refresh_token", length = 1024)
-    private String refreshToken;
-
     @Column(nullable = false, unique = true)
     private String nickname;
 
@@ -51,8 +48,6 @@ public class Member {
     @Column(name = "fcm_token")
     private String fcmToken;
 
-    //private String fcmToken;
-
     @Column(name = "profile_name")
     private String profileName;
 
@@ -68,16 +63,8 @@ public class Member {
                 '}';
     }
 
-    public void updateRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
-    }
-
     public void updateWhoAmI(String whoAmI){
         this.whoAmI = whoAmI;
-    }
-
-    public void inValidateRefreshToken() {
-        this.refreshToken = "";
     }
 
     public void updateProfileImageName(String profileName) {

@@ -5,8 +5,7 @@ import com.god.life.dto.*;
 import com.god.life.error.ErrorMessage;
 import com.god.life.error.ForbiddenException;
 import com.god.life.error.NotFoundResource;
-import com.god.life.repository.BoardRepository;
-import com.god.life.repository.CategoryRepository;
+import com.god.life.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,15 +24,19 @@ import java.util.List;
 public class BoardService {
 
     private static final int PAGE_SIZE = 10;
-
     private final BoardRepository boardRepository;
     private final ImageService imageService;
-    private final GodLifeScoreService godLifeScoreService;
     private final CategoryRepository categoryRepository;
+    private final GodLifeScoreRepository godLifeScoreRepository;
+    private final CommentRepository commentRepository;
 
-    private static final String POPULAR_BOARDS_KEY = "popularBoard";
 
-
+    /**
+     * @param request 갓생 인증 게시물 정보
+     * @param loginMember 작성자
+     * @param uploadResponse 업로드한 이미지 정보
+     * @return 해당 게시물 저장 번호
+     */
     @Transactional
     public Long createBoard(BoardCreateRequest request, Member loginMember, List<ImageSaveResponse> uploadResponse) {
         Category category = categoryRepository.findByCategoryType(CategoryType.GOD_LIFE_PAGE);
@@ -41,16 +44,22 @@ public class BoardService {
         Board board = request.toBoard(loginMember,category);
         boardRepository.save(board);
 
-
         for (ImageSaveResponse response : uploadResponse) {
             imageService.saveImage(response, loginMember, board);
         }
 
+        GodLifeScore godLifeScore = GodLifeScore.likeMemberToBoard(loginMember, board);
+        godLifeScoreRepository.save(godLifeScore);
         //생성된 게시판 ID 반환
         return board.getId();
     }
 
 
+    /**
+     * @param boardId 상세 조회할 게시물 번호
+     * @param loginMember 현재 접속 중인 유저 정보
+     * @return 해당 게시물 상세 정보 반환
+     */
     @Transactional
     public BoardResponse detailBoard(Long boardId, Member loginMember) {
         Board board = boardRepository.findByIdWithMember(boardId, CategoryType.GOD_LIFE_PAGE)
@@ -58,13 +67,16 @@ public class BoardService {
 
         board.increaseViewCount();
         boolean isOwner = board.getMember().getId().equals(loginMember.getId()); // 작성자와 현재 로그인한 사람이 동일인인지
-        boolean memberLikedBoard = godLifeScoreService.isMemberLikedBoard(board, loginMember);
-        int godLifeScore = godLifeScoreService.calculateGodLifeScoreBoard(board.getId());
+        boolean memberLikedBoard = godLifeScoreRepository.existsByBoardAndMember(board, loginMember);
 
-        return BoardResponse.of(board, isOwner, memberLikedBoard, godLifeScore);
+        return BoardResponse.of(board, isOwner, memberLikedBoard);
     }
 
 
+    /**
+     * @param member  현재 로그인한 유저 정보 (게시판 권한 확인)
+     * @param boardId 조회할 게시물 번호
+     */
     public void checkAuthorization(Member member, Long boardId) {
         Board board = boardRepository.findByIdWithMember(boardId, CategoryType.GOD_LIFE_PAGE)
                 .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_BOARD_MESSAGE.getErrorMessage()));
@@ -75,6 +87,13 @@ public class BoardService {
 
     }
 
+    /**
+     * @param boardId 수정할 게시판 번호
+     * @param uploadResponse 다시 업로드한 이미지 정보
+     * @param request 수정할 게시판 정보
+     * @param loginMember 현재 접속 중인 유저
+     * @return
+     */
     @Transactional
     public BoardResponse updateBoard(Long boardId, List<ImageSaveResponse> uploadResponse, BoardCreateRequest request, Member loginMember) {
         Board board = boardRepository.findById(boardId).get(); //권한 체크 로직에서 게시판이 있는지 확인하므로 바로 꺼내오기
@@ -86,17 +105,27 @@ public class BoardService {
         }
 
         board.updateBoard(request);
-        boolean memberLikedBoard = godLifeScoreService.isMemberLikedBoard(board, loginMember);
+        boolean memberLikedBoard = godLifeScoreRepository.existsByBoardAndMember(board, loginMember);
 
         return BoardResponse.of(board, true, memberLikedBoard);
     }
 
+    /**
+     * @param boardId 삭제할 게시판 번호
+     * @return 삭제 성공 유무
+     */
     @Transactional
     public boolean deleteBoard(Long boardId) {
+        commentRepository.deleteByBoardId(boardId);
+        godLifeScoreRepository.deleteByBoardId(boardId);
         boardRepository.deleteById(boardId);
         return true;
     }
 
+    /**
+     * @param boardSearchRequest 게시물 검색 조건
+     * @return  검색 조건에 맞는 게시물 dto 반환
+     */
     @Transactional(readOnly = true)
     public List<BoardSearchResponse> getBoardList(BoardSearchRequest boardSearchRequest) {
         Pageable pageable =
@@ -110,42 +139,46 @@ public class BoardService {
                 .forEach(b -> {
                     b.getComments();
                     b.getImages();
-                    b.getGodLifeScores();
                 });
 
         List<BoardSearchResponse> response = new ArrayList<>();
         for (Board board : boards) {
             BoardSearchResponse dto = BoardSearchResponse.of(board, false);
-            dto.setGodScore(board.getGodLifeScores().stream().mapToInt(GodLifeScore::getScore).sum());
+            dto.substractPoint(2);
             response.add(dto);
         }
 
         return response;
     }
 
+    /**
+     * 회원 탈퇴한 유저의 게시물을 삭제합니다.
+     * @param deteleMember 회원탈퇴한 유저 번호
+     */
     public void deleteBoardWrittenByMember(Member deteleMember) {
         boardRepository.deleteByMember(deteleMember);
     }
 
+    /**
+     * 한 주간 인기 있는 갓생 인증 게시물 리스트 반환
+     */
     @Transactional(readOnly = true)
     public List<BoardSearchResponse> searchWeeklyPopularBoardList() {
         return boardRepository.findWeeklyPopularBoard();
-        // return (List<BoardSearchResponse>) redisTemplate.opsForValue().get(POPULAR_BOARDS_KEY);
     }
 
+    /**
+     * 전체 기간 동안 인기 있는 갓생 인증 게시물 반환
+     */
     @Transactional(readOnly = true)
     public List<BoardSearchResponse> searchTopPopularBoardList(){
         return boardRepository.findTotalPopularBoard();
     }
 
-
-    @Transactional(readOnly = true)
-    public void cachingWeeklyBoard(){
-        List<BoardSearchResponse> weeklyPopularBoard = boardRepository.findWeeklyPopularBoard();
-        //redisTemplate.opsForValue().set(POPULAR_BOARDS_KEY, weeklyPopularBoard);
-    }
-
-
+    /**
+     * @param member : 임시 게시물을 작성할 회언
+     * @return 임시 게시물 번호 반환
+     */
     @Transactional
     public Long createTemporaryBoard(Member member) {
         Category category = categoryRepository.findByCategoryType(CategoryType.GOD_LIFE_STIMULUS);
@@ -165,6 +198,11 @@ public class BoardService {
         return boardRepository.save(tmpBoard).getId();
     }
 
+    /**
+     * @param member 작성자
+     * @param dto 최종 갓생 자극 인증 게시물 반환
+     * @return 게시물 번호 반환
+     */
     @Transactional
     public Long saveTemporaryBoard(Member member, GodLifeStimulationBoardRequest dto) {
         Long boardId = dto.getBoardId();
@@ -180,12 +218,20 @@ public class BoardService {
         return board.getId();
     }
 
+    /**
+     * @param boardId 조회할 갓생 자극 게시물 번호
+     * @param member 로그인 유저
+     * @return 갓생 자극 게시물 상세 정보
+     */
     @Transactional
     public GodLifeStimulationBoardResponse detailStimulusBoard(Long boardId, Member member) {
-
         return boardRepository.findStimulusBoardEqualsBoardId(boardId, member);
     }
 
+    /**
+     * @param page : 페이지 번호
+     * @return 페이지 번호에 맞는 갓생 자극 게시물 간단한 정보 반ㄴ환
+     */
     public List<GodLifeStimulationBoardBriefResponse> getListStimulusBoard(Integer page) {
         Page<GodLifeStimulationBoardBriefResponse> result = boardRepository
                 .findStimulusBoardPaging(PageRequest.of(page, PAGE_SIZE, Sort.by("create_date").descending()));
@@ -193,24 +239,39 @@ public class BoardService {
         return result.getContent();
     }
 
+    /**
+     * @param date 임시 게시물을 삭제할 날짜 기쥰
+     * @return 삭제된 임기 게시물 번호
+     */
     @Transactional
     public List<Long> getIncompleteWriteBoardIds(LocalDateTime date) {
-        List<Long> incompleteBoardsBeforeDate = boardRepository.findIncompleteBoardsBeforeDate(date,BoardStatus.T, CategoryType.GOD_LIFE_STIMULUS);
-        //List<Long> incompleteBoardsBeforeDate = boardRepository.findIncompleteBoardsBeforeDate(date);
+        List<Long> incompleteBoardsBeforeDate = boardRepository
+                .findIncompleteBoardsBeforeDate(date,BoardStatus.T, CategoryType.GOD_LIFE_STIMULUS);
         imageService.deleteImages(incompleteBoardsBeforeDate);
         boardRepository.deleteAllById(incompleteBoardsBeforeDate);
         return incompleteBoardsBeforeDate;
     }
 
+    /**
+     * @param request 갓생 자극 게시물 검색 조건
+     * @return 검색 조건에 맞는 갓생 자극 게시물 반환
+     */
     public List<GodLifeStimulationBoardBriefResponse> getListStimulusBoardUsingSearchCondition(StimulationBoardSearchCondition request) {
         return boardRepository.findStimulusBoardSearchCondition(request);
     }
 
+    /**
+     * @return 전체기간 동안 가장 인기있는 갓생 자극 게시물 리스트 반환
+     */
     public List<GodLifeStimulationBoardBriefResponse> getAllTimePopularStimulusBoardList(){
         return boardRepository.findAllTimePopularStimulusBoardList();
     }
 
+    /**
+     * @return 전체기간 동안 가장 조회수가 높은 갓생 자극 게심ㄹ 리스트 반환
+     */
     public List<GodLifeStimulationBoardBriefResponse> getMostViewedStimulusBoardList(){
         return boardRepository.findMostViewedBoardList();
     }
+
 }

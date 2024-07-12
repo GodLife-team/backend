@@ -16,8 +16,6 @@ import java.util.Optional;
 public interface FcmAlarmRepository extends JpaRepository<FcmAlarm, String> {
 
     //지금 보내야 하는 토큰 반환
-//    @Query("select m.fcmToken from FcmAlarm f join f.member m " +
-//            "where function('DATE_FORMAT', f.sendTime, '%Y-%m-%d %H:%i') = function('DATE_FORMAT', :now,  '%Y-%m-%d %H:%i')")
     @Query("select m.fcmToken from FcmAlarm f join f.member m where f.sendTime = :now")
     List<String> findSendUserTokens(@Param(value = "now") LocalDateTime now);
 
@@ -29,7 +27,6 @@ public interface FcmAlarmRepository extends JpaRepository<FcmAlarm, String> {
     void deleteTodayAlarm(@Param("member") Member member);
 
     // 금일 알람 가져옴
-   // @Query("select f from FcmAlarm f where f.member = :member and function('DATE_FORMAT', f.sendTime, '%Y-%m-%d') = function('DATE_FORMAT', now(), '%Y-%m-%d')")
     @Query("select f from FcmAlarm f where f.member = :member and f.sendTime = :now")
     Optional<FcmAlarm> selectTodayAlarm(@Param("member") Member member);
 

@@ -12,7 +12,6 @@ public interface GodLifeScoreRepository extends JpaRepository<GodLifeScore, Long
 
     boolean existsByBoardAndMember(Board board, Member member);
 
-    //@Query("delete from GodLifeScore g where g.member = :member and g.board = :board")
     void deleteByBoardAndMember(Board board, Member member);
 
     // boardId 에 대응되는 게시판의 갓생 점수 합
@@ -25,4 +24,7 @@ public interface GodLifeScoreRepository extends JpaRepository<GodLifeScore, Long
 
     @Modifying
     void deleteByMember(Member deleteMember);
+
+
+    void deleteByBoardId(Long boardId);
 }

@@ -16,7 +16,11 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @ToString(exclude = {"member", "comments", "images"})
+@Table(indexes = @Index(name = "create_date_index", columnList = "create_date"))
 public class Board extends BaseEntity{
+
+    public static final int WRITE_POINT = 2;
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,6 +42,7 @@ public class Board extends BaseEntity{
     @Column(name = "total_score")
     private Integer totalScore;
 
+    @Column
     private int view;
 
     @Column
@@ -92,4 +97,6 @@ public class Board extends BaseEntity{
     public void increaseViewCount() {
         this.view += 1;
     }
+
+//    public void increase
 }

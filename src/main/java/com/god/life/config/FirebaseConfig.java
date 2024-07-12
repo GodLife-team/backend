@@ -11,8 +11,6 @@ import org.springframework.core.io.ClassPathResource;
 
 @Configuration
 public class FirebaseConfig {
-
-
     private final String fcmServiceFile;
 
     public FirebaseConfig(@Value("${fcm.file}") String fcmServiceFile) {

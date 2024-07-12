@@ -66,7 +66,7 @@ public class BoardSearchResponse {
                 .title(board.getTitle())
                 .tags(board.toListTag())
                 .writtenAt(DateUtil.formattingTimeDifference(board.getCreateDate()))
-                .godScore(0)
+                .godScore(board.getTotalScore())
                 .imagesURL(board.getImages().stream().map(Image::getServerName).toList())
                 .commentCount(board.getComments().size())
                 .nickname(board.getMember().getNickname())
@@ -75,5 +75,10 @@ public class BoardSearchResponse {
                 .build();
 
         return response;
+    }
+
+    // 작성하면서 받은 갓생 점수는 제외
+    public void substractPoint(int point) {
+        this.godScore -= point;
     }
 }

@@ -47,7 +47,6 @@ public class MemberService {
         //redis에 refresh token 저장
         redisService.setValue(String.valueOf(savedMember.getId()), response.getRefreshToken(),
                 REFRESH_EXPIRATION_TIME);
-        savedMember.updateRefreshToken(response.getRefreshToken()); // refresh 토큰 업데이트
 
         return response;
     }
@@ -61,10 +60,6 @@ public class MemberService {
     public TokenResponse updateRefreshToken(String jwt) {
         String id = jwtUtil.getId(jwt);
         String refreshInRedis = redisService.getValues(id);
-
-        //만약 해커가 refresh 토큰으로 access token으로 재발급 받음
-        //근데 추후 유저가 refresh 토큰으로 access token으로 재발급 시도시
-        // redis에 있는 두개의 값이 다름 ==> 해킹이라 판단 후 재 로그인
         if (refreshInRedis.equals(RedisService.NO_VALUE) || !jwt.equals(refreshInRedis)) {
             redisService.deleteValue(id);
             throw new JwtInvalidException("재 로그인 해주세요.");
@@ -94,16 +89,7 @@ public class MemberService {
         Member findMember = memberRepository.findByIdWithImage(loginMember)
                 .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_MEMBER_MESSAGE.getErrorMessage()));
 
-        LoginInfoResponse response = LoginInfoResponse.builder()
-                .age(findMember.getAge())
-                .sex(findMember.getSex().getSex())
-                .nickname(findMember.getNickname())
-                .godLifeScore((int) findMember.getGodLifePoint())
-                .backgroundImage(findMember.getBackgroundName() == null ? "" : findMember.getBackgroundName())
-                .whoAmI(findMember.getWhoAmI())
-                .memberId(findMember.getId())
-                .fcm(findMember.getFcmToken())
-                .profileImage(findMember.getProfileName() == null ? "" : findMember.getProfileName()).build();
+        LoginInfoResponse response = LoginInfoResponse.from(findMember);
 
         return response;
     }
@@ -116,7 +102,6 @@ public class MemberService {
 
         TokenResponse response = jwtUtil.createToken(String.valueOf(member.getId()), member.getNickname());
         redisService.setValue(String.valueOf(member.getId()), response.getRefreshToken(), REFRESH_EXPIRATION_TIME);
-        //member.updateRefreshToken(response.getRefreshToken()); // refresh 토큰 업데이트
 
 
         return response;
@@ -133,8 +118,7 @@ public class MemberService {
     // 로그 아웃
     @Transactional
     public void removeRefreshToken(Long memberId) {
-        Member member = memberRepository.findById(memberId).get();
-        member.inValidateRefreshToken();
+        redisService.deleteValue(String.valueOf(memberId));
     }
 
     // 회원 탈퇴
@@ -157,10 +141,6 @@ public class MemberService {
     // memberId의 유저 정보를 조회함
     public MemberInfoResponse memberInfoResponse(Member member, Long findMemberId) {
         MemberInfoResponse memberInfo = memberRepository.getMemberInfo(findMemberId);
-
-//        MemberInfoResponse memberInfo = memberRepository.getMemberTotalInfo(findMemberId)
-//                .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_MEMBER_MESSAGE.getErrorMessage()));
-
         memberInfo.setOwner(member.getId().equals(findMemberId));
 
         return memberInfo;

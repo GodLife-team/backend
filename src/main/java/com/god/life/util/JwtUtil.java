@@ -163,8 +163,7 @@ public class JwtUtil {
 
         // jwt 토큰 종류 확인
         if (!getTokenType(jwt).equals(JwtUtil.REFRESH)) {
-            log.info("잘못된 토큰!!! getTokenType(jwt).equals(JwtUtil.REFRESH) ");
-            throw new JwtInvalidException("잘못된 토큰입니다.");
+            throw new JwtInvalidException("잘못된 타입의 토큰입니다.");
         }
     }
 

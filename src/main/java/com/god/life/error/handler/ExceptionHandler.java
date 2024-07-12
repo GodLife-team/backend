@@ -1,10 +1,7 @@
 package com.god.life.error.handler;
 
 import com.god.life.dto.common.CommonResponse;
-import com.god.life.error.BadRequestException;
-import com.god.life.error.ForbiddenException;
-import com.god.life.error.JwtInvalidException;
-import com.god.life.error.NotFoundResource;
+import com.god.life.error.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -94,6 +91,13 @@ public class ExceptionHandler {
     public ResponseEntity<CommonResponse<String>> badRequestException(BadRequestException badRequestException) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new CommonResponse<>(HttpStatus.BAD_REQUEST, "", badRequestException.getMessage()));
+    }
+
+
+    @org.springframework.web.bind.annotation.ExceptionHandler(UniqueException.class)
+    public ResponseEntity<CommonResponse<String>> uniqueException(UniqueException badRequestException) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new CommonResponse<>(HttpStatus.CONFLICT, "", badRequestException.getMessage()));
     }
 
 }

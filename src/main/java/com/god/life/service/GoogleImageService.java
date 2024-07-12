@@ -18,15 +18,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Google Cloud Platform bucket에 이미지를 업로드하는 클래스
+ */
+
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class GoogleImageService implements ImageUploadService {
 
     @Value("${spring.cloud.gcp.storage.bucket}")
     private String bucketName;
     private final Storage storage;
-
 
     // GCP Bucket에 요청한 이미지 저장
     @Override
@@ -51,7 +53,7 @@ public class GoogleImageService implements ImageUploadService {
             try {
                 responses.add(upload(image));
             } catch (IOException ex) {
-                for (int i = 0; i < responses.size(); i++) { //사진 업로드에 실패했으면 이전까지 업로드했던 사진 예외
+                for (int i = 0; i < responses.size(); i++) { //사진 업로드에 실패했으면 이전까지 업로드했던 사진 삭제처리
                     delete(responses.get(i).getServerName());
                 }
                 throw new IllegalStateException("사진 업로드에 실패했습니다. 다시 시도해 주세요.");
@@ -67,6 +69,7 @@ public class GoogleImageService implements ImageUploadService {
         BlobId blobId = BlobId.of(bucketName, fileName);
         storage.delete(blobId);
     }
+
 
     @Override
     public List<String> getAllImageNames() {

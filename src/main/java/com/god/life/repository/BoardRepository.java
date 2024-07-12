@@ -20,39 +20,37 @@ import java.util.Optional;
 @Repository
 public interface BoardRepository extends JpaRepository<Board, Long>, CustomBoardRepository {
 
-
+    // boardId에 대한 글 조회합니다
     @Query("select b from Board b join fetch b.member where b.id = :boardId and b.category.categoryType = :categoryType")
     Optional<Board> findByIdWithMember(@Param("boardId") Long boardId, @Param("categoryType") CategoryType categoryType);
 
     @Query("select b from Board b where b.id = :boardId")
     Optional<Board> findByIdAnyBoardType(@Param("boardId") Long boardId);
 
-//    @Query(value = "select b from Board b join fetch b.member where b.category = Category.categoryType", countQuery = "select count(b) from Board b join b.member")
-//    Page<Board> findByBoardfetchjoin(Pageable pageable);
-
+    // 해당 회원이 작성한 글 삭제합니다
     @Modifying
     void deleteByMember(Member deleteMember);
 
+    // Category에 맞는 글을 조회합니다
     @Query(value = "select b from Board b join b.category where b.category.categoryType = :categoryType")
     List<Board> getBoardsByCategory(@Param("categoryType") CategoryType categoryType);
 
+    // 최종 저장을 위해 임시 저장된 게시판을 가져옵니다.
     @Query("select b from Board b join fetch b.member where b.id = :boardId and b.status = :status")
     Optional<Board> findTemporaryBoardByIdAndBoardStatus(@Param("boardId") Long boardId,
                                                           @Param("status") BoardStatus status);
 
-    // 하루 전까지 미완성된 게시글 ID를 가져옴
+    // 하루 전까지 미완성된 게시글 ID를 가져옵니다
     @Query("select b.id from Board b join b.category where b.createDate < :date and b.status = :status and b.category.categoryType = :categoryType")
-    //@Query("select b.id from Board b where b.createDate < :date")
     List<Long> findIncompleteBoardsBeforeDate(@Param("date") LocalDateTime date,
                                               @Param("status") BoardStatus status,
                                               @Param("categoryType") CategoryType categoryType);
 
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("update Board b set b.totalScore = b.totalScore + 2 where b.id = :boardId")
+    void incrementGodLifeScore(@Param("boardId") Long boardId);
 
-//    @Query(
-//            "select b from Board b left join (select g from god_life_score g where" +
-//                    " between DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY) AND NOW()) as g" +
-//                    " on b.board_id = g.board_id group by b.board_id"
-//    )
-//    @Query("select ")
-//    void ASDF();
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("update Board b set b.totalScore = b.totalScore - 2 where b.id = :boardId")
+    void decrementGodLifeScore(@Param("boardId") Long boardId);
 }

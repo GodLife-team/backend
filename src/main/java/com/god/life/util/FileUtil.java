@@ -15,6 +15,10 @@ public class FileUtil {
         return UUID.randomUUID().toString();
     }
 
+    /**
+     * @param fileName 저장할 파일 이름
+     * @return 해당 파일의 확장자를 반환합니다.
+     */
     public static String getExt(String fileName){
         //확장자 추출
         int extIdx = fileName.lastIndexOf('.');

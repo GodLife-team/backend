@@ -73,6 +73,15 @@ public class MemberRepositoryTest {
         GodLifeScore like5 = createLike(member, boardMember2_1);
         GodLifeScore like6 = createLike(member, boardMember3_1);
         GodLifeScore like7 = createLike(member1, boardMember3_1);
+
+        boardRepository.incrementGodLifeScore(boardMember1_1.getId());
+        boardRepository.incrementGodLifeScore(boardMember1_1.getId());
+        boardRepository.incrementGodLifeScore(boardMember1_1.getId());
+        boardRepository.incrementGodLifeScore(boardMember1_2.getId());
+        boardRepository.incrementGodLifeScore(boardMember1_2.getId());
+        boardRepository.incrementGodLifeScore(boardMember2_1.getId());
+        boardRepository.incrementGodLifeScore(boardMember3_1.getId());
+        boardRepository.incrementGodLifeScore(boardMember3_1.getId());
     }
 
 

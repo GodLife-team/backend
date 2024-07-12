@@ -4,8 +4,6 @@ import com.god.life.dto.ImageSaveResponse;
 import com.god.life.error.ForbiddenException;
 import com.god.life.service.ImageUploadService;
 import com.god.life.util.FileUtil;
-import com.google.cloud.storage.BlobInfo;
-import org.springframework.core.MethodParameter;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;

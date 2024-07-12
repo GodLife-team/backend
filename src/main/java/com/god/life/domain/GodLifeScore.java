@@ -16,10 +16,6 @@ import java.time.LocalDateTime;
                 name = "MEMBER_BOARD_UNIQUE",
                 columnNames = {"member", "board"}
         ),
-        @UniqueConstraint(
-                name = "MEMBER_MEMBER_UNIQUE",
-                columnNames = {"member", "liked_member"}
-        )
 })
 public class GodLifeScore extends BaseEntity {
 
@@ -45,7 +41,6 @@ public class GodLifeScore extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "liked_member", foreignKey = @ForeignKey(name = "fk_liked_member"))
     private Member likedMember;
-
 
 
    public static GodLifeScore likeMemberToBoard(Member member, Board board) {

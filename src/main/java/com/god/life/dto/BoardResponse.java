@@ -76,7 +76,7 @@ public class BoardResponse {
                 .whoAmI(board.getMember().getWhoAmI())
                 .writtenAt(board.getCreateDate().toLocalDate())
                 .tier("브론즈")
-                .godScore(0)
+                .godScore(board.getTotalScore())
                 .writerId(board.getMember().getId())
                 .profileURL(board.getMember().getProfileName() == null ? "" : board.getMember().getProfileName())
                 .memberLikedBoard(likedBoard).build();

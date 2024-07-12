@@ -17,16 +17,23 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Firebase의 Messging 을 통해 매 분마다 알림을 보내는 클래스입니다.
+ */
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class FcmAlarmService {
 
     private final FcmAlarmRepository fcmAlarmRepository;
     private final FirebaseMessaging messenger;
 
+    private static final String END_MESSAGE_TITLE = "오늘 TODO 까먹지 않으셨죠?";
+    private static final String END_MESSAGE_BODY = "오늘 굿생기록을 정리해 보세요!";
 
-    @Transactional(readOnly = true)
+
     public List<String> getUserTokenAtTime(LocalDateTime time) {
         return fcmAlarmRepository.findSendUserTokens(time);
     }
@@ -35,38 +42,9 @@ public class FcmAlarmService {
     @Transactional
     public void createTodayAlarm(AlarmCreateRequest request, Member member) {
         LocalDateTime sendTime = request.toTime();
-        // 보내야 하는 시간이 이미 지나간 시간이면
-        if (sendTime.isBefore(LocalDateTime.now())) {
-            throw new BadRequestException("현재 시간보다 이전의 알람을 등록할 수 없습니다");
-        }
         FcmAlarm fcmAlarm = new FcmAlarm(member, sendTime);
         fcmAlarmRepository.save(fcmAlarm);
     }
-
-    /**
-     * sendDTO에 token값에 대응되는 기기에 DTO 값 전송
-     */
-//    public String sendNotification(FcmSendDto fcmSendDto) {
-//        String sendToUser = fcmSendDto.getToken();
-//
-//        Notification notification = Notification.builder()
-//                .setTitle(fcmSendDto.getTitle())
-//                .setBody(fcmSendDto.getBody())
-//                .build();
-//
-//        MulticastMessage multicastMessage =
-//                MulticastMessage.builder()
-//                        .setNotification(notification)
-//                        .addAllTokens(List.of(fcmSendDto.getToken()))
-//                        .build();
-//        try{
-//            messenger.sendEachForMulticast(multicastMessage);
-//            return "TokenValue : " + sendToUser + "fcm 메세지 전송 성공!";
-//        } catch (FirebaseMessagingException e) {
-//            e.printStackTrace();
-//            return "메세지 전송 실패.. 로그 확인";
-//        }
-//    }
 
     //금일 생성된 알람을 제거합니다
     @Transactional
@@ -86,11 +64,7 @@ public class FcmAlarmService {
         fcmAlarm.updateAlarm(sendTime);
     }
 
-    private static final String END_MESSAGE_TITLE = "오늘 TODO 까먹지 않으셨죠?";
-    private static final String END_MESSAGE_BODY = "오늘 굿생기록을 정리해 보세요!";
-
-
-    // 1분마다
+    // 매 분마다 알람을 보낼 유저의 토큰값을 얻어내 해당 유저의 기기로 알림을 전송합니다.
     @Scheduled(cron = "0 * * * * *")
     public void sendMessage() {
         LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
@@ -102,7 +76,6 @@ public class FcmAlarmService {
         }
 
         log.info("이번에 보낼 사람 : {}", sendToUserTokens);
-
 
         Notification notification = Notification
                 .builder()

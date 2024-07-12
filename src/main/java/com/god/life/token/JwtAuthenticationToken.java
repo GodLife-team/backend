@@ -8,6 +8,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 
+/**
+ * JWT Token
+ */
+
 public class JwtAuthenticationToken extends AbstractAuthenticationToken {
 
     private String jwt;

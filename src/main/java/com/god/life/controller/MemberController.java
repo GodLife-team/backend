@@ -23,15 +23,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -41,8 +35,6 @@ public class MemberController {
 
     private final MemberService memberService;
     private final JwtUtil jwtUtil;
-    private final ImageService imageService;
-    private final ImageUploadService imageUploadService;
     private final GodLifeScoreService godLifeScoreService;
 
     @Operation(summary = "닉네임 중복체크")
@@ -153,14 +145,12 @@ public class MemberController {
     public ResponseEntity<CommonResponse<TokenResponse>> reissueToken(HttpServletRequest request) {
         String jwtHeader = request.getHeader(JwtUtil.AUTHORIZE_HEADER);
         if (jwtHeader == null) {
-            log.info("미인증...!!!");
             throw new JwtInvalidException("refresh 토큰이 존재하지 않습니다.");
         }
 
         String jwt = JwtUtil.parseJwt(jwtHeader);
         jwtUtil.validateRefreshJwt(jwt);
 
-        // 새로운 Refresh Token과 accessToken 재발급
         TokenResponse response = memberService.updateRefreshToken(jwt);
         return ResponseEntity
                 .ok(new CommonResponse<>(HttpStatus.OK, response));
@@ -185,30 +175,6 @@ public class MemberController {
 
         return ResponseEntity.ok((new CommonResponse<>(HttpStatus.OK, userInfo)));
     }
-
-
-//    @Operation(summary = "이미지 업로드", description = "요청된 타입에 따른 사진을 저장합니다. (프로필:profile, 배경:background)")
-//    @PostMapping(value = "/image-upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//    @Parameter(name="Authorization", description = "Bearer {Access Token}형태", required = true)
-//    @ApiResponses(
-//            value = {
-//                    @ApiResponse(responseCode = "200", description = "Body에 이미지 저장 주소반환",
-//                            useReturnTypeSchema = true),
-//            }
-//    )
-//    public ResponseEntity<CommonResponse<ImageSaveResponse>> profileUpload(
-//            @ModelAttribute ImageUploadRequest uploadRequest,
-//            @LoginMember Member loginMember) throws IOException {
-//
-//        //ImageSaveResponse save = imageService.uploadImage(file.getImage(), loginMember);
-//        ImageSaveResponse response = imageUploadService.upload(uploadRequest.getImage());
-//        response.setServerName(response.getServerName());
-//        imageService.deleteTypeImage(uploadRequest.getImageType() + "%", loginMember.getId());
-//        imageService.saveUserImage(response, loginMember);
-//        response.setServerName(response.getServerName().substring(uploadRequest.imageType.length()));
-//
-//        return ResponseEntity.ok((new CommonResponse<>(HttpStatus.OK, response)));
-//    }
 
     @Operation(summary = "자기소개 변경")
     @PatchMapping("/member")
@@ -250,6 +216,7 @@ public class MemberController {
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, "회원탈퇴 처리가 완료되었습니다."));
     }
 
+    
     @Operation(summary = "회원 정보 조회", description = "조회하는 회원의 각종 정보를 조회합니다.")
     @GetMapping("/member/{memberId}")
     @ApiResponses(
