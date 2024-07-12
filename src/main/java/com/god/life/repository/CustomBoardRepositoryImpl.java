@@ -5,11 +5,10 @@ import com.god.life.dto.*;
 import com.god.life.error.ErrorMessage;
 import com.god.life.error.NotFoundResource;
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.*;
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.NumberPath;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +23,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -116,7 +114,7 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
         log.info("전체 기간 인기 있는 갓생 인정 게시물 조회 시작");
         List<Board> boards = queryFactory.selectFrom(board)
                 .join(board.member, member).fetchJoin()
-                .where(category.categoryType.eq(CategoryType.GOD_LIFE_PAGE), board.totalScore.gt(2)) //게시글 작성으로 받은 점수는 제외
+                .where(category.categoryType.eq(CategoryType.GOD_LIFE_PAGE)) //게시글 작성으로 받은 점수는 제외
                 .orderBy(board.totalScore.desc(), board.id.asc())
                 .offset(0)
                 .limit(10)
@@ -130,6 +128,7 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
         List<BoardSearchResponse> result = new ArrayList<>();
         for (int i = 0; i < boards.size(); i++) {
             BoardSearchResponse dto = BoardSearchResponse.of(boards.get(i), false);
+            dto.substractPoint(Board.WRITE_POINT);
             result.add(dto);
         }
 
