@@ -86,7 +86,7 @@ public class MemberService {
     }
 
     public LoginInfoResponse getUserInfo(Long loginMember) {
-        Member findMember = memberRepository.findByIdWithImage(loginMember)
+        Member findMember = memberRepository.findById(loginMember)
                 .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_MEMBER_MESSAGE.getErrorMessage()));
 
         LoginInfoResponse response = LoginInfoResponse.from(findMember);
