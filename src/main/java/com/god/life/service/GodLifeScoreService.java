@@ -75,14 +75,6 @@ public class GodLifeScoreService {
         return boardScore == null ? 0 : boardScore;
     }
 
-    /**
-     * @param loginMember : 갓생 점수를 계산할 회원
-     * @return 해당 회원이 작성한 갓생 인증글에 대해 받은 전체 갓생 인정 점수를 반환합니다.
-     */
-    public Integer calculateGodLifeScoreMember(Member loginMember) {
-        Integer memberScore = godLifeScoreRepository.calculateGodLifeScoreWithMember(loginMember.getId());
-        return memberScore == null ? 0 : memberScore;
-    }
 
     /** 해당 회원이 갓생 인정 기록을 모두 삭제합니다.
      * @param deleteMember : 탈퇴하는 회원

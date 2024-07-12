@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -53,4 +54,7 @@ public interface BoardRepository extends JpaRepository<Board, Long>, CustomBoard
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("update Board b set b.totalScore = b.totalScore - 2 where b.id = :boardId")
     void decrementGodLifeScore(@Param("boardId") Long boardId);
+
+    @Query("select sum(b.totalScore) from Board b where b.member = :member")
+    Integer totalScoreBoardByLoginMember(@Param("member") Member loginMember);
 }

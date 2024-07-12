@@ -274,4 +274,8 @@ public class BoardService {
         return boardRepository.findMostViewedBoardList();
     }
 
+    public int calculateGodLifeScoreMember(Member loginMember) {
+        Integer sum = boardRepository.totalScoreBoardByLoginMember(loginMember);
+        return sum == null ? 0 : sum;
+    }
 }

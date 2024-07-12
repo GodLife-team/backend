@@ -6,9 +6,8 @@ import com.god.life.dto.*;
 import com.god.life.dto.common.CommonResponse;
 import com.god.life.error.JwtInvalidException;
 import com.god.life.error.NotFoundResource;
+import com.god.life.service.BoardService;
 import com.god.life.service.GodLifeScoreService;
-import com.god.life.service.ImageService;
-import com.god.life.service.ImageUploadService;
 import com.god.life.service.MemberService;
 import com.god.life.util.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,7 +34,7 @@ public class MemberController {
 
     private final MemberService memberService;
     private final JwtUtil jwtUtil;
-    private final GodLifeScoreService godLifeScoreService;
+    private final BoardService boardService;
 
     @Operation(summary = "닉네임 중복체크")
     @Parameter(name = "nickname", required = true, description = "중복을 확인할 닉네임")
@@ -170,7 +169,7 @@ public class MemberController {
 
         LoginInfoResponse userInfo = memberService.getUserInfo(loginMember.getId());
         // 로그인 한 유저 갓생점수 가져오기
-        Integer memberScore = godLifeScoreService.calculateGodLifeScoreMember(loginMember);
+        int memberScore = boardService.calculateGodLifeScoreMember(loginMember);
         userInfo.setGodLifeScore(memberScore);
 
         return ResponseEntity.ok((new CommonResponse<>(HttpStatus.OK, userInfo)));
