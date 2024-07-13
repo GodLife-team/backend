@@ -26,5 +26,7 @@ public interface GodLifeScoreRepository extends JpaRepository<GodLifeScore, Long
     void deleteByMember(Member deleteMember);
 
 
-    void deleteByBoardId(Long boardId);
+    @Modifying
+    @Query("delete GodLifeScore g where g.board.id = :boardId")
+    void deleteByBoardId(@Param("boardId") Long boardId);
 }
