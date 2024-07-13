@@ -18,6 +18,9 @@ public interface MemberRepository extends JpaRepository<Member, Long>, CustomMem
 
     boolean existsByProviderId(String id);
 
+    @Query("SELECT m, sum(b.totalScore) from Member m left join Board b on m.id = b.member.id where m.id = :memberId")
+    Optional<Member> findByIdWithImage(@Param("memberId") Long memberId);
+
     Optional<Member> findByProviderId(String providerId);
 
 }
