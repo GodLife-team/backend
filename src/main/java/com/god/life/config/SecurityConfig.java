@@ -1,9 +1,11 @@
 package com.god.life.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.god.life.admin.AdminAuthenticationProvider;
 import com.god.life.error.handler.CustomAccessDeniedHandler;
 import com.god.life.error.handler.CustomAuthenticationEntryPoint;
 import com.god.life.service.JwtAuthenticationProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -13,6 +15,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -21,15 +26,35 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 @EnableWebSecurity
 public class SecurityConfig {
 
-
     private final ObjectMapper objectMapper;
     private final AuthenticationManagerBuilder builder;
 
+    @Value("${admin.id}")
+    private String adminUsername;
+
+    @Value("${admin.password}")
+    private String adminPassword;
+
     public SecurityConfig(ObjectMapper objectMapper,
-                          JwtAuthenticationProvider provider, AuthenticationManagerBuilder builder) {
+                          JwtAuthenticationProvider provider, AuthenticationManagerBuilder builder,
+                          AdminAuthenticationProvider adminProvider) {
         this.objectMapper = objectMapper;
         this.builder = builder;
         builder.authenticationProvider(provider);
+        builder.authenticationProvider(adminProvider);
+    }
+
+    @Bean
+    public SecurityFilterChain adminSecurity(HttpSecurity http) throws Exception {
+        http
+                .securityMatcher("/admin/**")
+                .authorizeHttpRequests(request -> {
+                    request.anyRequest().hasRole("ADMIN");
+                })
+                .httpBasic(Customizer.withDefaults())
+                .csrf(AbstractHttpConfigurer::disable);
+
+        return http.build();
     }
 
     @Bean
@@ -42,8 +67,6 @@ public class SecurityConfig {
         http.authorizeHttpRequests(request -> {
             request.requestMatchers("/signup", "/check/**", "/fcm/**", "/reissue").permitAll();
             request.requestMatchers("/example/**").permitAll();
-            //request.requestMatchers("/reissue").permitAll();
-            request.requestMatchers("/admin").hasRole("ADMIN");
             request.anyRequest().authenticated();
         });
 
@@ -60,6 +83,16 @@ public class SecurityConfig {
         });
 
         return http.build();
+    }
+
+    @Bean
+    public UserDetailsService userDetailsService(){
+        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
+        manager.createUser(User.withUsername(adminUsername)
+                .password(adminPassword)
+                .roles("ADMIN").build());
+
+        return manager;
     }
 
     @Bean
