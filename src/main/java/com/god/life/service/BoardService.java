@@ -118,6 +118,7 @@ public class BoardService {
     public boolean deleteBoard(Long boardId) {
         commentRepository.deleteByBoardId(boardId);
         godLifeScoreRepository.deleteByBoardId(boardId);
+        imageService.deleteImages(boardId);
         boardRepository.deleteById(boardId);
         return true;
     }

@@ -116,7 +116,7 @@ public class BoardController {
         Long boardId = checkId(id);
         boardService.checkAuthorization(member, boardId);
 
-        imageService.deleteImages(boardId); //기존 이미지 삭제
+
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK,boardService.deleteBoard(boardId), ""));
     }
 
