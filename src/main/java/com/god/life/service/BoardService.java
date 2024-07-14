@@ -269,12 +269,16 @@ public class BoardService {
     }
 
     /**
-     * @return 전체기간 동안 가장 조회수가 높은 갓생 자극 게심ㄹ 리스트 반환
+     * @return 전체기간 동안 가장 조회수가 높은 갓생 자극 게시물 리스트 반환
      */
     public List<GodLifeStimulationBoardBriefResponse> getMostViewedStimulusBoardList(){
         return boardRepository.findMostViewedBoardList();
     }
 
+    /**
+     * @param loginMember 로그인한 유저
+     * @return 로그인한 유저의 전체 갓생 인정 점수 반환
+     */
     public int calculateGodLifeScoreMember(Member loginMember) {
         Integer sum = boardRepository.totalScoreBoardByLoginMember(loginMember);
         return sum == null ? 0 : sum;

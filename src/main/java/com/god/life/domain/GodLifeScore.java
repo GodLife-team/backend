@@ -4,8 +4,6 @@ package com.god.life.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -27,21 +25,15 @@ public class GodLifeScore extends BaseEntity {
     @Column(name = "god_life_score_id")
     private Long godLiefScoreId;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", foreignKey = @ForeignKey(name = "fk_member"))
+    @JoinColumn(name = "member_id")
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "board_id", foreignKey = @ForeignKey(name = "fk_board"))
+    @JoinColumn(name = "board_id")
     private Board board;
 
     private int score;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "liked_member", foreignKey = @ForeignKey(name = "fk_liked_member"))
-    private Member likedMember;
-
 
    public static GodLifeScore likeMemberToBoard(Member member, Board board) {
         return GodLifeScore

@@ -31,12 +31,9 @@ public class Image {
     private Board board; // 하나의 게시판에는 여러 사진을 가질 수 있으므로 게시판 : 사진 = 1 : N 관계
 
 
-    public void updateUploader(Member member) {
-        this.member = member;
-    }
-
     public void updateImagesName(ImageSaveResponse response) {
         this.serverName = response.getServerName();
         this.originalName = response.getOriginalName();
     }
+
 }

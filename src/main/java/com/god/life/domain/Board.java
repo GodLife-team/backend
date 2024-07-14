@@ -21,7 +21,6 @@ public class Board extends BaseEntity{
 
     public static final int WRITE_POINT = 2;
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "board_id")
@@ -98,5 +97,4 @@ public class Board extends BaseEntity{
         this.view += 1;
     }
 
-//    public void increase
 }
