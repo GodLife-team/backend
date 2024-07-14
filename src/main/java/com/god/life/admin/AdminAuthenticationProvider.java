@@ -12,6 +12,9 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 
+/**
+ * 관리자 전용 HttpBasic 인증 로그인
+ */
 @Component
 public class AdminAuthenticationProvider implements AuthenticationProvider {
 

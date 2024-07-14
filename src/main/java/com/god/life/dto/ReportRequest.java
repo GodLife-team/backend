@@ -42,4 +42,17 @@ public class ReportRequest {
                 .reportType(reportType).build();
     }
 
+    public static ReportRequest of(Report report) {
+        return new ReportRequest(
+                report.getReporterNickname(),
+                report.getReporterId(),
+                report.getReceivedNickname(),
+                report.getReceivedId(),
+                report.getReason(),
+                report.getReportContent(),
+                report.getReportId(),
+                report.getReportTime(),
+                report.getReportType()
+        );
+    }
 }

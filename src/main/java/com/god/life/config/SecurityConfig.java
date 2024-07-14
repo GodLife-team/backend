@@ -44,6 +44,8 @@ public class SecurityConfig {
         builder.authenticationProvider(adminProvider);
     }
 
+
+    // 관리자 전용 FilterChain 설정
     @Bean
     public SecurityFilterChain adminSecurity(HttpSecurity http) throws Exception {
         http
@@ -83,16 +85,6 @@ public class SecurityConfig {
         });
 
         return http.build();
-    }
-
-    @Bean
-    public UserDetailsService userDetailsService(){
-        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
-        manager.createUser(User.withUsername(adminUsername)
-                .password(adminPassword)
-                .roles("ADMIN").build());
-
-        return manager;
     }
 
     @Bean

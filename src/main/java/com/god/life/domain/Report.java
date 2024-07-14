@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 public class Report {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,8 +33,9 @@ public class Report {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
     private LocalDateTime reportTime;
 
-
     private String reportType;
+
+    private boolean complete;
 
 
 
