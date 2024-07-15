@@ -30,8 +30,6 @@ public class ReportRequest {
 
     private Long reportId;
 
-    private LocalDateTime reportTime;
-
     private String reportType;
 
 
@@ -44,7 +42,6 @@ public class ReportRequest {
                 .reason(reason)
                 .reportContent(reportContent)
                 .reportId(reportId)
-                .reportTime(reportTime)
                 .reportType(reportType).build();
     }
 

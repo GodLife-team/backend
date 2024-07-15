@@ -33,14 +33,12 @@ public class Report {
     private LocalDateTime reportTime;
 
     private String reportType;
-    
+
     private boolean complete;
 
     @PrePersist
     protected void prePersist(){
-        if (reportTime != null) {
-            reportTime = reportTime.withSecond(0).withNano(0);
-        }
+        reportTime = LocalDateTime.now().withSecond(0).withNano(0);
     }
 
 }
