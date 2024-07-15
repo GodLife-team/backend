@@ -19,7 +19,7 @@ public interface GodLifeScoreRepository extends JpaRepository<GodLifeScore, Long
     Integer calculateGodLifeScoreWithBoardId(@Param("boardId") Long boardId); //만약 좋아요가 하나도 안달려있으면 NULL,
 
     // memberId 가 받은 갓생 점수 합
-    @Query("select sum(g.score) from GodLifeScore g join g.board where g.board.member.id = :memberId or g.likedMember.id = :memberId")
+    @Query("select sum(g.score) from GodLifeScore g join g.board where g.board.member.id = :memberId")
     Integer calculateGodLifeScoreWithMember(@Param("memberId") Long memberId);
 
     @Modifying
