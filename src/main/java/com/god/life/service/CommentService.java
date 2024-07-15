@@ -63,7 +63,7 @@ public class CommentService {
         Comment comment = commentRepository.findByIdWithMember(commentId)
                 .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_COMMENT_MESSAGE.getErrorMessage()));
 
-        if (!comment.getMember().getId().equals(member.getId())) {
+        if (member != null && !comment.getMember().getId().equals(member.getId())) {
             throw new ForbiddenException(ErrorMessage.FORBIDDEN_ACTION_MESSAGE.getErrorMessage());
         }
 

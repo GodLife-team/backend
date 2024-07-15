@@ -1,6 +1,7 @@
 package com.god.life.dto;
 
 
+import com.god.life.domain.Board;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -32,4 +33,9 @@ public class GodLifeStimulationBoardBriefResponse {
 
     @Schema(description = "해당 게시판의 조회 수")
     private Integer view = 0;
+
+    public static GodLifeStimulationBoardBriefResponse of(Board board) {
+        return new GodLifeStimulationBoardBriefResponse(board.getTitle(), board.getId(), board.getThumbnailUrl(),
+                board.getIntroduction(), board.getMember().getNickname(), board.getTotalScore(), board.getView());
+    }
 }
