@@ -30,6 +30,8 @@ public class ReportRequest {
 
     private Long reportId;
 
+    private LocalDateTime reportTime;
+
     private String reportType;
 
 
