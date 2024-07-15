@@ -160,12 +160,14 @@ public class BoardRepositoryTest {
         // 회원 3 -> 따봉 2개 ==> 4점,
         // 회원 2 -> 따봉 1개 받아야함 ==> 2점,
         List<BoardSearchResponse> weeklyPopularBoard = boardRepository.findWeeklyPopularBoard();
-        System.out.println(weeklyPopularBoard.toString());
+        for (BoardSearchResponse boardSearchResponse : weeklyPopularBoard) {
+            System.out.println(boardSearchResponse);
+        }
 
         Assertions.assertThat(weeklyPopularBoard.size()).isEqualTo(3);
-        Assertions.assertThat(weeklyPopularBoard.get(0).getGodScore()-Board.WRITE_POINT).isEqualTo(6); // 10점
-        Assertions.assertThat(weeklyPopularBoard.get(1).getGodScore()-Board.WRITE_POINT).isEqualTo(4); // 4점
-        Assertions.assertThat(weeklyPopularBoard.get(2).getGodScore()-Board.WRITE_POINT).isEqualTo(2);; // 2점
+        Assertions.assertThat(weeklyPopularBoard.get(0).getGodScore()).isEqualTo(4); // 10점
+        Assertions.assertThat(weeklyPopularBoard.get(1).getGodScore()).isEqualTo(4); // 4점
+        Assertions.assertThat(weeklyPopularBoard.get(2).getGodScore()).isEqualTo(2);; // 2점
     }
 
     private void createTestCase() {

@@ -66,13 +66,13 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
                 .join(godLifeScore).on(board.id.eq(godLifeScore.board.id))
                 .where(
                         //일주일 간격으로 수행
-                        godLifeScore.createDate.between(monday, today).and(
-                                category.categoryType.eq(CategoryType.GOD_LIFE_PAGE)
-                        )
+                        godLifeScore.createDate.between(monday, today)
+                        .and(category.categoryType.eq(CategoryType.GOD_LIFE_PAGE))
+                        .and(godLifeScore.member.id.ne(board.member.id))
                 )
                 .groupBy(board.id)
-                .orderBy(godLifeScore.score.sum().desc(), board.id.asc())
-                .having(godLifeScore.score.sum().gt(2))
+                .orderBy(godLifeScore.score.sum().desc(), board.id.desc())
+                //.having(godLifeScore.score.sum().gt(2))
                 .offset(0)
                 .limit(10) // 10개만 fetch
                 .fetch();
