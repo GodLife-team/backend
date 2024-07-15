@@ -77,14 +77,10 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
                 .limit(10) // 10개만 fetch
                 .fetch();
 
+        List<Long> boardIds = weeklyPopularBoardDTO.stream()
+                .map(PopularBoardQueryDTO::getBoardId).toList();
         //인기 있는 게시판 정보 조회
-        List<Board> boards = queryFactory.selectFrom(board)
-                .join(board.member, member).fetchJoin()
-                .where(
-                        board.id.in(weeklyPopularBoardDTO.stream()
-                                .map(PopularBoardQueryDTO::getBoardId).collect(Collectors.toList())))
-                .orderBy(board.id.asc())
-                .fetch();
+        List<Board> boards = getBoardInIds(boardIds);
 
         // In 절 쿼리
         boards.stream().map(Board::getComments).forEach(Hibernate::initialize); // 댓글 fetch 조인
@@ -102,6 +98,16 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
         log.info("한 주간 인기 있는 갓생 인정 게시물 조회 종료 시간 = {}", (end-start)/(double)1000);
 
         return result;
+    }
+
+    @Override
+    public List<Board> getBoardInIds(List<Long> boardIds) {
+        return queryFactory.selectFrom(board)
+                .join(board.member, member).fetchJoin()
+                .where(
+                        board.id.in(boardIds))
+                .orderBy(board.id.asc())
+                .fetch();
     }
 
 
@@ -145,6 +151,8 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
      */
     @Override
     public Page<Board> findBoardWithSearchRequest(BoardSearchRequest boardSearchRequest, Pageable pageable) {
+        long start = System.currentTimeMillis();
+        log.info("조건 검색에 맞는 갓생 인증 게시물 조회 시작");
         List<Board> boards = queryFactory.selectFrom(board)
                 .join(category).on(board.category.categoryId.eq(category.categoryId))
                 .join(QBoard.board.member, member).fetchJoin()
@@ -153,7 +161,7 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
                         board.category.categoryType.eq(CategoryType.GOD_LIFE_PAGE))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .orderBy(board.createDate.desc())
+                .orderBy(board.id.desc())
                 .fetch();
 
         Long count = queryFactory.select(board.count())
@@ -161,6 +169,8 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
                 .where(keywordParam(boardSearchRequest.getKeyword()), tagsParam(boardSearchRequest.getTags()))
                 .fetchOne();
 
+        long end = System.currentTimeMillis();
+        log.info("조건 검색에 맞는 갓생 인증 게시물 조회 종료 시간 = {}", (end-start)/(double)1000);
         return new PageImpl<>(boards, pageable, count);
     }
 
@@ -173,7 +183,6 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
      */
     @Override
     public GodLifeStimulationBoardResponse findStimulusBoardEqualsBoardId(Long boardId, Member loginMember) {
-
         GodLifeStimulationBoardResponse godLifeStimulationBoardResponse = queryFactory.select(Projections.constructor(
                         GodLifeStimulationBoardResponse.class,
                         board.title.as("title"),
@@ -326,6 +335,8 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
                 .limit(10)
                 .fetch();
     }
+
+
 
 
     private BooleanExpression nicknameParam(String nickname) {

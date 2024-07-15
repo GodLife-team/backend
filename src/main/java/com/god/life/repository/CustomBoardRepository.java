@@ -35,4 +35,8 @@ public interface CustomBoardRepository {
     //전체 기간 조회수가 가장 많은 갓생 자극 페이지 10개 조회
     List<GodLifeStimulationBoardBriefResponse> findMostViewedBoardList();
 
+
+    //List ids안에 있는 게시글 조회
+    List<Board> getBoardInIds(List<Long> boardIds);
+
 }

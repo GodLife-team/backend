@@ -57,4 +57,8 @@ public interface BoardRepository extends JpaRepository<Board, Long>, CustomBoard
 
     @Query("select sum(b.totalScore) from Board b where b.member = :member")
     Integer totalScoreBoardByLoginMember(@Param("member") Member loginMember);
+
+    @Query("select b from Board b join fetch b.member join b.category " +
+            "where b.member.nickname = :author and b.status = 'S' and b.category.categoryType = 'GOD_LIFE_STIMULUS'")
+    List<Board> findBoardWrittenAuthor(@Param("author") String author);
 }
