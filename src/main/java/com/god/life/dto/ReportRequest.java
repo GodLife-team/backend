@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.god.life.domain.Report;
 import lombok.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -18,14 +17,21 @@ import java.time.LocalDateTime;
 public class ReportRequest {
 
     private String reporterNickname;
+
     private Long reporterId;
+
     private String receivedNickname;
+
     private Long receivedId;
+
     private String reason;
+
     private String reportContent;
+
     private Long reportId;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
+
     private LocalDateTime reportTime;
+
     private String reportType;
 
 

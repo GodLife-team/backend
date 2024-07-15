@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "게시글/댓글 신고", description = "게시글/댓글 신고할 때 사용하는 API")
 public class ReportController {
 
-    private ReportService reportService;
+    private final ReportService reportService;
 
     /**
      * 부적절한 댓글/게시물을 신고하는 입니다.

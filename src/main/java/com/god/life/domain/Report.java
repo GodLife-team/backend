@@ -30,13 +30,17 @@ public class Report {
 
     private Long reportId;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
     private LocalDateTime reportTime;
 
     private String reportType;
-
+    
     private boolean complete;
 
-
+    @PrePersist
+    protected void prePersist(){
+        if (reportTime != null) {
+            reportTime = reportTime.withSecond(0).withNano(0);
+        }
+    }
 
 }
