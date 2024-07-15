@@ -55,7 +55,7 @@ public class BoardService {
     }
 
 
-    /**
+    /** 갓생 인증 게시글 상세 조회
      * @param boardId 상세 조회할 게시물 번호
      * @param loginMember 현재 접속 중인 유저 정보
      * @return 해당 게시물 상세 정보 반환
@@ -124,8 +124,8 @@ public class BoardService {
     }
 
     /**
-     * @param boardSearchRequest 게시물 검색 조건
-     * @return  검색 조건에 맞는 게시물 dto 반환
+     * @param boardSearchRequest 갓생 인증 게시물 검색 조건
+     * @return  검색 조건에 맞는 갓생 인증 게시물 리스트 반환
      */
     @Transactional(readOnly = true)
     public List<BoardSearchResponse> getBoardList(BoardSearchRequest boardSearchRequest) {
