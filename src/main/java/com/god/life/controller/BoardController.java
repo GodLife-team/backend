@@ -55,10 +55,13 @@ public class BoardController {
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CommonResponse<Long>> createBoard(@ModelAttribute BoardCreateRequest request,
                                                             @LoginMember Member member) {
-
+        long start = System.currentTimeMillis();
+        log.info("게시판 생성 시작");
         List<ImageSaveResponse> uploadResponse = imageUploadService.uploads(request.getImages());
         Long boardId = boardService.createBoard(request, member, uploadResponse);
 
+        long end = System.currentTimeMillis();
+        log.info("게시판 생성 종료 걸리는 시간 = {}ms", (end - start));
         return ResponseEntity.ok().body(new CommonResponse<>(HttpStatus.CREATED, boardId));
     }
 
