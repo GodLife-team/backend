@@ -55,6 +55,8 @@ public class BoardRepositoryTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    private final String IMAGE_NAME = "IMAGE_TEST";
+
     @BeforeEach
     void init(){
         Category category1 = new Category(CategoryType.GOD_LIFE_STIMULUS);
@@ -425,7 +427,9 @@ public class BoardRepositoryTest {
         //then
         Assertions.assertThat(result).size().isEqualTo(2);
         Assertions.assertThat(result.get(0).getGodLifeScore()-Board.WRITE_POINT).isEqualTo(4);
+        Assertions.assertThat(result.get(0).getThumbnailUrl()).isEqualTo(IMAGE_NAME);
         Assertions.assertThat(result.get(1).getGodLifeScore()-Board.WRITE_POINT).isEqualTo(0);
+        Assertions.assertThat(result.get(1).getThumbnailUrl()).isEqualTo(IMAGE_NAME);
     }
 
     @Test
@@ -508,6 +512,7 @@ public class BoardRepositoryTest {
                 .view(0)
                 .totalScore(2)
                 .category(category)
+                .thumbnailUrl(IMAGE_NAME)
                 .status(BoardStatus.S)
                 .build();
         boardRepository.save(board);
