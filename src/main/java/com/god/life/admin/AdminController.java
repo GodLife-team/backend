@@ -1,8 +1,10 @@
 package com.god.life.admin;
 
-import com.god.life.dto.GodLifeStimulationBoardBriefResponse;
-import com.god.life.dto.ReportRequest;
-import com.god.life.dto.StimulationBoardSearchCondition;
+import com.god.life.domain.Member;
+import com.god.life.dto.board.response.BoardResponse;
+import com.god.life.dto.board.response.GodLifeStimulationBoardBriefResponse;
+import com.god.life.dto.report.request.ReportRequest;
+import com.god.life.dto.board.request.StimulationBoardSearchCondition;
 import com.god.life.service.BoardService;
 import com.god.life.service.RedisService;
 import com.god.life.service.ReportService;
@@ -33,11 +35,14 @@ public class AdminController {
     private final String RECOMMEND_BOARD_KEY = "board";
     private final String RECOMMEND_AUTHOR_KEY = "author";
 
+    private final Member adminMember = Member.builder().id(-1L).build();
+
     @GetMapping("/main")
     public String mainPageView(
             @RequestParam(name = "category", defaultValue = "게시판", required = false) String category,
             Model model) {
-        List<ReportRequest> list = reportService.getReports(category);
+        String type = category.equals("게시판") ? "board" : "comment";
+        List<ReportRequest> list = reportService.getReports(type);
         Map<Long, List<ReportRequest>> m = list.stream().collect(Collectors.groupingBy(ReportRequest::getReportId));
         model.addAttribute("category", category);
         model.addAttribute("reports", list);
@@ -52,6 +57,7 @@ public class AdminController {
             RedirectAttributes redirectAttributes,
             @PathVariable("id") Long id
     ) {
+        log.info("삭제 처리 함");
         category = category.replaceAll("\"", "");
 
         if (category.equals("게시판")) {
@@ -140,6 +146,22 @@ public class AdminController {
         redisService.deleteValueInList(RECOMMEND_BOARD_KEY, removeId);
         return "redirect:/admin/recommend/board";
     }
+
+    @GetMapping("/board/{boardId}")
+    public String detailReportedBoardView(@PathVariable(name = "boardId") Long boardId,
+                                          Model model) {
+
+        BoardResponse boardResponse = boardService.detailBoard(boardId, adminMember);
+        boardResponse.setTags(List.of("exercise", "study", "read a book"));
+        boardResponse.setImagesURL(List.of("01f8b0ab-9212-4cef-86e9-b5b62bd0821a",
+                "01f8b0ab-9212-4cef-86e9-b5b62bd0821a", "01f8b0ab-9212-4cef-86e9-b5b62bd0821a",
+                "01f8b0ab-9212-4cef-86e9-b5b62bd0821a", "01f8b0ab-9212-4cef-86e9-b5b62bd0821a"));
+
+        model.addAttribute("boardResponse", boardResponse);
+        log.info("boardResponse = {}", boardResponse);
+        return "boardDetail";
+    }
+
 
     @ExceptionHandler(value = Exception.class)
     public void ex(Exception exception) {

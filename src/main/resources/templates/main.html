@@ -7,7 +7,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
             crossorigin="anonymous"/>
-    </script>
     <meta charset="UTF-8">
     <title>관리자페이지</title>
     <script type="text/javascript">
@@ -44,7 +43,13 @@
     <div class="container-fluid px-4">
         <h1 class="text-primary" th:text="|${category} 신고 목록|"></h1>
         <div th:each="entry : ${map.entrySet()}" class="mb-5">
-            <h5 th:text="|${category} 번호 : ${entry.key}|"></h5>
+            <div>
+                <a th:if="${#strings.equals(category,'게시판')}"
+                   th:href="@{/admin/board/{boardId}(boardId = ${entry.key})}"
+                   th:text="|${category} 번호 : ${entry.key}|"></a>
+                <p th:if="${#strings.equals(category,'댓글')}"
+                   th:text="|${category} 번호 : ${entry.key}|"></p>
+            </div>
             <table class="table table-sm text-center">
                 <thead>
                 <tr>
