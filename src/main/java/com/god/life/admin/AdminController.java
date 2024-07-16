@@ -87,7 +87,7 @@ public class AdminController {
                 }
             }
         }
-        log.info("recommend = {}", recommendList);
+
         model.addAttribute("recommend", recommendList);
         model.addAttribute("boards", dto);
         return "boardList";
@@ -152,13 +152,7 @@ public class AdminController {
                                           Model model) {
 
         BoardResponse boardResponse = boardService.detailBoard(boardId, adminMember);
-        boardResponse.setTags(List.of("exercise", "study", "read a book"));
-        boardResponse.setImagesURL(List.of("01f8b0ab-9212-4cef-86e9-b5b62bd0821a",
-                "01f8b0ab-9212-4cef-86e9-b5b62bd0821a", "01f8b0ab-9212-4cef-86e9-b5b62bd0821a",
-                "01f8b0ab-9212-4cef-86e9-b5b62bd0821a", "01f8b0ab-9212-4cef-86e9-b5b62bd0821a"));
-
         model.addAttribute("boardResponse", boardResponse);
-        log.info("boardResponse = {}", boardResponse);
         return "boardDetail";
     }
 
