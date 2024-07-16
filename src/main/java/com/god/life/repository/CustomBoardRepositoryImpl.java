@@ -324,7 +324,7 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
         return queryFactory.select(Projections.fields(
                 GodLifeStimulationBoardBriefResponse.class,
                 board.title.as("title"),
-                board.thumbnailUrl.as("thumbnail"),
+                board.thumbnailUrl.as("thumbnailUrl"),
                 board.introduction.as("introduction"),
                 board.id.as("boardId"),
                 board.member.nickname.as("nickname"),

@@ -455,6 +455,7 @@ public class BoardRepositoryTest {
                 .toList();
 
         Assertions.assertThat(mostViewedBoardList).size().isEqualTo(4);
+        Assertions.assertThat(mostViewedBoardList.get(0).getThumbnailUrl()).isEqualTo(IMAGE_NAME);
         Assertions.assertThat(mostViewedBoardList.stream().map(GodLifeStimulationBoardBriefResponse::getView).toList())
                 .containsExactlyElementsOf(expectedViewCount);
     }
