@@ -3,6 +3,7 @@ package com.god.life.controller;
 import com.god.life.annotation.LoginMember;
 import com.god.life.domain.Member;
 import com.god.life.dto.common.CommonResponse;
+import com.god.life.dto.member.request.FcmUpdateRequest;
 import com.god.life.dto.member.request.ModifyWhoAmIRequest;
 import com.god.life.dto.member.request.SignupRequest;
 import com.god.life.dto.member.response.AlreadySignUpResponse;
@@ -191,6 +192,17 @@ public class MemberController {
                                        @RequestBody ModifyWhoAmIRequest modifyWhoAmIRequest) {
 
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, memberService.updateWhoAmI(member.getId(), modifyWhoAmIRequest)));
+    }
+
+    @Operation(summary = "FCM 토큰 업데이트")
+    @PostMapping("/member/fcm")
+    @ApiResponse(responseCode = "200", description = "FCM 업데이트가 완료된 경우")
+    public ResponseEntity<CommonResponse<Boolean>> postFcm(
+            @Parameter(description = "FCM 토큰 값 요청 객체")
+            @Valid @RequestBody FcmUpdateRequest updateRequest,
+                                                           @LoginMember Member member) {
+        memberService.updateFcmToken(updateRequest, member);
+        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, true));
     }
 
     @Operation(summary = "로그아웃")

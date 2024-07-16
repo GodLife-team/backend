@@ -1,6 +1,7 @@
 package com.god.life.service;
 
 import com.god.life.domain.Member;
+import com.god.life.dto.member.request.FcmUpdateRequest;
 import com.god.life.dto.member.request.ModifyWhoAmIRequest;
 import com.god.life.dto.member.request.SignupRequest;
 import com.god.life.dto.member.response.LoginInfoResponse;
@@ -154,4 +155,8 @@ public class MemberService {
         return memberRepository.findAllTimePopularMember();
     }
 
+    @Transactional
+    public void updateFcmToken(FcmUpdateRequest request, Member member) {
+        memberRepository.updateFcm(request.getFcmToken(), member.getId());
+    }
 }
