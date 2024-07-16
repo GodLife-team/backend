@@ -1,4 +1,4 @@
-package com.god.life.dto;
+package com.god.life.dto.board.request;
 
 
 import jakarta.validation.constraints.Max;

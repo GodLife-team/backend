@@ -1,7 +1,7 @@
 package com.god.life.service;
 
 import com.god.life.domain.Board;
-import com.god.life.dto.GodLifeStimulationBoardBriefResponse;
+import com.god.life.dto.board.response.GodLifeStimulationBoardBriefResponse;
 import com.god.life.repository.BoardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

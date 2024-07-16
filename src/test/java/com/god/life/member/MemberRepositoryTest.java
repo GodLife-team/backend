@@ -2,8 +2,8 @@ package com.god.life.member;
 
 import com.god.life.config.JpaAuditingConfiguration;
 import com.god.life.domain.*;
-import com.god.life.dto.MemberInfoResponse;
-import com.god.life.dto.PopularMemberResponse;
+import com.god.life.dto.member.response.MemberInfoResponse;
+import com.god.life.dto.popular.PopularMemberResponse;
 import com.god.life.repository.*;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

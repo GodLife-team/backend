@@ -1,6 +1,6 @@
 package com.god.life.service;
 
-import com.god.life.dto.ImageSaveResponse;
+import com.god.life.dto.image.ImageSaveResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;

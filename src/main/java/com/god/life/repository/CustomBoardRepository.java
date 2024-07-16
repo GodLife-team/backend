@@ -2,7 +2,11 @@ package com.god.life.repository;
 
 import com.god.life.domain.Board;
 import com.god.life.domain.Member;
-import com.god.life.dto.*;
+import com.god.life.dto.board.request.BoardSearchRequest;
+import com.god.life.dto.board.response.BoardSearchResponse;
+import com.god.life.dto.board.response.GodLifeStimulationBoardBriefResponse;
+import com.god.life.dto.board.response.GodLifeStimulationBoardResponse;
+import com.god.life.dto.board.request.StimulationBoardSearchCondition;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

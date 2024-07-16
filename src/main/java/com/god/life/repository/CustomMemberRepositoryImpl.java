@@ -1,11 +1,8 @@
 package com.god.life.repository;
 
-import com.god.life.domain.Image;
 import com.god.life.domain.Member;
-import com.god.life.domain.QMember;
-import com.god.life.dto.MemberInfoResponse;
-import com.god.life.dto.PopularBoardQueryDTO;
-import com.god.life.dto.PopularMemberResponse;
+import com.god.life.dto.member.response.MemberInfoResponse;
+import com.god.life.dto.popular.PopularMemberResponse;
 import com.god.life.error.ErrorMessage;
 import com.god.life.error.NotFoundResource;
 import com.querydsl.core.types.Projections;
@@ -13,9 +10,7 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.OptimisticLockException;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.annotations.OptimisticLock;
 import org.springframework.stereotype.Repository;
 
 import java.time.DayOfWeek;
@@ -27,7 +22,6 @@ import java.util.Optional;
 
 import static com.god.life.domain.QBoard.board;
 import static com.god.life.domain.QGodLifeScore.godLifeScore;
-import static com.god.life.domain.QImage.image;
 import static com.god.life.domain.QMember.member;
 
 @Slf4j

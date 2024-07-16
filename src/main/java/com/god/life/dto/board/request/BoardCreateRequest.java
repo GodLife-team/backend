@@ -1,4 +1,4 @@
-package com.god.life.dto;
+package com.god.life.dto.board.request;
 
 import com.god.life.domain.*;
 import io.swagger.v3.oas.annotations.media.Schema;

@@ -1,6 +1,6 @@
 package com.god.life.domain;
 
-import com.god.life.dto.ImageSaveResponse;
+import com.god.life.dto.image.ImageSaveResponse;
 import jakarta.persistence.*;
 import lombok.*;
 

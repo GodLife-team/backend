@@ -4,7 +4,7 @@ package com.god.life.service;
 import com.god.life.domain.Board;
 import com.god.life.domain.Image;
 import com.god.life.domain.Member;
-import com.god.life.dto.ImageSaveResponse;
+import com.god.life.dto.image.ImageSaveResponse;
 import com.god.life.error.ErrorMessage;
 import com.god.life.error.NotFoundResource;
 import com.god.life.repository.BoardRepository;
@@ -16,7 +16,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,7 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

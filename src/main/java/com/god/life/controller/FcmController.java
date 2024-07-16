@@ -3,7 +3,7 @@ package com.god.life.controller;
 
 import com.god.life.annotation.LoginMember;
 import com.god.life.domain.Member;
-import com.god.life.dto.AlarmCreateRequest;
+import com.god.life.dto.alarm.request.AlarmCreateRequest;
 import com.god.life.dto.common.CommonResponse;
 import com.god.life.service.FcmAlarmService;
 import io.swagger.v3.oas.annotations.Operation;

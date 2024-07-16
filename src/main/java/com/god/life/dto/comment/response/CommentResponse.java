@@ -1,19 +1,12 @@
-package com.god.life.dto;
+package com.god.life.dto.comment.response;
 
 
 import com.god.life.domain.Comment;
-import com.god.life.util.DateUtil;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.cglib.core.Local;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.Period;
-import java.time.temporal.ChronoUnit;
 
 import static com.god.life.util.DateUtil.formattingTimeDifference;
 

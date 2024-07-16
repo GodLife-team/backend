@@ -1,7 +1,15 @@
 package com.god.life.service;
 
 import com.god.life.domain.*;
-import com.god.life.dto.*;
+import com.god.life.dto.board.request.BoardCreateRequest;
+import com.god.life.dto.board.request.BoardSearchRequest;
+import com.god.life.dto.board.request.GodLifeStimulationBoardRequest;
+import com.god.life.dto.board.response.BoardResponse;
+import com.god.life.dto.board.response.BoardSearchResponse;
+import com.god.life.dto.board.response.GodLifeStimulationBoardBriefResponse;
+import com.god.life.dto.board.response.GodLifeStimulationBoardResponse;
+import com.god.life.dto.image.ImageSaveResponse;
+import com.god.life.dto.board.request.StimulationBoardSearchCondition;
 import com.god.life.error.ErrorMessage;
 import com.god.life.error.ForbiddenException;
 import com.god.life.error.NotFoundResource;
@@ -39,9 +47,9 @@ public class BoardService {
      */
     @Transactional
     public Long createBoard(BoardCreateRequest request, Member loginMember, List<ImageSaveResponse> uploadResponse) {
-        Category category = categoryRepository.findByCategoryType(CategoryType.GOD_LIFE_PAGE);
-        // DB entity 생성
-        Board board = request.toBoard(loginMember,category);
+            Category category = categoryRepository.findByCategoryType(CategoryType.GOD_LIFE_PAGE);
+            // DB entity 생성
+            Board board = request.toBoard(loginMember,category);
         boardRepository.save(board);
 
         for (ImageSaveResponse response : uploadResponse) {

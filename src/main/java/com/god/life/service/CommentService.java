@@ -3,8 +3,8 @@ package com.god.life.service;
 import com.god.life.domain.Board;
 import com.god.life.domain.Comment;
 import com.god.life.domain.Member;
-import com.god.life.dto.CommentCreateRequest;
-import com.god.life.dto.CommentResponse;
+import com.god.life.dto.comment.request.CommentCreateRequest;
+import com.god.life.dto.comment.response.CommentResponse;
 import com.god.life.error.ErrorMessage;
 import com.god.life.error.ForbiddenException;
 import com.god.life.error.NotFoundResource;
@@ -63,7 +63,7 @@ public class CommentService {
         Comment comment = commentRepository.findByIdWithMember(commentId)
                 .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_COMMENT_MESSAGE.getErrorMessage()));
 
-        if (member != null && !comment.getMember().getId().equals(member.getId())) {
+        if (!comment.getMember().getId().equals(member.getId())) {
             throw new ForbiddenException(ErrorMessage.FORBIDDEN_ACTION_MESSAGE.getErrorMessage());
         }
 

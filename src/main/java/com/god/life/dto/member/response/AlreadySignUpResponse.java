@@ -1,4 +1,4 @@
-package com.god.life.dto;
+package com.god.life.dto.member.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

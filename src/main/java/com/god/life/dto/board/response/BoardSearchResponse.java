@@ -1,4 +1,4 @@
-package com.god.life.dto;
+package com.god.life.dto.board.response;
 
 import com.god.life.domain.Board;
 import com.god.life.domain.Image;
@@ -6,8 +6,6 @@ import com.god.life.util.DateUtil;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 

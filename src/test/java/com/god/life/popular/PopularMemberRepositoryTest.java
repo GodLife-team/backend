@@ -2,7 +2,7 @@ package com.god.life.popular;
 
 import com.god.life.config.JpaAuditingConfiguration;
 import com.god.life.domain.*;
-import com.god.life.dto.PopularMemberResponse;
+import com.god.life.dto.popular.PopularMemberResponse;
 import com.god.life.repository.BoardRepository;
 import com.god.life.repository.GodLifeScoreRepository;
 import com.god.life.repository.ImageRepository;

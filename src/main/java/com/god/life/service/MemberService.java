@@ -1,8 +1,12 @@
 package com.god.life.service;
 
-import com.god.life.domain.Image;
 import com.god.life.domain.Member;
-import com.god.life.dto.*;
+import com.god.life.dto.member.request.ModifyWhoAmIRequest;
+import com.god.life.dto.member.request.SignupRequest;
+import com.god.life.dto.member.response.LoginInfoResponse;
+import com.god.life.dto.member.response.MemberInfoResponse;
+import com.god.life.dto.member.response.TokenResponse;
+import com.god.life.dto.popular.PopularMemberResponse;
 import com.god.life.error.ErrorMessage;
 import com.god.life.error.JwtInvalidException;
 import com.god.life.error.NotFoundResource;
@@ -14,12 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
-import java.time.temporal.Temporal;
-import java.time.temporal.TemporalUnit;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @Transactional(readOnly = true)
@@ -154,7 +153,5 @@ public class MemberService {
     public List<PopularMemberResponse> searchAllTimePopularMember(){
         return memberRepository.findAllTimePopularMember();
     }
-
-
 
 }

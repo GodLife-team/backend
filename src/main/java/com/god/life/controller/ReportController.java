@@ -1,7 +1,7 @@
 package com.god.life.controller;
 
 
-import com.god.life.dto.ReportRequest;
+import com.god.life.dto.report.request.ReportRequest;
 import com.god.life.dto.common.CommonResponse;
 import com.god.life.service.ReportService;
 import io.swagger.v3.oas.annotations.Operation;

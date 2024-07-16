@@ -1,4 +1,4 @@
-package com.god.life.dto;
+package com.god.life.dto.board.response;
 
 
 import com.god.life.domain.Board;
@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @NoArgsConstructor
 @AllArgsConstructor

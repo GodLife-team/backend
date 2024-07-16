@@ -2,7 +2,7 @@ package com.god.life.board;
 
 
 import com.god.life.domain.*;
-import com.god.life.dto.ImageSaveResponse;
+import com.god.life.dto.image.ImageSaveResponse;
 import com.god.life.error.ForbiddenException;
 import com.god.life.mockuser.MockUserCustom;
 import com.god.life.repository.BoardRepository;
@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;

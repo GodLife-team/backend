@@ -2,8 +2,16 @@ package com.god.life.controller;
 
 import com.god.life.annotation.LoginMember;
 import com.god.life.domain.Member;
-import com.god.life.dto.*;
+import com.god.life.dto.board.request.BoardCreateRequest;
+import com.god.life.dto.board.request.BoardSearchRequest;
+import com.god.life.dto.board.request.GodLifeStimulationBoardRequest;
+import com.god.life.dto.board.response.BoardResponse;
+import com.god.life.dto.board.response.BoardSearchResponse;
+import com.god.life.dto.board.response.GodLifeStimulationBoardBriefResponse;
+import com.god.life.dto.board.response.GodLifeStimulationBoardResponse;
 import com.god.life.dto.common.CommonResponse;
+import com.god.life.dto.image.ImageSaveResponse;
+import com.god.life.dto.board.request.StimulationBoardSearchCondition;
 import com.god.life.error.NotFoundResource;
 import com.god.life.service.BoardService;
 import com.god.life.service.GodLifeScoreService;
@@ -18,12 +26,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 

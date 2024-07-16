@@ -1,4 +1,4 @@
-package com.god.life.dto;
+package com.god.life.dto.member.request;
 
 
 import com.god.life.domain.Member;
@@ -9,8 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
-
-import javax.sound.midi.MetaMessage;
 
 @Data
 @AllArgsConstructor

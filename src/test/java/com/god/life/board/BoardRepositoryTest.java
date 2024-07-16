@@ -3,10 +3,10 @@ package com.god.life.board;
 
 import com.god.life.config.JpaAuditingConfiguration;
 import com.god.life.domain.*;
-import com.god.life.dto.BoardSearchResponse;
-import com.god.life.dto.GodLifeStimulationBoardBriefResponse;
-import com.god.life.dto.GodLifeStimulationBoardResponse;
-import com.god.life.dto.StimulationBoardSearchCondition;
+import com.god.life.dto.board.response.BoardSearchResponse;
+import com.god.life.dto.board.response.GodLifeStimulationBoardBriefResponse;
+import com.god.life.dto.board.response.GodLifeStimulationBoardResponse;
+import com.god.life.dto.board.request.StimulationBoardSearchCondition;
 import com.god.life.error.NotFoundResource;
 import com.god.life.repository.*;
 import jakarta.persistence.EntityManager;
@@ -27,7 +27,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.fail;
 

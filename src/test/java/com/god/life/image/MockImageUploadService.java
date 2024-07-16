@@ -1,6 +1,6 @@
 package com.god.life.image;
 
-import com.god.life.dto.ImageSaveResponse;
+import com.god.life.dto.image.ImageSaveResponse;
 import com.god.life.error.ForbiddenException;
 import com.god.life.service.ImageUploadService;
 import com.god.life.util.FileUtil;

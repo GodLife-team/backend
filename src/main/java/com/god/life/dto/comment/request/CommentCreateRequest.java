@@ -1,4 +1,4 @@
-package com.god.life.dto;
+package com.god.life.dto.comment.request;
 
 
 import com.god.life.domain.Board;

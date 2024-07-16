@@ -1,15 +1,10 @@
-package com.god.life.dto;
+package com.god.life.dto.board.response;
 
 import com.god.life.domain.Board;
-import com.god.life.domain.Image;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ToString
 public class BoardResponse {
 
     @Schema(description = "게시판 번호")

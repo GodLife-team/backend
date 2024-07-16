@@ -1,6 +1,5 @@
-package com.god.life.dto;
+package com.god.life.dto.report.request;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.god.life.domain.Report;
 import lombok.*;
 

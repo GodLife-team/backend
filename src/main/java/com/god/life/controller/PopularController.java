@@ -1,9 +1,9 @@
 package com.god.life.controller;
 
 
-import com.god.life.dto.BoardSearchResponse;
-import com.god.life.dto.GodLifeStimulationBoardBriefResponse;
-import com.god.life.dto.PopularMemberResponse;
+import com.god.life.dto.board.response.BoardSearchResponse;
+import com.god.life.dto.board.response.GodLifeStimulationBoardBriefResponse;
+import com.god.life.dto.popular.PopularMemberResponse;
 import com.god.life.dto.common.CommonResponse;
 import com.god.life.service.BoardService;
 import com.god.life.service.MemberService;

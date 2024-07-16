@@ -1,7 +1,7 @@
 package com.god.life.repository;
 
-import com.god.life.dto.MemberInfoResponse;
-import com.god.life.dto.PopularMemberResponse;
+import com.god.life.dto.member.response.MemberInfoResponse;
+import com.god.life.dto.popular.PopularMemberResponse;
 
 import java.util.List;
 

@@ -2,12 +2,16 @@ package com.god.life.controller;
 
 import com.god.life.annotation.LoginMember;
 import com.god.life.domain.Member;
-import com.god.life.dto.*;
 import com.god.life.dto.common.CommonResponse;
+import com.god.life.dto.member.request.ModifyWhoAmIRequest;
+import com.god.life.dto.member.request.SignupRequest;
+import com.god.life.dto.member.response.AlreadySignUpResponse;
+import com.god.life.dto.member.response.LoginInfoResponse;
+import com.god.life.dto.member.response.MemberInfoResponse;
+import com.god.life.dto.member.response.TokenResponse;
 import com.god.life.error.JwtInvalidException;
 import com.god.life.error.NotFoundResource;
 import com.god.life.service.BoardService;
-import com.god.life.service.GodLifeScoreService;
 import com.god.life.service.MemberService;
 import com.god.life.util.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -227,7 +231,7 @@ public class MemberController {
     )
     @Parameter(name = "memberId", description = "조회하려는 회원의 id")
     public ResponseEntity<CommonResponse<MemberInfoResponse>> getMemberInfo(@LoginMember Member member,
-                                                @PathVariable(name = "memberId") String pathVariableMemberId) {
+                                                                            @PathVariable(name = "memberId") String pathVariableMemberId) {
         Long infoMemberId = checkId(pathVariableMemberId);
         MemberInfoResponse response = memberService.memberInfoResponse(member, infoMemberId);
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, response));

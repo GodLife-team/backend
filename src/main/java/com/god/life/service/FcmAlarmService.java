@@ -2,7 +2,7 @@ package com.god.life.service;
 
 import com.god.life.domain.FcmAlarm;
 import com.god.life.domain.Member;
-import com.god.life.dto.AlarmCreateRequest;
+import com.god.life.dto.alarm.request.AlarmCreateRequest;
 import com.god.life.error.BadRequestException;
 import com.god.life.repository.FcmAlarmRepository;
 import com.google.firebase.messaging.*;

@@ -1,12 +1,8 @@
 package com.god.life.member;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.god.life.config.JwtSecurityConfig;
-import com.god.life.config.SecurityConfig;
 import com.god.life.controller.MemberController;
-import com.god.life.dto.SignupRequest;
-import com.god.life.dto.TokenResponse;
-import com.god.life.repository.MemberRepository;
+import com.god.life.dto.member.request.SignupRequest;
+import com.god.life.dto.member.response.TokenResponse;
 import com.god.life.service.GodLifeScoreService;
 import com.god.life.service.ImageService;
 import com.god.life.service.ImageUploadService;
@@ -21,27 +17,19 @@ import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.ResultActions;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
-import java.util.logging.SimpleFormatter;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;

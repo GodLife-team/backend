@@ -1,8 +1,8 @@
 package com.god.life.domain;
 
 
-import com.god.life.dto.BoardCreateRequest;
-import com.god.life.dto.GodLifeStimulationBoardRequest;
+import com.god.life.dto.board.request.BoardCreateRequest;
+import com.god.life.dto.board.request.GodLifeStimulationBoardRequest;
 import jakarta.persistence.*;
 import lombok.*;
 

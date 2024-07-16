@@ -2,8 +2,8 @@ package com.god.life.popular;
 
 
 import com.god.life.controller.PopularController;
-import com.god.life.dto.GodLifeStimulationBoardBriefResponse;
-import com.god.life.dto.PopularMemberResponse;
+import com.god.life.dto.board.response.GodLifeStimulationBoardBriefResponse;
+import com.god.life.dto.popular.PopularMemberResponse;
 import com.god.life.mockuser.MockUserCustom;
 import com.god.life.service.BoardService;
 import com.god.life.service.MemberService;

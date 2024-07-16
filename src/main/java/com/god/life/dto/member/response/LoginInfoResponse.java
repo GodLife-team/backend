@@ -1,7 +1,6 @@
-package com.god.life.dto;
+package com.god.life.dto.member.response;
 
 import com.god.life.domain.Member;
-import com.god.life.domain.Sex;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

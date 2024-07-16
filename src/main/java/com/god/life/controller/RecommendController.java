@@ -1,6 +1,6 @@
 package com.god.life.controller;
 
-import com.god.life.dto.GodLifeStimulationBoardBriefResponse;
+import com.god.life.dto.board.response.GodLifeStimulationBoardBriefResponse;
 import com.god.life.dto.common.CommonResponse;
 import com.god.life.service.RecommendService;
 import io.swagger.v3.oas.annotations.Operation;

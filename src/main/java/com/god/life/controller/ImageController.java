@@ -2,7 +2,7 @@ package com.god.life.controller;
 
 import com.god.life.annotation.LoginMember;
 import com.god.life.domain.Member;
-import com.god.life.dto.ImageSaveResponse;
+import com.god.life.dto.image.ImageSaveResponse;
 import com.god.life.dto.common.CommonResponse;
 import com.god.life.service.ImageService;
 import com.god.life.service.ImageUploadService;

@@ -1,4 +1,4 @@
-package com.god.life.dto;
+package com.god.life.dto.popular;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,7 +1,12 @@
 package com.god.life.repository;
 
 import com.god.life.domain.*;
-import com.god.life.dto.*;
+import com.god.life.dto.board.request.BoardSearchRequest;
+import com.god.life.dto.board.response.BoardSearchResponse;
+import com.god.life.dto.board.response.GodLifeStimulationBoardBriefResponse;
+import com.god.life.dto.board.response.GodLifeStimulationBoardResponse;
+import com.god.life.dto.board.request.StimulationBoardSearchCondition;
+import com.god.life.dto.popular.PopularBoardQueryDTO;
 import com.god.life.error.ErrorMessage;
 import com.god.life.error.NotFoundResource;
 import com.querydsl.core.BooleanBuilder;
@@ -26,7 +31,6 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.god.life.domain.QBoard.board;
 import static com.god.life.domain.QCategory.category;

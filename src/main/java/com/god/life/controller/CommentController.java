@@ -3,8 +3,8 @@ package com.god.life.controller;
 
 import com.god.life.annotation.LoginMember;
 import com.god.life.domain.Member;
-import com.god.life.dto.CommentCreateRequest;
-import com.god.life.dto.CommentResponse;
+import com.god.life.dto.comment.request.CommentCreateRequest;
+import com.god.life.dto.comment.response.CommentResponse;
 import com.god.life.dto.common.CommonResponse;
 import com.god.life.error.NotFoundResource;
 import com.god.life.service.CommentService;
