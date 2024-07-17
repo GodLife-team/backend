@@ -36,9 +36,10 @@ public class GoogleImageService implements ImageUploadService{
 
     @Value("${spring.cloud.gcp.storage.bucket}")
     private String bucketName;
+
     private final Storage storage;
 
-    //private final Executor executor;
+    private final Executor executor;
 
     // GCP Bucket에 요청한 이미지 저장
     @Override
@@ -68,27 +69,36 @@ public class GoogleImageService implements ImageUploadService{
             throw new BadRequestException(TOO_MANY_FILE);
         }
 
-        List<ImageSaveResponse> responses = new ArrayList<>();
+        List<ImageSaveResponse> responses = new CopyOnWriteArrayList<>();
+        List<CompletableFuture<ImageSaveResponse>> futures = images.stream()
+                .map(image -> CompletableFuture.supplyAsync(() -> {
+                    long start = System.currentTimeMillis();
+                    ImageSaveResponse response = upload(image);
+                    log.info("업로드 수행 시간 = {}ms", System.currentTimeMillis() - start);
+                    return response;
+                }, executor)).toList();
 
-        for (MultipartFile image : images) {
+        AtomicBoolean failureChecker = new AtomicBoolean(false);
+
+        futures.forEach(future -> {
             try {
-                long start = System.currentTimeMillis();
-                log.info("이미지 업로드 시작 : {}", image.getOriginalFilename());
-                responses.add(upload(image));
-                long end = System.currentTimeMillis();
-                log.info("이미지 업로드 종료 : {}ms", (start-end));
-            } catch (InternalServerException ex) {
-                for (int i = 0; i < responses.size(); i++) { //사진 업로드에 실패했으면 이전까지 업로드했던 사진 삭제처리
-                    delete(responses.get(i).getServerName());
-                }
-                throw new IllegalStateException(FAILURE_FILE_UPLOAD);
+                responses.add(future.join());
+            } catch (CancellationException | CompletionException ex) {
+                failureChecker.set(true);
             }
+        });
+
+        if (failureChecker.get()) {
+            for (ImageSaveResponse response : responses) {
+                executor.execute(() -> delete(response.getServerName()));
+            }
+            throw new InternalServerException("이미지 업로드 중 에러가 발생했습니다. 다시 시도해 주세요");
         }
+
 
         return responses;
     }
-
-
+    
 
     // 사진 삭제
     @Override
