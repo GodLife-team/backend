@@ -69,34 +69,29 @@ public class GoogleImageService implements ImageUploadService{
             throw new BadRequestException(TOO_MANY_FILE);
         }
 
-        List<ImageSaveResponse> responses = new CopyOnWriteArrayList<>();
         List<CompletableFuture<ImageSaveResponse>> futures = images.stream()
-                .map(image -> CompletableFuture.supplyAsync(() -> {
-                    long start = System.currentTimeMillis();
-                    ImageSaveResponse response = upload(image);
-                    log.info("업로드 수행 시간 = {}ms", System.currentTimeMillis() - start);
-                    return response;
-                }, executor)).toList();
+                .map(image -> CompletableFuture.supplyAsync(() -> upload(image), executor)
+                        .exceptionally(ex -> null)) //실패시 null 로 반환하도록 만듬
+                .toList();
 
-        AtomicBoolean failureChecker = new AtomicBoolean(false);
+        List<ImageSaveResponse> containFailure =
+                CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                        .thenApply(Void -> futures.stream()
+                                .map(CompletableFuture::join)
+                                .toList())
+                        .join();
 
-        futures.forEach(future -> {
-            try {
-                responses.add(future.join());
-            } catch (CancellationException | CompletionException ex) {
-                failureChecker.set(true);
-            }
-        });
-
-        if (failureChecker.get()) {
-            for (ImageSaveResponse response : responses) {
+        // null 제외
+        List<ImageSaveResponse> successImages = containFailure.stream().filter(Objects::nonNull).toList();
+        // 업로드 실패시 성공한 이미지 정보 삭제처리 진행
+        if (successImages.size() < images.size()) {
+            for (ImageSaveResponse response : successImages) {
                 executor.execute(() -> delete(response.getServerName()));
             }
             throw new InternalServerException("이미지 업로드 중 에러가 발생했습니다. 다시 시도해 주세요");
         }
 
-
-        return responses;
+        return successImages;
     }
     
 
