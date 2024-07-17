@@ -39,7 +39,7 @@ public class ImageService {
 
         try {
             response = imageUploadService.upload(file);
-        } catch (IOException ex) {
+        } catch (RuntimeException ex){
             throw new IllegalArgumentException("서버 내부 오류입니다. 다시 시도해 주세요.");
         }
 

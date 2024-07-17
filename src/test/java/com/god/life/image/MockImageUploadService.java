@@ -17,9 +17,9 @@ public class MockImageUploadService implements ImageUploadService  {
     private final Map<String, MultipartFile> storage = new HashMap<>();
 
     @Override
-    public ImageSaveResponse upload(MultipartFile file) throws IOException {
-        String serverName = FileUtil.createServerName();
+    public ImageSaveResponse upload(MultipartFile file) {
         String originName = file.getOriginalFilename();
+        String serverName = FileUtil.createServerName(file.getOriginalFilename());
         String ext = FileUtil.getExt(originName);
 
         // 이미지 업로드
@@ -35,7 +35,7 @@ public class MockImageUploadService implements ImageUploadService  {
         for (MultipartFile image : Images) {
             try {
                 responses.add(upload(image));
-            } catch (IOException | IllegalArgumentException ex) {
+            } catch (IllegalArgumentException ex) {
                 for (int i = 0; i < responses.size(); i++) { //사진 업로드에 실패했으면 이전까지 업로드했던 사진 예외
                     delete(responses.get(i).getServerName());
                 }
