@@ -38,7 +38,7 @@ public class GoogleImageService implements ImageUploadService{
     private String bucketName;
     private final Storage storage;
 
-    private final Executor executor;
+    //private final Executor executor;
 
     // GCP Bucket에 요청한 이미지 저장
     @Override
