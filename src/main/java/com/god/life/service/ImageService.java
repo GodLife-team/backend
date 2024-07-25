@@ -34,18 +34,6 @@ public class ImageService {
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository; // dao만 단순히 접근하므로 repo를 사용
 
-    public ImageSaveResponse uploadImage(MultipartFile file) {
-        ImageSaveResponse response = null;
-
-        try {
-            response = imageUploadService.upload(file);
-        } catch (RuntimeException ex){
-            throw new IllegalArgumentException("서버 내부 오류입니다. 다시 시도해 주세요.");
-        }
-
-        return response;
-    }
-
     @Transactional
     public void saveImage(ImageSaveResponse response, Member member, Board board) {
         Image image = response.toEntity(member, board);

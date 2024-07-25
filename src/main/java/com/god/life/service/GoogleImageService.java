@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Google Cloud Platform bucket에 이미지를 업로드하는 클래스
@@ -31,7 +30,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Slf4j
 public class GoogleImageService implements ImageUploadService{
 
-    private static final String TOO_MANY_FILE = "사진 수가 너무 많습니다.";
     private static final String FAILURE_FILE_UPLOAD = "사진 업로드에 실패했습니다. 다시 시도해 주세요.";
 
     @Value("${spring.cloud.gcp.storage.bucket}")
@@ -45,32 +43,16 @@ public class GoogleImageService implements ImageUploadService{
     @Override
     public ImageSaveResponse upload(MultipartFile file) {
         FileUtil.validateFileExt(file);
-        String originName = file.getOriginalFilename();
-        String serverName = FileUtil.createServerName(file.getOriginalFilename());
-
-        // 이미지 업로드
-        try {
-            storage.createFrom(BlobInfo.newBuilder(bucketName, serverName)
-                            .setContentType(file.getContentType()).build()
-                    , file.getInputStream());
-        } catch (IOException | StorageException ex) {
-            log.error("GCP에 업로드 실패", ex);
-            throw new InternalServerException("GCP에 이미지 업로드 실패..");
-        }
-
-        return new ImageSaveResponse(originName, serverName);
+        return uploadInternal(file);
     }
-
 
     //여러 사진 업로드
     @Override
     public List<ImageSaveResponse> uploads(List<MultipartFile> images) {
-        if (MAX_IMAGE_LENGTH < images.size()) {
-            throw new BadRequestException(TOO_MANY_FILE);
-        }
+        validateImage(images);
 
         List<CompletableFuture<ImageSaveResponse>> futures = images.stream()
-                .map(image -> CompletableFuture.supplyAsync(() -> upload(image), executor)
+                .map(image -> CompletableFuture.supplyAsync(() -> uploadInternal(image), executor)
                         .exceptionally(ex -> null)) //실패시 null 로 반환하도록 만듬
                 .toList();
 
@@ -93,7 +75,31 @@ public class GoogleImageService implements ImageUploadService{
 
         return successImages;
     }
-    
+
+    private void validateImage(List<MultipartFile> images) {
+        if (MAX_IMAGE_LENGTH < images.size()) {
+            throw new BadRequestException(TOO_MANY_FILE);
+        }
+        images.forEach(FileUtil::validateFileExt);
+    }
+
+    private ImageSaveResponse uploadInternal(MultipartFile image) {
+        String originName = image.getOriginalFilename();
+        String serverName = FileUtil.createServerName(image.getOriginalFilename());
+
+        // 이미지 업로드
+        try {
+            storage.createFrom(BlobInfo.newBuilder(bucketName, serverName)
+                            .setContentType(image.getContentType()).build()
+                    , image.getInputStream());
+        } catch (IOException | StorageException ex) {
+            log.error("GCP에 업로드 실패", ex);
+            throw new InternalServerException("GCP에 이미지 업로드 실패..");
+        }
+
+        return new ImageSaveResponse(originName, serverName);
+    }
+
 
     // 사진 삭제
     @Override

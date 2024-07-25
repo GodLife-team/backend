@@ -86,7 +86,7 @@ public class ImageController {
             @Parameter(description = "업로드할 이미지의 게시판 번호") @RequestParam("tmpBoardId") Long tmpBoardId,
             @LoginMember Member member) {
 
-        ImageSaveResponse response = imageService.uploadImage(image);
+        ImageSaveResponse response = imageUploadService.upload(image);
         imageService.saveImage(response, member, tmpBoardId);
 
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, response.getServerName()));

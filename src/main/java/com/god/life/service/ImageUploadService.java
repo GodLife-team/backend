@@ -9,6 +9,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public interface ImageUploadService {
 
+
+    static final String TOO_MANY_FILE = "사진 수가 너무 많습니다.";
+
     static final int MAX_IMAGE_LENGTH = 5;
 
     ImageSaveResponse upload(MultipartFile file);
