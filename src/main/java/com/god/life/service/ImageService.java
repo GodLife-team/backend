@@ -29,7 +29,6 @@ import java.util.List;
 @Slf4j
 public class ImageService {
 
-    private final ImageUploadService imageUploadService;
     private final ImageRepository imageRepository;
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository; // dao만 단순히 접근하므로 repo를 사용
