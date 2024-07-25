@@ -2,6 +2,7 @@ package com.god.life.service;
 
 import com.god.life.domain.Board;
 import com.god.life.dto.board.response.GodLifeStimulationBoardBriefResponse;
+import com.god.life.dto.recommend.response.RecommendAuthorResponse;
 import com.god.life.repository.BoardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,12 +29,15 @@ public class RecommendService {
     }
 
 
-    public List<GodLifeStimulationBoardBriefResponse> findBoardWrittenAuthor() {
+    public RecommendAuthorResponse findBoardWrittenAuthor() {
         String author = redisService.getValues("author");
         if (author.equals(RedisService.NO_VALUE)) {
-            return new ArrayList<>();
+            return new RecommendAuthorResponse();
         }
         List<Board> boardWrittenAuthor = boardRepository.findBoardWrittenAuthor(author);
-        return boardWrittenAuthor.stream().map(GodLifeStimulationBoardBriefResponse::of).toList();
+        List<GodLifeStimulationBoardBriefResponse> response =
+                boardWrittenAuthor.stream().map(GodLifeStimulationBoardBriefResponse::of).toList();
+
+        return new RecommendAuthorResponse(boardWrittenAuthor.get(0).getMember(), response);
     }
 }

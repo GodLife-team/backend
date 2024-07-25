@@ -2,6 +2,7 @@ package com.god.life.controller;
 
 import com.god.life.dto.board.response.GodLifeStimulationBoardBriefResponse;
 import com.god.life.dto.common.CommonResponse;
+import com.god.life.dto.recommend.response.RecommendAuthorResponse;
 import com.god.life.service.RecommendService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -50,7 +51,8 @@ public class RecommendController {
             }
     )
     @GetMapping("/recommend/author")
-    public ResponseEntity<CommonResponse<List<GodLifeStimulationBoardBriefResponse>>> getRecommendWithAuthor() {
+    public ResponseEntity<CommonResponse<RecommendAuthorResponse>> getRecommendWithAuthor() {
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, recommendService.findBoardWrittenAuthor()));
     }
+
 }
