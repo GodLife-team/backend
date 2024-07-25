@@ -27,7 +27,7 @@ public interface FcmAlarmRepository extends JpaRepository<FcmAlarm, String> {
     void deleteTodayAlarm(@Param("member") Member member);
 
     // 금일 알람 가져옴
-    @Query("select f from FcmAlarm f where f.member = :member and f.sendTime = :now")
+    @Query("select f from FcmAlarm f where f.member = :member and function('DATE', f.sendTime) = function('DATE', now()) ")
     Optional<FcmAlarm> selectTodayAlarm(@Param("member") Member member);
 
 }
