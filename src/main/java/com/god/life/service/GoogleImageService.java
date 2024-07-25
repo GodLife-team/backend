@@ -86,11 +86,12 @@ public class GoogleImageService implements ImageUploadService{
     private ImageSaveResponse uploadInternal(MultipartFile image) {
         String originName = image.getOriginalFilename();
         String serverName = FileUtil.createServerName(image.getOriginalFilename());
+        String ext = FileUtil.getExt(originName);
 
         // 이미지 업로드
         try {
             storage.createFrom(BlobInfo.newBuilder(bucketName, serverName)
-                            .setContentType(image.getContentType()).build()
+                            .setContentType(ext).build()
                     , image.getInputStream());
         } catch (IOException | StorageException ex) {
             log.error("GCP에 업로드 실패", ex);
