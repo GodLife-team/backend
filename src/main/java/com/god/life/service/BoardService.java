@@ -80,21 +80,6 @@ public class BoardService {
         return BoardResponse.of(board, isOwner, memberLikedBoard);
     }
 
-
-    /**
-     * @param member  현재 로그인한 유저 정보 (게시판 권한 확인)
-     * @param boardId 조회할 게시물 번호
-     */
-    public void checkAuthorization(Member member, Long boardId) {
-        Board board = boardRepository.findByIdWithMember(boardId, CategoryType.GOD_LIFE_PAGE)
-                .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_BOARD_MESSAGE.getErrorMessage()));
-
-        if (!member.getId().equals(board.getMember().getId())) {
-            throw new ForbiddenException(ErrorMessage.FORBIDDEN_ACTION_MESSAGE.getErrorMessage());
-        }
-
-    }
-
     /**
      * @param boardId 수정할 게시판 번호
      * @param uploadResponse 다시 업로드한 이미지 정보
@@ -219,9 +204,7 @@ public class BoardService {
                 .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_BOARD_MESSAGE.getErrorMessage()));
 
         //권한 체크 ==> 최종적으로 마무리할 수 있는지
-        if (!board.getMember().getId().equals(member.getId())) {
-            throw new ForbiddenException(ErrorMessage.FORBIDDEN_ACTION_MESSAGE.getErrorMessage());
-        }
+        checkAuthorization(member, boardId, CategoryType.GOD_LIFE_STIMULUS);
 
         board.updateBoard(dto);
         return board.getId();
@@ -305,11 +288,23 @@ public class BoardService {
                 .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_BOARD_MESSAGE.getErrorMessage()));
 
         //권한 체크 ==> 최종적으로 마무리할 수 있는지
-        if (!board.getMember().getId().equals(member.getId())) {
-            throw new ForbiddenException(ErrorMessage.FORBIDDEN_ACTION_MESSAGE.getErrorMessage());
-        }
+        checkAuthorization(member, board.getId(), CategoryType.GOD_LIFE_STIMULUS);
 
         board.updateBoard(request);
         return board.getId();
     }
+
+    /** 해당 게시판을 수정/삭제할 권한이 있는지 확인함.
+     * @param member  현재 로그인한 유저 정보 (게시판 권한 확인)
+     * @param boardId 조회할 게시물 번호
+     */
+    public void checkAuthorization(Member member, Long boardId, CategoryType categoryType) {
+        Board board = boardRepository.findByIdWithMember(boardId, categoryType)
+                .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_BOARD_MESSAGE.getErrorMessage()));
+
+        if (!member.getId().equals(board.getMember().getId())) {
+            throw new ForbiddenException(ErrorMessage.FORBIDDEN_ACTION_MESSAGE.getErrorMessage());
+        }
+    }
+    
 }

@@ -1,6 +1,7 @@
 package com.god.life.controller;
 
 import com.god.life.annotation.LoginMember;
+import com.god.life.domain.CategoryType;
 import com.god.life.domain.Member;
 import com.god.life.dto.board.request.BoardCreateRequest;
 import com.god.life.dto.board.request.BoardSearchRequest;
@@ -100,7 +101,7 @@ public class BoardController {
                                                                      @ModelAttribute BoardCreateRequest request,
                                                                      @LoginMember Member member) {
         Long boardId = checkId(id);
-        boardService.checkAuthorization(member, boardId);
+        boardService.checkAuthorization(member, boardId, CategoryType.GOD_LIFE_PAGE);
 
         imageService.deleteImages(boardId); //기존 이미지 삭제
         List<ImageSaveResponse> images = imageUploadService.uploads(request.getImages());
@@ -123,7 +124,7 @@ public class BoardController {
                                                                @LoginMember Member member)
     {
         Long boardId = checkId(id);
-        boardService.checkAuthorization(member, boardId);
+        boardService.checkAuthorization(member, boardId, CategoryType.GOD_LIFE_PAGE);
 
 
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK,boardService.deleteBoard(boardId), ""));
