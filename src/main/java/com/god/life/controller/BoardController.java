@@ -240,6 +240,23 @@ public class BoardController {
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, response));
     }
 
+    @Operation(summary = "갓생 자극 게시판 삭제")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "갓생 자극 게시판 삭제 성공시 True",
+                            useReturnTypeSchema = true)
+            }
+    )
+    @DeleteMapping("/board/stimulation/{id}")
+    public ResponseEntity<CommonResponse<Boolean>> deleteStimulusBoard(@PathVariable(name = "id") String id,
+                                                               @LoginMember Member member)
+    {
+        Long boardId = checkId(id);
+        boardService.checkAuthorization(member, boardId, CategoryType.GOD_LIFE_STIMULUS);
+
+        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK,boardService.deleteBoard(boardId), ""));
+    }
+
     private Long checkId(String id) {
         long boardId;
         try {
