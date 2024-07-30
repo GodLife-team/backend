@@ -5,13 +5,13 @@ import com.god.life.domain.Member;
 import com.god.life.dto.board.request.BoardCreateRequest;
 import com.god.life.dto.board.request.BoardSearchRequest;
 import com.god.life.dto.board.request.GodLifeStimulationBoardRequest;
+import com.god.life.dto.board.request.StimulationBoardSearchCondition;
 import com.god.life.dto.board.response.BoardResponse;
 import com.god.life.dto.board.response.BoardSearchResponse;
 import com.god.life.dto.board.response.GodLifeStimulationBoardBriefResponse;
 import com.god.life.dto.board.response.GodLifeStimulationBoardResponse;
 import com.god.life.dto.common.CommonResponse;
 import com.god.life.dto.image.ImageSaveResponse;
-import com.god.life.dto.board.request.StimulationBoardSearchCondition;
 import com.god.life.error.NotFoundResource;
 import com.god.life.service.BoardService;
 import com.god.life.service.GodLifeScoreService;
@@ -135,7 +135,6 @@ public class BoardController {
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode = "200", description = "최신 게시판 검색 조회",
-                     //content = @Content(schema = @Schema(implementation = List.class)),
                     useReturnTypeSchema = true)
             }
     )
@@ -173,11 +172,23 @@ public class BoardController {
             }
     )
     public ResponseEntity<CommonResponse<Long>> postStimulationBoard(@LoginMember Member member,
-                                                                     @Parameter(description = "갓생 자극 게시물 최종 작성") @RequestBody GodLifeStimulationBoardRequest dto) {
+                                                                     @Parameter(description = "갓생 자극 게시물 최종 작성") @RequestBody GodLifeStimulationBoardRequest request) {
 
-        Long savedBoardId = boardService.saveTemporaryBoard(member, dto);
-        imageService.deleteUnusedImageInHtml(dto.getContent(), savedBoardId, dto.getThumbnailUrl());
+        Long savedBoardId = boardService.saveTemporaryBoard(member, request);
+        imageService.deleteUnusedImageInHtml(request.getContent(), savedBoardId, request.getThumbnailUrl());
+
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, savedBoardId));
+    }
+
+    @PutMapping("/board/stimulation")
+    @Operation(summary = "갓생 자극 게시물 수정")
+    @ApiResponse(responseCode = "200", description = "수정 성공시 수정된 게시판 ID 반환")
+    public ResponseEntity<CommonResponse<Long>> updateBoard(@LoginMember Member member,
+                                                            @Parameter(description = "갓생 자극 게시물 수정본") @RequestBody GodLifeStimulationBoardRequest request) {
+        Long updatedBoardId = boardService.updateStimulationBoard(member, request);
+        imageService.deleteUnusedImageInHtml(request.getContent(), updatedBoardId, request.getThumbnailUrl());
+
+        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, updatedBoardId));
     }
 
     @GetMapping("/board/stimulation/{boardId}")
@@ -191,7 +202,6 @@ public class BoardController {
     public ResponseEntity<CommonResponse<GodLifeStimulationBoardResponse>> viewGodStimulusBoard(
             @PathVariable(name = "boardId") String boardId,
             @LoginMember Member member) {
-
         GodLifeStimulationBoardResponse response
                 = boardService.detailStimulusBoard(checkId(boardId), member);
 
@@ -213,7 +223,7 @@ public class BoardController {
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, response));
     }
 
-    // 추후 api 통합이 페이징처리와 필요해보임
+
     @GetMapping("/boards/stimulation/filter")
     @Operation(summary = "검색 조건에 맞는 갓생 자극 게시물 조회")
     @ApiResponses(
@@ -228,7 +238,6 @@ public class BoardController {
         List<GodLifeStimulationBoardBriefResponse> response = boardService.getListStimulusBoardUsingSearchCondition(request);
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, response));
     }
-
 
     private Long checkId(String id) {
         long boardId;

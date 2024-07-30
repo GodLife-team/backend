@@ -90,7 +90,7 @@ public class BoardService {
                 .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_BOARD_MESSAGE.getErrorMessage()));
 
         if (!member.getId().equals(board.getMember().getId())) {
-            throw new ForbiddenException("수정 및 삭제 권한이 없습니다.");
+            throw new ForbiddenException(ErrorMessage.FORBIDDEN_ACTION_MESSAGE.getErrorMessage());
         }
 
     }
@@ -290,5 +290,26 @@ public class BoardService {
     public int calculateGodLifeScoreMember(Member loginMember) {
         Integer sum = boardRepository.totalScoreBoardByLoginMember(loginMember);
         return sum == null ? 0 : sum;
+    }
+
+    /**
+     * 갓생 자극 게시물 수정사항 반영
+     *
+     * @param member  : 작성자
+     * @param request : 수정 내용 본
+     * @return 업데이트된 게시판 번호 반환
+     */
+    @Transactional
+    public Long updateStimulationBoard(Member member, GodLifeStimulationBoardRequest request) {
+        Board board = boardRepository.findByIdWithMember(request.getBoardId(), CategoryType.GOD_LIFE_STIMULUS)
+                .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_BOARD_MESSAGE.getErrorMessage()));
+
+        //권한 체크 ==> 최종적으로 마무리할 수 있는지
+        if (!board.getMember().getId().equals(member.getId())) {
+            throw new ForbiddenException(ErrorMessage.FORBIDDEN_ACTION_MESSAGE.getErrorMessage());
+        }
+
+        board.updateBoard(request);
+        return board.getId();
     }
 }

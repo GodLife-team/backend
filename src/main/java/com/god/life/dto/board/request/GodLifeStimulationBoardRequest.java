@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 public class GodLifeStimulationBoardRequest {
 
-    @Schema(description = "임시 생성된 boardId")
+    @Schema(description = "생성된 boardId")
     private Long boardId;
 
     @Schema(description = "제목")

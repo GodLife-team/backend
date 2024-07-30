@@ -42,7 +42,7 @@ public class Board extends BaseEntity{
     private Integer totalScore;
 
     @Column
-    private int view;
+    private int view = 0;
 
     @Column
     private String thumbnailUrl;
@@ -80,7 +80,6 @@ public class Board extends BaseEntity{
         this.introduction = request.getIntroduction();
         this.tag = "";
         this.status = BoardStatus.S;
-        this.view = 0;
     }
 
     public static String toDBTag(List<String> tags) {
