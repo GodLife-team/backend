@@ -10,10 +10,13 @@ import com.god.life.dto.popular.PopularBoardQueryDTO;
 import com.god.life.error.ErrorMessage;
 import com.god.life.error.NotFoundResource;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
@@ -211,12 +214,20 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
             throw new NotFoundResource(ErrorMessage.INVALID_BOARD_MESSAGE.getErrorMessage());
         }
 
+        //좋아요 유무 확인 --> 없으면 NULL / 있으면 1로 넘어옴
+        Integer isLiked = queryFactory.selectOne().from(godLifeScore)
+                .where(godLifeScore.board.id.eq(boardId)
+                        .and(godLifeScore.member.id.eq(loginMember.getId())))
+                .fetchFirst();
+
         queryFactory.update(board)
                 .set(board.view, board.view.add(1))
                 .where(board.id.eq(boardId)).execute();
 
         //게시판 주인 확인
         godLifeStimulationBoardResponse.setOwner(loginMember.getId().equals(godLifeStimulationBoardResponse.getWriterId()));
+        //좋아요 유무 확인
+        godLifeStimulationBoardResponse.setMemberLikedBoard(isLiked != null);
 
         return godLifeStimulationBoardResponse;
     }
