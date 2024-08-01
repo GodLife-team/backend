@@ -46,6 +46,9 @@ public class GodLifeStimulationBoardResponse {
     @Schema(description = "작성 일자")
     private String createDate;
 
+    @Schema(description = "로그인한 유저가 갓생 인증을 했는지")
+    public boolean memberLikedBoard;
+
     public GodLifeStimulationBoardResponse(
             String title,
             String thumbnailUrl,
@@ -57,9 +60,9 @@ public class GodLifeStimulationBoardResponse {
             Integer view,
             LocalDateTime createDate,
             Integer godLifeScore
-    ){
+    ) {
         this.title = title;
-        this.thumbnailUrl =thumbnailUrl;
+        this.thumbnailUrl = thumbnailUrl;
         this.introduction = introduction;
         this.content = content;
         this.boardId = boardId;
