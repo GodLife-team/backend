@@ -13,6 +13,7 @@ import com.god.life.dto.board.response.GodLifeStimulationBoardBriefResponse;
 import com.god.life.dto.board.response.GodLifeStimulationBoardResponse;
 import com.god.life.dto.common.CommonResponse;
 import com.god.life.dto.image.ImageSaveResponse;
+import com.god.life.error.BadRequestException;
 import com.god.life.error.NotFoundResource;
 import com.god.life.service.BoardService;
 import com.god.life.service.GodLifeScoreService;
@@ -218,8 +219,13 @@ public class BoardController {
             }
     )
     public ResponseEntity<CommonResponse<List<GodLifeStimulationBoardBriefResponse>>> viewGodStimulusBoardListUsingPaging(
-            @Parameter(description = "갓생 자극 게시물 페이징 검색 번호 0부터 시작") Integer page
+            @Parameter(description = "갓생 자극 게시물 페이징 검색 번호 0부터 시작")
+            @RequestParam(name = "page", required = false, defaultValue = "0") Integer page
     ) {
+        if (page < 0) {
+            throw new BadRequestException("페이지 번호는 0번부터 시작해야 합니다.");
+        }
+        
         List<GodLifeStimulationBoardBriefResponse> response = boardService.getListStimulusBoard(page);
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, response));
     }
