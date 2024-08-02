@@ -33,12 +33,7 @@
 </head>
 <body>
 <div class="container mt-5 pt-5">
-    <div class="btn-group" role="group">
-        <a href="/admin/main" class="btn btn-secondary">게시글 신고 목록</a>
-        <a href="/admin/main?category=댓글" class="btn btn-secondary">댓글 신고 목록</a>
-        <a href="/admin/recommend/board" class="btn btn-secondary">갓생 자극 게시물 선정</a>
-        <a href="/admin/recommend/author" class="btn btn-secondary">추천 작가 선정</a>
-    </div>
+    <div th:replace="~{common/header :: headerFragment}"></div>
     <main class="mt-2 pt-2">
     <div class="container-fluid px-4">
         <h1 class="text-primary" th:text="|${category} 신고 목록|"></h1>

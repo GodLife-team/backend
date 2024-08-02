@@ -6,8 +6,10 @@ import com.god.life.dto.board.response.GodLifeStimulationBoardBriefResponse;
 import com.god.life.dto.report.request.ReportRequest;
 import com.god.life.dto.board.request.StimulationBoardSearchCondition;
 import com.god.life.service.BoardService;
+import com.god.life.service.MemberService;
 import com.god.life.service.RedisService;
 import com.god.life.service.ReportService;
+import com.god.life.service.alarm.AlarmSender;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -32,6 +34,11 @@ public class AdminController {
     private final StimulationBoardSearchCondition EMPTY_CONDITION = new StimulationBoardSearchCondition();
 
     private final RedisService redisService;
+
+    private final MemberService memberService;
+
+    private final AlarmSender alarmSender;
+
     private final String RECOMMEND_BOARD_KEY = "board";
     private final String RECOMMEND_AUTHOR_KEY = "author";
 
@@ -156,6 +163,18 @@ public class AdminController {
         return "boardDetail";
     }
 
+    @GetMapping("/alarm")
+    public String alarmForm(Model model) {
+        model.addAttribute("alarmDto", new AlarmDTO());
+        return "alarm";
+    }
+
+    @PostMapping("/alarm")
+    public String sendAlarm(@ModelAttribute AlarmDTO alarmDTO) {
+        List<String> tokens = memberService.getAllTokens();
+        alarmSender.sendAlarm(tokens, alarmDTO.getTitle(), alarmDTO.getContent());
+        return "redirect:/admin/alarm";
+    }
 
     @ExceptionHandler(value = Exception.class)
     public void ex(Exception exception) {

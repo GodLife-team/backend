@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long>, CustomMemberRepository {
@@ -25,4 +26,6 @@ public interface MemberRepository extends JpaRepository<Member, Long>, CustomMem
     @Query("update Member m set m.fcmToken = :fcm where m.id = :memberId")
     void updateFcm(@Param("fcm") String fcm, @Param("memberId") Long memberId);
 
+    @Query("select m.fcmToken from Member m where m.fcmToken is not null")
+    Optional<List<String>> findAllFcmToken();
 }
