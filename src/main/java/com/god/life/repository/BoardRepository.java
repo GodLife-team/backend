@@ -28,6 +28,9 @@ public interface BoardRepository extends JpaRepository<Board, Long>, CustomBoard
     @Query("select b from Board b where b.id = :boardId")
     Optional<Board> findByIdAnyBoardType(@Param("boardId") Long boardId);
 
+    @Query("select b from Board b join fetch b.member m where b.id = :boardId")
+    Board findMemberByBoardId(@Param("boardId") Long boardId);
+
     // 해당 회원이 작성한 글 삭제합니다
     @Modifying
     void deleteByMember(Member deleteMember);

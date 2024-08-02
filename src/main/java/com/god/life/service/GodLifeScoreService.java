@@ -10,6 +10,7 @@ import com.god.life.error.NotFoundResource;
 import com.god.life.error.UniqueException;
 import com.god.life.repository.BoardRepository;
 import com.god.life.repository.GodLifeScoreRepository;
+import com.god.life.service.alarm.AlarmServiceFacade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -27,7 +28,7 @@ public class GodLifeScoreService {
 
     //갓생 인정을 하는 메소드입니다.
     @Transactional
-    public Boolean likeBoard(Member member, Long boardId) {
+    public String likeBoard(Member member, Long boardId) {
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_BOARD_MESSAGE.getErrorMessage()));
 
@@ -40,7 +41,8 @@ public class GodLifeScoreService {
         GodLifeScore godLifeScore = GodLifeScore.likeMemberToBoard(member, board);
         godLifeScoreRepository.save(godLifeScore);
         boardRepository.incrementGodLifeScore(boardId);
-        return true;
+
+        return board.getTitle();
     }
 
     /**

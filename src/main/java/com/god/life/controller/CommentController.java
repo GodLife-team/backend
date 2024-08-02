@@ -8,6 +8,7 @@ import com.god.life.dto.comment.response.CommentResponse;
 import com.god.life.dto.common.CommonResponse;
 import com.god.life.error.NotFoundResource;
 import com.god.life.service.CommentService;
+import com.god.life.service.alarm.AlarmServiceFacade;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -26,7 +27,7 @@ import java.util.List;
 public class CommentController {
 
     private final CommentService commentService;
-
+    private final AlarmServiceFacade alarmServiceFacade;
 
     @Operation(summary = "댓글 조회")
     @ApiResponses(
@@ -62,7 +63,11 @@ public class CommentController {
             @LoginMember Member member) {
 
         Long id = checkId(boardId);
-        CommentResponse commentResponse = commentService.createComment(id, request, member);
+        String boardTitle = commentService.createComment(id, request, member);
+
+        //알람 전송
+        String alarmTitle = boardTitle + "에 댓글이 달렸어요!";
+        alarmServiceFacade.processAlarm(id, member.getId(), alarmTitle, request.getComment());
 
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, true));
     }
