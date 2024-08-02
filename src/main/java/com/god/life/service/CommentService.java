@@ -10,6 +10,7 @@ import com.god.life.error.ForbiddenException;
 import com.god.life.error.NotFoundResource;
 import com.god.life.repository.BoardRepository;
 import com.god.life.repository.CommentRepository;
+import com.god.life.service.alarm.AlarmServiceFacade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CommentService {
 
+    private final AlarmServiceFacade alarmServiceFacade;
     private final CommentRepository commentRepository;
     private final BoardRepository boardRepository;
 
@@ -35,14 +37,14 @@ public class CommentService {
     }
 
     @Transactional
-    public CommentResponse createComment(Long boardId, CommentCreateRequest request, Member member) {
+    public String createComment(Long boardId, CommentCreateRequest request, Member member) {
         Board board = boardRepository.findByIdAnyBoardType(boardId)
                 .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_BOARD_MESSAGE.getErrorMessage()));
 
         Comment comment = request.toEntity(board, member);
         commentRepository.save(comment);
 
-        return CommentResponse.of(comment, member.getId());
+        return board.getTitle();
     }
 
     @Transactional

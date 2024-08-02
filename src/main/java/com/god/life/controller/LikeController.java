@@ -5,6 +5,7 @@ import com.god.life.annotation.LoginMember;
 import com.god.life.domain.Member;
 import com.god.life.dto.common.CommonResponse;
 import com.god.life.service.GodLifeScoreService;
+import com.god.life.service.alarm.AlarmServiceFacade;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 public class LikeController {
 
     private final GodLifeScoreService godLifeScoreService;
+    private final AlarmServiceFacade alarmServiceFacade;
 
     @Operation(description = "게시판ID 에 대한 갓생 인정 클릭")
     @PostMapping("/board/{boardId}")
@@ -39,13 +41,12 @@ public class LikeController {
             @LoginMember Member member) {
 
 
-        Boolean successLike = godLifeScoreService.likeBoard(member, boardId);
-        if (successLike) {
-            return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, "true", ""));
-        }
+        String title = godLifeScoreService.likeBoard(member, boardId);
+        String alarmTitle = "[굿생 인정]";
+        String content = title + "에 '굿생 인정'을 받았어요!";
+        alarmServiceFacade.processAlarm(boardId,member.getId(), alarmTitle, content);
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new CommonResponse<>(HttpStatus.OK, "false", "이미 좋아요를 눌렀습니다."));
+        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, "true", ""));
     }
 
 
