@@ -13,15 +13,18 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GoogleAlarmSender implements AlarmSender {
 
-
     private final FirebaseMessaging sender;
+    private static final String MESSAGE_DATA_KEY = "boardId";
+
 
     @Override
     public void sendAlarm(Long boardId, String token, String title, String content) {
         Notification notification = makeNotification(title, content);
         Message message = Message.builder()
-                .setNotification(notification)
-                .putData("boardId", String.valueOf(boardId))
+                //.setNotification(notification)
+                .putData("title" , title)
+                .putData("content", content)
+                .putData(MESSAGE_DATA_KEY, String.valueOf(boardId))
                 .setToken(token)
                 .build();
 
@@ -46,9 +49,13 @@ public class GoogleAlarmSender implements AlarmSender {
         Notification notification = makeNotification(title, content);
         MulticastMessage message = MulticastMessage
                 .builder()
-                .setNotification(notification)
+                //.setNotification(notification)
+                .putData("title" , title)
+                .putData("content", content)
+                .putData(MESSAGE_DATA_KEY, null) //공통 처리를 위한 null 전송
                 .addAllTokens(tokens)
                 .build();
+
 
         try {
             BatchResponse batchResponse = sender.sendEachForMulticast(message);
@@ -78,5 +85,6 @@ public class GoogleAlarmSender implements AlarmSender {
                 .setBody(content)
                 .build();
     }
+
 
 }
