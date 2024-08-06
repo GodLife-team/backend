@@ -28,4 +28,9 @@ public interface MemberRepository extends JpaRepository<Member, Long>, CustomMem
 
     @Query("select m.fcmToken from Member m where m.fcmToken is not null")
     Optional<List<String>> findAllFcmToken();
+
+    @Modifying
+    @Query("update Member m set m.checkAlarm = :onOff where m.id = :memberId")
+    void updateAlarmOption(@Param("memberId") Long memberId, @Param("onOff") boolean onOff);
+
 }

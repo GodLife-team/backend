@@ -41,7 +41,6 @@ public class Member {
     @Column(name = "introduction")
     private String whoAmI;
 
-    // 조회 용도, mappedBy : 조회만 할 것이고, member 조회시 member_id에 대응되는 이미지 다 가져오게함.
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     private List<Image> images = new ArrayList<>();
 
@@ -53,6 +52,9 @@ public class Member {
 
     @Column(name = "background_name")
     private String backgroundName;
+
+    @Column(name = "checkAlarm")
+    private boolean checkAlarm; //개인 알람 on/off 유무
 
     @Override
     public String toString() {

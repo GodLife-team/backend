@@ -2,6 +2,7 @@ package com.god.life.controller;
 
 import com.god.life.annotation.LoginMember;
 import com.god.life.domain.Member;
+import com.god.life.dto.alarm.request.AlarmOnOffRequest;
 import com.god.life.dto.common.CommonResponse;
 import com.god.life.dto.member.request.FcmUpdateRequest;
 import com.god.life.dto.member.request.ModifyWhoAmIRequest;
@@ -247,6 +248,18 @@ public class MemberController {
         Long infoMemberId = checkId(pathVariableMemberId);
         MemberInfoResponse response = memberService.memberInfoResponse(member, infoMemberId);
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, response));
+    }
+
+    @PatchMapping("/member/alarm")
+    @Operation(summary = "개별 알림 on/off 기능")
+    @ApiResponse(responseCode = "200", description = "변경 성공", useReturnTypeSchema = true)
+    public ResponseEntity<CommonResponse<Boolean>> patchIndividualAlarm(
+                                    @Parameter(hidden = true) @LoginMember Member member,
+                                    @RequestBody AlarmOnOffRequest request) {
+
+        memberService.updateAlarmOption(member.getId(), request);
+        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, true));
+
     }
 
     private Long checkId(String id) {
