@@ -30,6 +30,8 @@ public class FcmAlarmService {
 
     private final FcmAlarmRepository fcmAlarmRepository;
     private final AlarmSender alarmSender;
+    private static final String END_MESSAGE_TITLE = "오늘 TODO 까먹지 않으셨죠?";
+    private static final String END_MESSAGE_BODY = "오늘 굿생기록을 정리해 보세요!";
 
     public List<String> getUserTokenAtTime(LocalDateTime time) {
         return fcmAlarmRepository.findSendUserTokens(time);
@@ -66,7 +68,7 @@ public class FcmAlarmService {
     public void sendMessage() {
         LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
         List<String> sendToUserTokens = getUserTokenAtTime(now);
-        alarmSender.sendTodoAlarm(sendToUserTokens);
+        alarmSender.sendAlarm(sendToUserTokens, END_MESSAGE_TITLE, END_MESSAGE_BODY);
     }
 
 }

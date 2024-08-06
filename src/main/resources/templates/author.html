@@ -21,12 +21,7 @@
 <body>
 
 <div class="container mt-5">
-  <div class="btn-group" role="group">
-    <a href="/admin/main" class="btn btn-secondary">게시글 신고 목록</a>
-    <a href="/admin/main?category=댓글" class="btn btn-secondary">댓글 신고 목록</a>
-    <a href="/admin/recommend/board" class="btn btn-secondary">갓생 자극 게시물 선정</a>
-    <a href="/admin/recommend/author" class="btn btn-secondary">추천 작가 선정</a>
-  </div>
+  <div th:replace="~{common/header :: headerFragment}"></div>
   <div class="row" th:if="${recommendAuthor} != null">
     <h2>선정된 추천 작가 정보</h2>
     <div class="display: flex; justify-content: space-between; align-items: center; mb-2">

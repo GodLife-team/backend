@@ -9,7 +9,9 @@ public interface AlarmSender {
     void sendAlarm(Long boardId, String token, String title, String content);
 
     // 갓생 기록 알람 시간에 대해 전달.
-    void sendTodoAlarm(List<String> token);
+    void sendAlarm(List<String> token, String title, String content);
+
+
 
 
 }

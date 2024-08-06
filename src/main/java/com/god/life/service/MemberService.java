@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -136,6 +137,10 @@ public class MemberService {
         boardService.deleteBoardWrittenByMember(deleteMember);
         //멤버 삭제
         memberRepository.delete(deleteMember);
+    }
+
+    public List<String> getAllTokens(){
+        return memberRepository.findAllFcmToken().orElse(new ArrayList<>());
     }
 
     // memberId의 유저 정보를 조회함

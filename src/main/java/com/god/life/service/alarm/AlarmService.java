@@ -20,9 +20,6 @@ public class AlarmService {
     private final AlarmRepository alarmRepository;
     private final BoardRepository boardRepository;
 
-
-
-
     /**
      * boardId에 대응되는 알람 저장
      */

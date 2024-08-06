@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<header th:fragment="headerFragment">
+    <div class="btn-group mb-3" role="group">
+        <a href="/admin/main" class="btn btn-secondary">게시글 신고 목록</a>
+        <a href="/admin/main?category=댓글" class="btn btn-secondary">댓글 신고 목록</a>
+        <a href="/admin/recommend/board" class="btn btn-secondary">갓생 자극 게시물 선정</a>
+        <a href="/admin/recommend/author" class="btn btn-secondary">추천 작가 선정</a>
+        <a href="/admin/alarm" class="btn btn-secondary">전체 알림 보내기</a>
+    </div>
+</header>
+
+</body>
+</html>

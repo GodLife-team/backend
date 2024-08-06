@@ -4,6 +4,7 @@ import com.google.firebase.messaging.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,8 +13,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GoogleAlarmSender implements AlarmSender {
 
-    private static final String END_MESSAGE_TITLE = "오늘 TODO 까먹지 않으셨죠?";
-    private static final String END_MESSAGE_BODY = "오늘 굿생기록을 정리해 보세요!";
 
     private final FirebaseMessaging sender;
 
@@ -36,7 +35,7 @@ public class GoogleAlarmSender implements AlarmSender {
 
     // 매 분마다 알람을 보낼 유저의 토큰값을 얻어내 해당 유저의 기기로 알림을 전송합니다.
     @Override
-    public void sendTodoAlarm(List<String> tokens) {
+    public void sendAlarm(List<String> tokens, String title, String content) {
         //보낼 대상이 없으면 알림 전송 XXX
         if (tokens == null || tokens.size() == 0) {
             return;
@@ -44,7 +43,7 @@ public class GoogleAlarmSender implements AlarmSender {
 
         log.info("이번에 보낼 사람 : {}", tokens);
 
-        Notification notification = makeNotification(END_MESSAGE_TITLE, END_MESSAGE_BODY);
+        Notification notification = makeNotification(title, content);
         MulticastMessage message = MulticastMessage
                 .builder()
                 .setNotification(notification)
