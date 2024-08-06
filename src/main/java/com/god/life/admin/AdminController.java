@@ -1,5 +1,6 @@
 package com.god.life.admin;
 
+import com.god.life.admin.dto.AlarmDTO;
 import com.god.life.domain.Member;
 import com.god.life.dto.board.response.BoardResponse;
 import com.god.life.dto.board.response.GodLifeStimulationBoardBriefResponse;
@@ -29,7 +30,12 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AdminController {
 
+    private final String RECOMMEND_BOARD_KEY = "board";
+    private final String RECOMMEND_AUTHOR_KEY = "author";
+
+
     private final ReportService reportService;
+
     private final BoardService boardService;
     private final StimulationBoardSearchCondition EMPTY_CONDITION = new StimulationBoardSearchCondition();
 
@@ -39,10 +45,8 @@ public class AdminController {
 
     private final AlarmSender alarmSender;
 
-    private final String RECOMMEND_BOARD_KEY = "board";
-    private final String RECOMMEND_AUTHOR_KEY = "author";
-
     private final Member adminMember = Member.builder().id(-1L).build();
+
 
     @GetMapping("/main")
     public String mainPageView(
@@ -149,7 +153,7 @@ public class AdminController {
     }
 
     @PostMapping("/recommend/board")
-    public String deleteRecommendBoard(@ModelAttribute(name = "id") String removeId){
+    public String deleteRecommendBoard(@ModelAttribute(name = "id") String removeId) {
         redisService.deleteValueInList(RECOMMEND_BOARD_KEY, removeId);
         return "redirect:/admin/recommend/board";
     }
