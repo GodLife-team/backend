@@ -24,9 +24,12 @@ public class AlarmResponse {
     @Schema(description = "알람 내용")
     private String content;
 
+    @Schema(description = "읽음 유무")
+    private boolean isRead;
 
     public static AlarmResponse of(Alarm alarm) {
-        return new AlarmResponse(alarm.getAlarmId(), alarm.getBoardId(), alarm.getTitle(), alarm.getContent());
+        return new AlarmResponse(alarm.getAlarmId(), alarm.getBoardId(),
+                alarm.getTitle(), alarm.getContent(), alarm.isRead());
     }
 
 

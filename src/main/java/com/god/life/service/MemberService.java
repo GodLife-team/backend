@@ -1,6 +1,7 @@
 package com.god.life.service;
 
 import com.god.life.domain.Member;
+import com.god.life.dto.alarm.request.AlarmOnOffRequest;
 import com.god.life.dto.member.request.FcmUpdateRequest;
 import com.god.life.dto.member.request.ModifyWhoAmIRequest;
 import com.god.life.dto.member.request.SignupRequest;
@@ -163,5 +164,10 @@ public class MemberService {
     @Transactional
     public void updateFcmToken(FcmUpdateRequest request, Member member) {
         memberRepository.updateFcm(request.getFcmToken(), member.getId());
+    }
+
+    @Transactional
+    public void updateAlarmOption(Long memberId, AlarmOnOffRequest request) {
+        memberRepository.updateAlarmOption(memberId, request.getOnOff());
     }
 }

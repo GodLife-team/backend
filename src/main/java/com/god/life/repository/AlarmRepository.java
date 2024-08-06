@@ -11,7 +11,8 @@ import java.util.Optional;
 public interface AlarmRepository extends JpaRepository<Alarm, Long> {
 
     //읽지 않은 알람을 가져옵니다.
-    @Query("select a from Alarm a where a.memberId = :memberId and a.isRead = false")
-    Optional<List<Alarm>> findUnreadAlarmByMemberId(@Param("memberId") Long loginMemberId);
-    
+    @Query("select a from Alarm a where a.memberId = :memberId")
+    Optional<List<Alarm>> findAlarmByMemberId(@Param("memberId") Long loginMemberId);
+
+    Optional<Alarm> findAlarmByAlarmIdAndMemberId(Long alarmId, Long memberId);
 }

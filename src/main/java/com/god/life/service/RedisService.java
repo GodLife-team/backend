@@ -37,7 +37,6 @@ public class RedisService {
         template.delete(key);
     }
 
-
     public void addValueToRightOnList(String key, String data) {
         ListOperations<String, Object> list = template.opsForList();
         if (list.size(key).intValue() == 10)   {
@@ -58,4 +57,6 @@ public class RedisService {
         ListOperations<String, Object> list = template.opsForList();
         list.remove(recommendBoardKey, 0, removeId); //0은 모두 삭제, count > 0 head -> tail까지 돌면서 count개 삭제, cout<0은 반대
     }
+
+
 }
