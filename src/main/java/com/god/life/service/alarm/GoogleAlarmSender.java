@@ -19,7 +19,7 @@ public class GoogleAlarmSender implements AlarmSender {
 
     @Override
     public void sendAlarm(Long boardId, String token, String title, String content) {
-        Notification notification = makeNotification(title, content);
+        //Notification notification = makeNotification(title, content);
         Message message = Message.builder()
                 //.setNotification(notification)
                 .putData("title" , title)
@@ -46,13 +46,13 @@ public class GoogleAlarmSender implements AlarmSender {
 
         log.info("이번에 보낼 사람 : {}", tokens);
 
-        Notification notification = makeNotification(title, content);
+        //Notification notification = makeNotification(title, content);
         MulticastMessage message = MulticastMessage
                 .builder()
                 //.setNotification(notification)
                 .putData("title" , title)
                 .putData("content", content)
-                .putData(MESSAGE_DATA_KEY, null) //공통 처리를 위한 null 전송
+                .putData(MESSAGE_DATA_KEY, "") //공통 처리를 위한 null 전송
                 .addAllTokens(tokens)
                 .build();
 
