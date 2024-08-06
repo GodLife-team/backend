@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Getter
-public class Alarm {
+public class Alarm extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,5 +32,9 @@ public class Alarm {
 
     private boolean isRead; //읽었는지 유무
 
+
+    public void checkRead(){
+        this.isRead = true;
+    }
 
 }
