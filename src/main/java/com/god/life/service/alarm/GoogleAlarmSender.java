@@ -19,9 +19,8 @@ public class GoogleAlarmSender implements AlarmSender {
 
     @Override
     public void sendAlarm(Long boardId, String token, String title, String content) {
-        //Notification notification = makeNotification(title, content);
+
         Message message = Message.builder()
-                //.setNotification(notification)
                 .putData("title" , title)
                 .putData("content", content)
                 .putData(MESSAGE_DATA_KEY, String.valueOf(boardId))
@@ -46,16 +45,13 @@ public class GoogleAlarmSender implements AlarmSender {
 
         log.info("이번에 보낼 사람 : {}", tokens);
 
-        //Notification notification = makeNotification(title, content);
         MulticastMessage message = MulticastMessage
                 .builder()
-                //.setNotification(notification)
                 .putData("title" , title)
                 .putData("content", content)
                 .putData(MESSAGE_DATA_KEY, "") //공통 처리를 위한 null 전송
                 .addAllTokens(tokens)
                 .build();
-
 
         try {
             BatchResponse batchResponse = sender.sendEachForMulticast(message);
@@ -76,14 +72,6 @@ public class GoogleAlarmSender implements AlarmSender {
         } catch (FirebaseMessagingException e) {
             log.error("FCM 전송 오류!", e);
         }
-    }
-
-    private Notification makeNotification(String title, String content) {
-        return Notification
-                .builder()
-                .setTitle(title)
-                .setBody(content)
-                .build();
     }
 
 
