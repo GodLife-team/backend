@@ -3,6 +3,7 @@ package com.god.life.controller;
 
 import com.god.life.annotation.LoginMember;
 import com.god.life.domain.Member;
+import com.god.life.dto.board.BoardAlarmInfo;
 import com.god.life.dto.comment.request.CommentCreateRequest;
 import com.god.life.dto.comment.response.CommentResponse;
 import com.god.life.dto.common.CommonResponse;
@@ -63,11 +64,10 @@ public class CommentController {
             @LoginMember Member member) {
 
         Long id = checkId(boardId);
-        String boardTitle = commentService.createComment(id, request, member);
+        BoardAlarmInfo dto = commentService.createComment(id, request, member);
 
         //알람 전송
-        String alarmTitle = boardTitle + "에 댓글이 달렸어요!";
-        alarmServiceFacade.processAlarm(id, member.getId(), alarmTitle, request.getComment());
+        alarmServiceFacade.processAlarm(member.getId(), dto);
 
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, true));
     }

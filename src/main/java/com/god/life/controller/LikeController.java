@@ -3,6 +3,7 @@ package com.god.life.controller;
 
 import com.god.life.annotation.LoginMember;
 import com.god.life.domain.Member;
+import com.god.life.dto.board.BoardAlarmInfo;
 import com.god.life.dto.common.CommonResponse;
 import com.god.life.service.GodLifeScoreService;
 import com.god.life.service.alarm.AlarmServiceFacade;
@@ -40,11 +41,8 @@ public class LikeController {
             @PathVariable(name = "boardId") Long boardId,
             @LoginMember Member member) {
 
-
-        String title = godLifeScoreService.likeBoard(member, boardId);
-        String alarmTitle = "[굿생 인정]";
-        String content = title + "에 '굿생 인정'을 받았어요!";
-        alarmServiceFacade.processAlarm(boardId,member.getId(), alarmTitle, content);
+        BoardAlarmInfo boardTypeDTO = godLifeScoreService.likeBoard(member, boardId);
+        alarmServiceFacade.processAlarm(member.getId(), boardTypeDTO);
 
         return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK, "true", ""));
     }

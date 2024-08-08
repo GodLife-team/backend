@@ -2,8 +2,8 @@ package com.god.life.domain;
 
 public enum CategoryType {
 
-    GOD_LIFE_PAGE("갓생 기록 페이지"),
-    GOD_LIFE_STIMULUS("갓생 자극 페이지");
+    GOD_LIFE_PAGE("normal"),
+    GOD_LIFE_STIMULUS("stimulus");
 
     private String type;
 
@@ -11,6 +11,7 @@ public enum CategoryType {
         this.type = type;
     }
 
-
-
+    public String getType() {
+        return type;
+    }
 }
