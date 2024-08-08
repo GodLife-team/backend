@@ -27,11 +27,7 @@ public class GoogleAlarmSender implements AlarmSender {
                 .setToken(token)
                 .build();
 
-        try {
-            sender.send(message);
-        } catch (FirebaseMessagingException e) {
-            log.error("메세지 전송 실패... token = {}, 제목 = {}, 내용 = {}", token, title, content);
-        }
+        sender.sendAsync(message); //비동기로 전송
 
     }
 
