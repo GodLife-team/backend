@@ -4,16 +4,14 @@ package com.god.life.service;
 import com.god.life.domain.Board;
 import com.god.life.domain.GodLifeScore;
 import com.god.life.domain.Member;
-import com.god.life.error.BadRequestException;
+import com.god.life.dto.board.BoardAlarmInfo;
 import com.god.life.error.ErrorMessage;
 import com.god.life.error.NotFoundResource;
 import com.god.life.error.UniqueException;
 import com.god.life.repository.BoardRepository;
 import com.god.life.repository.GodLifeScoreRepository;
-import com.god.life.service.alarm.AlarmServiceFacade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,11 +23,13 @@ public class GodLifeScoreService {
 
     private final BoardRepository boardRepository;
     private final GodLifeScoreRepository godLifeScoreRepository;
+    private static final String ALARM_TITLE = "굿생 인정\uD83D\uDC4D";
+    private static final String ALARM_CONTENT_SUFFIX = "에 '굿생 인정'을 받았어요!";
 
     //갓생 인정을 하는 메소드입니다.
     @Transactional
-    public String likeBoard(Member member, Long boardId) {
-        Board board = boardRepository.findById(boardId)
+    public BoardAlarmInfo likeBoard(Member member, Long boardId) {
+        Board board = boardRepository.findByIdWithCategory(boardId)
                 .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_BOARD_MESSAGE.getErrorMessage()));
 
         //이미 좋아요를 누른 경우
@@ -42,7 +42,9 @@ public class GodLifeScoreService {
         godLifeScoreRepository.save(godLifeScore);
         boardRepository.incrementGodLifeScore(boardId);
 
-        return board.getTitle();
+        String content = "[" + board.getTitle() + "]" + ALARM_CONTENT_SUFFIX;
+
+        return new BoardAlarmInfo(ALARM_TITLE, content, board.getId(), board.getCategory().getCategoryType());
     }
 
     /**

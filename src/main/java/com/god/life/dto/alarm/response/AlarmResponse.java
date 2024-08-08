@@ -27,9 +27,12 @@ public class AlarmResponse {
     @Schema(description = "읽음 유무")
     private boolean isRead;
 
+    @Schema(description = "알람이 발생한 게시판 종류")
+    private String type;
+
     public static AlarmResponse of(Alarm alarm) {
         return new AlarmResponse(alarm.getAlarmId(), alarm.getBoardId(),
-                alarm.getTitle(), alarm.getContent(), alarm.isRead());
+                alarm.getTitle(), alarm.getContent(), alarm.isRead(), alarm.getCategoryType().getType());
     }
 
 

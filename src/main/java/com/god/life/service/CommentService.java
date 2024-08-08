@@ -3,6 +3,7 @@ package com.god.life.service;
 import com.god.life.domain.Board;
 import com.god.life.domain.Comment;
 import com.god.life.domain.Member;
+import com.god.life.dto.board.BoardAlarmInfo;
 import com.god.life.dto.comment.request.CommentCreateRequest;
 import com.god.life.dto.comment.response.CommentResponse;
 import com.god.life.error.ErrorMessage;
@@ -10,7 +11,6 @@ import com.god.life.error.ForbiddenException;
 import com.god.life.error.NotFoundResource;
 import com.god.life.repository.BoardRepository;
 import com.god.life.repository.CommentRepository;
-import com.god.life.service.alarm.AlarmServiceFacade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +23,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CommentService {
 
-    private final AlarmServiceFacade alarmServiceFacade;
     private final CommentRepository commentRepository;
     private final BoardRepository boardRepository;
 
@@ -37,14 +36,14 @@ public class CommentService {
     }
 
     @Transactional
-    public String createComment(Long boardId, CommentCreateRequest request, Member member) {
-        Board board = boardRepository.findByIdAnyBoardType(boardId)
+    public BoardAlarmInfo createComment(Long boardId, CommentCreateRequest request, Member member) {
+        Board board = boardRepository.findByIdWithCategory(boardId)
                 .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_BOARD_MESSAGE.getErrorMessage()));
 
         Comment comment = request.toEntity(board, member);
         commentRepository.save(comment);
-
-        return board.getTitle();
+        String alarmTitle = board.getTitle() + "에 댓글이 달렸어요!";
+        return new BoardAlarmInfo(alarmTitle, request.getComment(), boardId, board.getCategory().getCategoryType());
     }
 
     @Transactional

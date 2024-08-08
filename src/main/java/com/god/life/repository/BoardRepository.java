@@ -25,9 +25,6 @@ public interface BoardRepository extends JpaRepository<Board, Long>, CustomBoard
     @Query("select b from Board b join fetch b.member where b.id = :boardId and b.category.categoryType = :categoryType")
     Optional<Board> findByIdWithMember(@Param("boardId") Long boardId, @Param("categoryType") CategoryType categoryType);
 
-    @Query("select b from Board b where b.id = :boardId")
-    Optional<Board> findByIdAnyBoardType(@Param("boardId") Long boardId);
-
     @Query("select b from Board b join fetch b.member m where b.id = :boardId")
     Board findMemberByBoardId(@Param("boardId") Long boardId);
 
@@ -64,4 +61,7 @@ public interface BoardRepository extends JpaRepository<Board, Long>, CustomBoard
     @Query("select b from Board b join fetch b.member join b.category " +
             "where b.member.nickname = :author and b.status = 'S' and b.category.categoryType = 'GOD_LIFE_STIMULUS'")
     List<Board> findBoardWrittenAuthor(@Param("author") String author);
+
+    @Query("select b from Board b join fetch b.category where b.id = :boardId")
+    Optional<Board> findByIdWithCategory(@Param("boardId") Long boardId);
 }
