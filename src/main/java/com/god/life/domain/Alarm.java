@@ -1,10 +1,7 @@
 package com.god.life.domain;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -31,6 +28,10 @@ public class Alarm extends BaseEntity{
     private Long memberId; //알람을 받은 회원 번호
 
     private boolean isRead; //읽었는지 유무
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category_type")
+    private CategoryType categoryType; // 알람 게시판 종류
 
 
     public void checkRead(){

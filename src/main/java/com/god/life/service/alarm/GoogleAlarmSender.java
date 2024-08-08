@@ -1,5 +1,7 @@
 package com.god.life.service.alarm;
 
+import com.god.life.domain.CategoryType;
+import com.god.life.dto.board.BoardAlarmInfo;
 import com.google.firebase.messaging.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,19 +18,18 @@ public class GoogleAlarmSender implements AlarmSender {
     private final FirebaseMessaging sender;
     private static final String MESSAGE_DATA_KEY = "boardId";
 
-
+    // type : normal : 갓생 인증 개시판, stimulus : 갓생 인증
     @Override
-    public void sendAlarm(Long boardId, String token, String title, String content) {
-
+    public void sendAlarm(String token, BoardAlarmInfo info) {
         Message message = Message.builder()
-                .putData("title" , title)
-                .putData("content", content)
-                .putData(MESSAGE_DATA_KEY, String.valueOf(boardId))
+                .putData("title" , info.getTitle())
+                .putData("content", info.getContent())
+                .putData("type", info.getCategoryType().getType())
+                .putData(MESSAGE_DATA_KEY, String.valueOf(info.getBoardId()))
                 .setToken(token)
                 .build();
 
         sender.sendAsync(message); //비동기로 전송
-
     }
 
     // 매 분마다 알람을 보낼 유저의 토큰값을 얻어내 해당 유저의 기기로 알림을 전송합니다.
