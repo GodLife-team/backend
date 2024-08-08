@@ -28,7 +28,8 @@ public class AlarmServiceFacade {
         Member boardOwner = alarmService.saveAlarm(boardId, loginMemberId, alarmTitle, alarmBody);
 
         // 2. 알람 전송 ==> 이 때 본인이 작성한 게시물의 댓글은 알림을 보내지 않는다.
-        if (boardOwner.getFcmToken() != null && boardOwner.isCheckAlarm()) {
+        boolean shouldSendAlarm = boardOwner.isCheckAlarm() && !boardOwner.getId().equals(loginMemberId);
+        if (shouldSendAlarm) {
             String token = boardOwner.getFcmToken();
             log.info("이번에 보낼 FCM 토큰 값 = {}", token);
             alarmSender.sendAlarm(boardId, token, alarmTitle, alarmBody);
