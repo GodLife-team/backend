@@ -116,8 +116,6 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository {
     // 전체 기간 인기있는 회원 반환
     @Override
     public List<PopularMemberResponse> findAllTimePopularMember() {
-        //게시판 작성 개수에 따라 점수를 다르게 주면 되는 거 아닌가?
-        //따라서 게시글 작성 개수를 가지고 갓생 점수 연산 ?
         //인기 있는 회원 번호 조회 (받은 좋아요 수까지)
         List<PopularMemberResponse> weeklyPopularMembers = queryFactory.select(Projections.bean(
                         PopularMemberResponse.class,
