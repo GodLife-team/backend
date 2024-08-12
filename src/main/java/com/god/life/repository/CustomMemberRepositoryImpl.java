@@ -38,7 +38,6 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository {
     // findMemberId로 조회하려는 유저의 정보를 조회함,
     @Override
     public MemberInfoResponse getMemberInfo(Long findMemberId) {
-
         // 해당 회원의 닉네임, 자기소개, 작성한 게시물 수 계산
         Optional<MemberInfoResponse> hasResponse = queryFactory
                 .select(Projections.fields(
@@ -111,25 +110,24 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository {
             }
         }
 
-
         return weeklyPopularMembers;
     }
 
     // 전체 기간 인기있는 회원 반환
     @Override
     public List<PopularMemberResponse> findAllTimePopularMember() {
-
+        //게시판 작성 개수에 따라 점수를 다르게 주면 되는 거 아닌가?
+        //따라서 게시글 작성 개수를 가지고 갓생 점수 연산 ?
         //인기 있는 회원 번호 조회 (받은 좋아요 수까지)
         List<PopularMemberResponse> weeklyPopularMembers = queryFactory.select(Projections.bean(
                         PopularMemberResponse.class,
                         member.id.as("memberId"),
-                        godLifeScore.score.sum().as("godLifeScore")
+                        board.totalScore.sum().as("godLifeScore")
                 ))
                 .from(member)
                 .join(board).on(member.id.eq(board.member.id))
-                .join(godLifeScore).on(board.id.eq(godLifeScore.board.id))
                 .groupBy(member.id)
-                .orderBy(godLifeScore.score.sum().desc(), member.id.asc())
+                .orderBy(board.totalScore.sum().desc(), member.id.asc())
                 .offset(0)
                 .limit(10)
                 .fetch(); // 탑 10명만 가져오기
@@ -140,7 +138,6 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository {
                         weeklyPopularMembers.stream().map(PopularMemberResponse::getMemberId).toList()))
                 .fetch();
 
-        // 조립
         // 조립
         for (int i = 0; i < weeklyPopularMembers.size(); i++) {
             var weeklyPopularMember = weeklyPopularMembers.get(i);
