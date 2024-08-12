@@ -281,7 +281,8 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
                         board.introduction.as("introduction"),
                         board.id.as("boardId"),
                         board.member.nickname.as("nickname"),
-                        board.totalScore.as("godLifeScore")
+                        board.totalScore.as("godLifeScore"),
+                        board.view.as("view")
                 ))
                 .from(board)
                 .join(board.member)
