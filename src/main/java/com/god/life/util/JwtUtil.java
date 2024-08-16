@@ -50,7 +50,6 @@ public class JwtUtil {
     public static final String REFRESH = "refresh";
 
 
-
     @PostConstruct
     public void init() {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
@@ -66,11 +65,6 @@ public class JwtUtil {
     public String createRefreshToken() {
         return createJWT("refresh", "refresh", REFRESH_EXPIRATION_TIME, REFRESH);
     }
-
-    public String testCreateToken(String id, String nickname) {
-        return createJWT(id, nickname, 10, ACCESS);
-    }
-
 
     private String createJWT(String id, String nickname, int time, String tokenType) {
         Date now = new Date();
@@ -170,4 +164,5 @@ public class JwtUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(accessToken).getPayload()
                 .getExpiration();
     }
+
 }

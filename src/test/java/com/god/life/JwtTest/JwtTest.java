@@ -42,12 +42,12 @@ public class JwtTest {
         ReflectionTestUtils.setField(
                 jwtUtil,
                 "ACCESS_EXPIRATION_TIME",
-                7_200_000
+                10
         );
         ReflectionTestUtils.setField(
                 jwtUtil,
                 "REFRESH_EXPIRATION_TIME",
-                1_209_600_000
+                1_000_000
         );
         jwtUtil.init();
     }
@@ -90,22 +90,23 @@ public class JwtTest {
     public void 재발급_테스트() throws InterruptedException {
         Date now = new Date();
 
-        String accessToken = jwtUtil.testCreateToken(id, nickname);
+        String accessToken = jwtUtil.createAccessToken(id, nickname);
         String refreshToken = jwtUtil.createRefreshToken(); // 추후 DB에 저장해야 함
 
-        Thread.sleep(10);  // 접근 토큰의 시간은 10밀리초로 테스트
+        Thread.sleep(1000);  // 접근 토큰의 시간은 10초로 1초를 대기해 만료시킴 테스트
         String reIssuedToken = null;
         try {
             jwtUtil.getClaims(accessToken); // JWT expired Exception 발생
         } catch (JwtInvalidException exception) {
             // 토큰 재발급
             // 추후 DB 조회에서 재발급 여부를 확인해야 함
-            reIssuedToken = jwtUtil.testCreateToken(id, nickname);
+            reIssuedToken = jwtUtil.createRefreshToken();
         }
 
         System.out.println(accessToken);
         System.out.println(reIssuedToken);
-        //assertThat(accessToken).isNotEqualTo(reIssuedToken);
+        assertThat(accessToken).isNotEqualTo(reIssuedToken);
+        assertThat(reIssuedToken).isNotEqualTo(refreshToken);
     }
 
 
