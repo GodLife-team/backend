@@ -15,7 +15,7 @@ public class FileUtil {
 
     private static final List<String> VALID_IMAGE_EXT = List.of(".jpg", ".png", ".jpeg");
 
-    public static String createServerName(String originName){ //서버 이미지 이름 생성
+    public static String createServerName(){ //서버 이미지 이름 생성
         return UUID.randomUUID().toString();
     }
 

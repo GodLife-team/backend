@@ -85,7 +85,7 @@ public class GoogleImageService implements ImageUploadService{
 
     private ImageSaveResponse uploadInternal(MultipartFile image) {
         String originName = image.getOriginalFilename();
-        String serverName = FileUtil.createServerName(image.getOriginalFilename());
+        String serverName = FileUtil.createServerName();
         String ext = FileUtil.getExt(originName);
 
         // 이미지 업로드

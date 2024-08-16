@@ -39,7 +39,7 @@ public class MockImageUploadService implements ImageUploadService  {
 
         FileUtil.validateFileExt(file);
         String originName = file.getOriginalFilename();
-        String serverName = FileUtil.createServerName(file.getOriginalFilename());
+        String serverName = FileUtil.createServerName();
 
         // 이미지 업로드
         storage.put(serverName, file);
