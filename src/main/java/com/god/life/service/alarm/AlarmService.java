@@ -3,6 +3,7 @@ package com.god.life.service.alarm;
 
 import com.god.life.domain.Alarm;
 import com.god.life.domain.Board;
+import com.god.life.domain.CategoryType;
 import com.god.life.domain.Member;
 import com.god.life.dto.board.BoardAlarmInfo;
 import com.god.life.error.NotFoundResource;
@@ -37,7 +38,7 @@ public class AlarmService {
                     .memberId(boardOwner.getId())
                     .title(info.getTitle())
                     .content(info.getContent())
-                    .categoryType(info.getCategoryType())
+                    .categoryType(info.getBoardCategory())
                     .isRead(false)
                     .build();
             alarmRepository.save(alarm);
@@ -45,7 +46,6 @@ public class AlarmService {
 
         return boardOwner;
     }
-
 
     // 읽지 않은 알람을 가져옵니다. 없는 경우 빈 리스트
     @Transactional(readOnly = true)

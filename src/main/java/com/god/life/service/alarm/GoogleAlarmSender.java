@@ -1,6 +1,7 @@
 package com.god.life.service.alarm;
 
 import com.god.life.domain.CategoryType;
+import com.god.life.dto.alarm.AlarmType;
 import com.god.life.dto.board.BoardAlarmInfo;
 import com.google.firebase.messaging.*;
 import lombok.RequiredArgsConstructor;
@@ -21,10 +22,11 @@ public class GoogleAlarmSender implements AlarmSender {
     // type : normal : 갓생 인증 개시판, stimulus : 갓생 인증
     @Override
     public void sendAlarm(String token, BoardAlarmInfo info) {
+
         Message message = Message.builder()
                 .putData("title" , info.getTitle())
                 .putData("content", info.getContent())
-                .putData("type", info.getCategoryType().getType())
+                .putData("type", info.getAlarmType().getType())
                 .putData(MESSAGE_DATA_KEY, String.valueOf(info.getBoardId()))
                 .setToken(token)
                 .build();
@@ -34,7 +36,8 @@ public class GoogleAlarmSender implements AlarmSender {
 
     // 매 분마다 알람을 보낼 유저의 토큰값을 얻어내 해당 유저의 기기로 알림을 전송합니다.
     @Override
-    public void sendAlarm(List<String> tokens, String title, String content) {
+    public void sendAlarm(List<String> tokens, String title, String content, AlarmType alarmType) {
+
         //보낼 대상이 없으면 알림 전송 XXX
         if (tokens == null || tokens.size() == 0) {
             return;
@@ -44,9 +47,10 @@ public class GoogleAlarmSender implements AlarmSender {
 
         MulticastMessage message = MulticastMessage
                 .builder()
-                .putData("title" , title)
+                .putData("title", title)
                 .putData("content", content)
                 .putData(MESSAGE_DATA_KEY, "") //공통 처리를 위한 null 전송
+                .putData("type", alarmType.getType())
                 .addAllTokens(tokens)
                 .build();
 

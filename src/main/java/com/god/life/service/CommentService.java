@@ -3,6 +3,7 @@ package com.god.life.service;
 import com.god.life.domain.Board;
 import com.god.life.domain.Comment;
 import com.god.life.domain.Member;
+import com.god.life.dto.alarm.AlarmType;
 import com.god.life.dto.board.BoardAlarmInfo;
 import com.god.life.dto.comment.request.CommentCreateRequest;
 import com.god.life.dto.comment.response.CommentResponse;
@@ -43,7 +44,9 @@ public class CommentService {
         Comment comment = request.toEntity(board, member);
         commentRepository.save(comment);
         String alarmTitle = board.getTitle() + "에 댓글이 달렸어요!";
-        return new BoardAlarmInfo(alarmTitle, request.getComment(), boardId, board.getCategory().getCategoryType());
+
+        return new BoardAlarmInfo(alarmTitle, request.getComment(), boardId,
+                AlarmType.COMMENT, board.getCategory().getCategoryType());
     }
 
     @Transactional

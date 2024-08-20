@@ -4,6 +4,7 @@ package com.god.life.service;
 import com.god.life.domain.Board;
 import com.god.life.domain.GodLifeScore;
 import com.god.life.domain.Member;
+import com.god.life.dto.alarm.AlarmType;
 import com.god.life.dto.board.BoardAlarmInfo;
 import com.god.life.error.ErrorMessage;
 import com.god.life.error.NotFoundResource;
@@ -44,7 +45,9 @@ public class GodLifeScoreService {
 
         String content = "[" + board.getTitle() + "]" + ALARM_CONTENT_SUFFIX;
 
-        return new BoardAlarmInfo(ALARM_TITLE, content, board.getId(), board.getCategory().getCategoryType());
+        return new BoardAlarmInfo(ALARM_TITLE, content, board.getId(),
+                AlarmType.toAlarmType(board.getCategory().getCategoryType()),
+                board.getCategory().getCategoryType());
     }
 
     /**
