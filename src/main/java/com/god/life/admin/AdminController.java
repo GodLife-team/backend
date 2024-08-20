@@ -2,6 +2,7 @@ package com.god.life.admin;
 
 import com.god.life.admin.dto.AlarmDTO;
 import com.god.life.domain.Member;
+import com.god.life.dto.alarm.AlarmType;
 import com.god.life.dto.board.response.BoardResponse;
 import com.god.life.dto.board.response.GodLifeStimulationBoardBriefResponse;
 import com.god.life.dto.report.request.ReportRequest;
@@ -32,7 +33,6 @@ public class AdminController {
 
     private final String RECOMMEND_BOARD_KEY = "board";
     private final String RECOMMEND_AUTHOR_KEY = "author";
-
 
     private final ReportService reportService;
 
@@ -176,7 +176,7 @@ public class AdminController {
     @PostMapping("/alarm")
     public String sendAlarm(@ModelAttribute AlarmDTO alarmDTO) {
         List<String> tokens = memberService.getAllTokens();
-        alarmSender.sendAlarm(tokens, alarmDTO.getTitle(), alarmDTO.getContent());
+        alarmSender.sendAlarm(tokens, alarmDTO.getTitle(), alarmDTO.getContent(), AlarmType.ENTIRE);
         return "redirect:/admin/alarm";
     }
 

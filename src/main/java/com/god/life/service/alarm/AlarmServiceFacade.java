@@ -21,7 +21,6 @@ public class AlarmServiceFacade {
     // 알람 생성 후 외부 API에 알람을 보내야 할지 결정
     // 알람 생성하는 곳에서 외부 API를 호출하면 외부 API가 오래 걸리면 커넥션 낭비 --> 트랜잭션에서 분리
     public void processAlarm(Long loginMemberId, BoardAlarmInfo alarmInfo) {
-        log.info("이번에 보낼 알람 제목 = {}, 내용 = {}", alarmInfo.getTitle(), alarmInfo.getContent());
         // 1. 알람 저장
         Member boardOwner = alarmService.saveAlarm(loginMemberId, alarmInfo);
 

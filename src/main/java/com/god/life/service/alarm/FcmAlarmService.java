@@ -3,6 +3,7 @@ package com.god.life.service.alarm;
 import com.god.life.domain.Board;
 import com.god.life.domain.FcmAlarm;
 import com.god.life.domain.Member;
+import com.god.life.dto.alarm.AlarmType;
 import com.god.life.dto.alarm.request.AlarmCreateRequest;
 import com.god.life.error.BadRequestException;
 import com.god.life.repository.BoardRepository;
@@ -68,7 +69,7 @@ public class FcmAlarmService {
     public void sendMessage() {
         LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
         List<String> sendToUserTokens = getUserTokenAtTime(now);
-        alarmSender.sendAlarm(sendToUserTokens, END_MESSAGE_TITLE, END_MESSAGE_BODY);
+        alarmSender.sendAlarm(sendToUserTokens, END_MESSAGE_TITLE, END_MESSAGE_BODY, AlarmType.TODO);
     }
 
 }
