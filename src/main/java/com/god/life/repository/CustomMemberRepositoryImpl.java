@@ -117,15 +117,14 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository {
     @Override
     public List<PopularMemberResponse> findAllTimePopularMember() {
         //인기 있는 회원 번호 조회 (받은 좋아요 수까지)
-        List<PopularMemberResponse> weeklyPopularMembers = queryFactory.select(Projections.bean(
+        List<PopularMemberResponse> allTimePopularMembers = queryFactory.select(Projections.bean(
                         PopularMemberResponse.class,
-                        member.id.as("memberId"),
+                        board.member.id.as("memberId"),
                         board.totalScore.sum().as("godLifeScore")
                 ))
-                .from(member)
-                .join(board).on(member.id.eq(board.member.id))
-                .groupBy(member.id)
-                .orderBy(board.totalScore.sum().desc(), member.id.asc())
+                .from(board)
+                .groupBy(board.member.id)
+                .orderBy(board.totalScore.sum().desc(), board.member.id.asc())
                 .offset(0)
                 .limit(10)
                 .fetch(); // 탑 10명만 가져오기
@@ -133,25 +132,25 @@ public class CustomMemberRepositoryImpl implements CustomMemberRepository {
         // 탑 10명의 멤버 정보 및 이미지 URL 조회하기
         List<Member> popularMember = queryFactory.selectFrom(member)
                 .where(member.id.in(
-                        weeklyPopularMembers.stream().map(PopularMemberResponse::getMemberId).toList()))
+                        allTimePopularMembers.stream().map(PopularMemberResponse::getMemberId).toList()))
                 .fetch();
 
         // 조립
-        for (int i = 0; i < weeklyPopularMembers.size(); i++) {
-            var weeklyPopularMember = weeklyPopularMembers.get(i);
+        for (int i = 0; i < allTimePopularMembers.size(); i++) {    
+            var allTimePopularMember = allTimePopularMembers.get(i);
             for (int j = 0; j < popularMember.size(); j++) {
                 Member member = popularMember.get(j);
-                if (weeklyPopularMember.getMemberId().equals(member.getId())) {
-                    weeklyPopularMember.setNickname(member.getNickname());
-                    weeklyPopularMember.setWhoAmI(member.getWhoAmI());
-                    weeklyPopularMember.setProfileURL(member.getProfileName() == null ? "" : member.getProfileName());
-                    weeklyPopularMember.setBackgroundUrl(member.getBackgroundName() == null ? "" : member.getBackgroundName());
+                if (allTimePopularMember.getMemberId().equals(member.getId())) {
+                    allTimePopularMember.setNickname(member.getNickname());
+                    allTimePopularMember.setWhoAmI(member.getWhoAmI());
+                    allTimePopularMember.setProfileURL(member.getProfileName() == null ? "" : member.getProfileName());
+                    allTimePopularMember.setBackgroundUrl(member.getBackgroundName() == null ? "" : member.getBackgroundName());
                 }
             }
         }
 
 
-        return weeklyPopularMembers;
+        return allTimePopularMembers;
     }
 
 

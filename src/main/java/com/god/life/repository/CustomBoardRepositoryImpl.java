@@ -1,5 +1,6 @@
 package com.god.life.repository;
 
+import com.god.life.annotation.Timer;
 import com.god.life.domain.*;
 import com.god.life.dto.board.request.BoardSearchRequest;
 import com.god.life.dto.board.response.BoardSearchResponse;
@@ -55,9 +56,9 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
      * @return 갓생 인증 리스트 10개
      */
     @Override
+    @Timer
     public List<BoardSearchResponse> findWeeklyPopularBoard() {
         long start = System.currentTimeMillis();
-        log.info("한주간 인기 있는 갓생 인정 게시물 조회 시작");
         LocalDateTime today = LocalDateTime.now(); // 현재 시각
         //이번 주 월요일 0시 0분 0초
         LocalDateTime monday = LocalDateTime.of(LocalDate.now().with(DayOfWeek.MONDAY), LocalTime.MIDNIGHT);
@@ -101,8 +102,6 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
             result.add(dto);
         }
 
-        long end = System.currentTimeMillis();
-        log.info("한 주간 인기 있는 갓생 인정 게시물 조회 종료 시간 = {}", (end-start)/(double)1000);
 
         return result;
     }
@@ -122,9 +121,9 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
      * 전체 기간에서 갓생 인정을 가장 많이 받은 게시물 10개를 반환합니다.
      */
     @Override
+    @Timer
     public List<BoardSearchResponse> findTotalPopularBoard() {
         long start = System.currentTimeMillis();
-        log.info("전체 기간 인기 있는 갓생 인정 게시물 조회 시작");
         List<Board> boards = queryFactory.selectFrom(board)
                 .join(board.member, member).fetchJoin()
                 .where(category.categoryType.eq(CategoryType.GOD_LIFE_PAGE)) //게시글 작성으로 받은 점수는 제외
@@ -145,25 +144,25 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
             result.add(dto);
         }
 
-
-        long end = System.currentTimeMillis();
-        log.info("전체 기간 인기 있는 갓생 인정 게시물 조회 종료 시간 = {}", (end-start)/(double)1000);
         return result;
     }
 
     /**
      * @param boardSearchRequest 검색 조건
-     * @param pageable 페이징 번호 및 정렬 깆누
+     * @param pageable           페이징 번호 및 정렬 기준
      * @return 요청에 적합한 게시물 리스트 반환
      */
     @Override
+    @Timer
     public Page<Board> findBoardWithSearchRequest(BoardSearchRequest boardSearchRequest, Pageable pageable) {
-        long start = System.currentTimeMillis();
-        log.info("조건 검색에 맞는 갓생 인증 게시물 조회 시작");
+
+
         List<Board> boards = queryFactory.selectFrom(board)
                 .join(category).on(board.category.categoryId.eq(category.categoryId))
                 .join(QBoard.board.member, member).fetchJoin()
-                .where(keywordParam(boardSearchRequest.getKeyword()),tagsParam(boardSearchRequest.getTags()),
+                .where(
+                        keywordParam(boardSearchRequest.getKeyword()),
+                        tagsParam(boardSearchRequest.getTags()),
                         nicknameParam(boardSearchRequest.getNickname()),
                         board.category.categoryType.eq(CategoryType.GOD_LIFE_PAGE))
                 .offset(pageable.getOffset())
@@ -177,7 +176,6 @@ public class CustomBoardRepositoryImpl implements CustomBoardRepository {
                 .fetchOne();
 
         long end = System.currentTimeMillis();
-        log.info("조건 검색에 맞는 갓생 인증 게시물 조회 종료 시간 = {}", (end-start)/(double)1000);
         return new PageImpl<>(boards, pageable, count);
     }
 
