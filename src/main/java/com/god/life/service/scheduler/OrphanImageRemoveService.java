@@ -24,23 +24,12 @@ public class OrphanImageRemoveService {
     private final ImageService imageService;
 
     // 매일 오전 3시에 삭제하도록
-    @Scheduled(cron = "0 0 3 * * ?")
+    //@Scheduled(cron = "0 0 3 * * ?")
     //@Scheduled(fixedDelay = 50000)
     public void removeImages(){
         log.info("고아 이미지 삭제...");
         List<String> imageNamesInCloud = imageUploadService.getAllImageNames();
-        List<String> imageNamesInDB = imageService.getAllImageNames()
-                .stream()
-                .map(image -> {
-                    if(image.startsWith("profile")){
-                        return image.replace("profile", "");
-                    } else if (image.startsWith("background")) {
-                        return image.replace("background", "");
-                    }else {
-                        return image;
-                    }
-                }).toList();
-
+        List<String> imageNamesInDB = imageService.getAllImageNames();
 
         List<String> removeImageNames = new ArrayList<>();
         // 1. GCS 에 사진들을 저장후
