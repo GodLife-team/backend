@@ -130,11 +130,10 @@ public class MemberService {
         Member deleteMember = memberRepository.findById(memberId).get();
         //회원 이미지, 게시판 이미지 삭제
         imageService.deleteUserImages(deleteMember);
-        //댓글 삭제
         commentService.deleteCommentWrittenByMember(deleteMember);
         //좋아요 삭제
         godLifeScoreService.deleteUserLikedHistory(deleteMember);
-        //게시판 삭제
+        //게시판, 댓글 삭제
         boardService.deleteBoardWrittenByMember(deleteMember);
         //멤버 삭제
         memberRepository.delete(deleteMember);
@@ -151,7 +150,6 @@ public class MemberService {
 
         return memberInfo;
     }
-
 
     public List<PopularMemberResponse> searchWeeklyPopularMember() {
         return memberRepository.findWeeklyPopularMember();
@@ -170,4 +168,5 @@ public class MemberService {
     public void updateAlarmOption(Long memberId, AlarmOnOffRequest request) {
         memberRepository.updateAlarmOption(memberId, request.getOnOff());
     }
+
 }

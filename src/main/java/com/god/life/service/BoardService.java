@@ -47,9 +47,9 @@ public class BoardService {
      */
     @Transactional
     public Long createBoard(BoardCreateRequest request, Member loginMember, List<ImageSaveResponse> uploadResponse) {
-            Category category = categoryRepository.findByCategoryType(CategoryType.GOD_LIFE_PAGE);
-            // DB entity 생성
-            Board board = request.toBoard(loginMember,category);
+        Category category = categoryRepository.findByCategoryType(CategoryType.GOD_LIFE_PAGE);
+        // DB entity 생성
+        Board board = request.toBoard(loginMember,category);
         boardRepository.save(board);
 
         for (ImageSaveResponse response : uploadResponse) {
@@ -74,6 +74,7 @@ public class BoardService {
                 .orElseThrow(() -> new NotFoundResource(ErrorMessage.INVALID_BOARD_MESSAGE.getErrorMessage()));
 
         board.increaseViewCount();
+        //boardRepository.updateViewCount(board.getId());
         boolean isOwner = board.getMember().getId().equals(loginMember.getId()); // 작성자와 현재 로그인한 사람이 동일인인지
         boolean memberLikedBoard = godLifeScoreRepository.existsByBoardAndMember(board, loginMember);
 
@@ -150,6 +151,11 @@ public class BoardService {
      * @param deteleMember 회원탈퇴한 유저 번호
      */
     public void deleteBoardWrittenByMember(Member deteleMember) {
+        List<Long> boardIds = boardRepository.findAllBoardIdByMember(deteleMember);
+        if(boardIds.size() > 0){
+            commentRepository.deleteCommentInBoardIds(boardIds);
+        }
+
         boardRepository.deleteByMember(deteleMember);
     }
 

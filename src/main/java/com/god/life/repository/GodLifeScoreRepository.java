@@ -23,7 +23,8 @@ public interface GodLifeScoreRepository extends JpaRepository<GodLifeScore, Long
     Integer calculateGodLifeScoreWithMember(@Param("memberId") Long memberId);
 
     @Modifying
-    void deleteByMember(Member deleteMember);
+    @Query("delete GodLifeScore g  where g.member = :member ")
+    void deleteByMember(@Param("member") Member deleteMember);
 
 
     @Modifying

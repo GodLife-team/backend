@@ -20,7 +20,8 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
 
     // 게시판이 있는 이미지는 게시판 삭제시 삭제 진행
     @Modifying
-    void deleteByMember(Member member);
+    @Query("delete Image i where i.member = :member")
+    void deleteByMember(@Param("member") Member member);
 
     @Modifying
     @Query("delete from Image i where i.board.id = :boardId")

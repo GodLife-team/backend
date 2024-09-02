@@ -4,16 +4,12 @@ import com.god.life.domain.Board;
 import com.god.life.domain.BoardStatus;
 import com.god.life.domain.CategoryType;
 import com.god.life.domain.Member;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -30,7 +26,8 @@ public interface BoardRepository extends JpaRepository<Board, Long>, CustomBoard
 
     // 해당 회원이 작성한 글 삭제합니다
     @Modifying
-    void deleteByMember(Member deleteMember);
+    @Query("delete Board b where b.member = :member")
+    void deleteByMember(@Param("member") Member deleteMember);
 
     // Category에 맞는 글을 조회합니다
     @Query(value = "select b from Board b join b.category where b.category.categoryType = :categoryType")
@@ -64,4 +61,8 @@ public interface BoardRepository extends JpaRepository<Board, Long>, CustomBoard
 
     @Query("select b from Board b join fetch b.category where b.id = :boardId")
     Optional<Board> findByIdWithCategory(@Param("boardId") Long boardId);
+
+
+    @Query("select b.id from Board b where b.member = :member")
+    List<Long> findAllBoardIdByMember(@Param("member") Member deteleMember);
 }

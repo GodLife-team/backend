@@ -27,10 +27,15 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     // 해당 회원이 작성한 댓글을 삭제합니다.
     @Modifying
-    void deleteByMember(Member deleteMember);
+    @Query("delete Comment c where c.member = :member")
+    void deleteByMember(@Param("member") Member deleteMember);
 
     @Modifying
     @Query("delete Comment c where c.board.id = :boardId")
     void deleteByBoardId(@Param("boardId") Long boardId);
+
+    @Modifying
+    @Query("delete Comment c where c.board.id in :boardIds")
+    void deleteCommentInBoardIds(@Param("boardIds") List<Long> boardIds);
 }
 
