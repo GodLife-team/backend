@@ -154,6 +154,7 @@ public class BoardService {
         List<Long> boardIds = boardRepository.findAllBoardIdByMember(deteleMember);
         if(boardIds.size() > 0){
             commentRepository.deleteCommentInBoardIds(boardIds);
+            godLifeScoreRepository.deleteScoreInBoardIds(boardIds);
         }
 
         boardRepository.deleteByMember(deteleMember);

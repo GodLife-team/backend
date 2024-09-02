@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface GodLifeScoreRepository extends JpaRepository<GodLifeScore, Long> {
 
     boolean existsByBoardAndMember(Board board, Member member);
@@ -30,4 +32,8 @@ public interface GodLifeScoreRepository extends JpaRepository<GodLifeScore, Long
     @Modifying
     @Query("delete GodLifeScore g where g.board.id = :boardId")
     void deleteByBoardId(@Param("boardId") Long boardId);
+
+    @Modifying
+    @Query("delete GodLifeScore g where g.board.id in :boardIds")
+    void deleteScoreInBoardIds(@Param("boardIds") List<Long> boardIds);
 }
