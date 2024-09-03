@@ -46,7 +46,7 @@ public class ImageController {
     )
     public ResponseEntity<CommonResponse<ImageSaveResponse>> profileImageUpload(
             @RequestParam(name = "image") MultipartFile image,
-            @LoginMember Member loginMember) throws IOException {
+            @LoginMember Member loginMember) {
 
         ImageSaveResponse response = imageUploadService.upload(image);
         imageService.updateMemberProfileImage(response, loginMember);
@@ -65,7 +65,7 @@ public class ImageController {
     )
     public ResponseEntity<CommonResponse<ImageSaveResponse>> backgroundImageUpload(
             @RequestParam(name = "image") MultipartFile image,
-            @LoginMember Member loginMember) throws IOException {
+            @LoginMember Member loginMember) {
 
         ImageSaveResponse response = imageUploadService.upload(image);
         imageService.updateMemberBackgroundImage(response, loginMember);
