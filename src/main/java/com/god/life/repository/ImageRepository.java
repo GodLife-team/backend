@@ -39,5 +39,6 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     @Query("delete from Image i where i.board.id = :boardId and i.serverName not in :imageNames")
     void deleteUnusedImageOnBoard(@Param("imageNames") List<String> usedImageNames, @Param("boardId") Long boardId);
 
-    Optional<Image> findByMemberAndServerName(Member member, String serverName);
+    @Query("select i from Image i where i.member = :member and i.serverName = :serverName")
+    Optional<Image> findByMemberAndServerName(@Param("member") Member member, @Param("serverName")String serverName);
 }

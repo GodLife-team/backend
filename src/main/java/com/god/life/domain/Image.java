@@ -36,4 +36,7 @@ public class Image {
         this.originalName = response.getOriginalName();
     }
 
+    public void imageOwner(Member loginMember) {
+        this.member = loginMember;
+    }
 }

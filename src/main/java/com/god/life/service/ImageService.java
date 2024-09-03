@@ -120,32 +120,46 @@ public class ImageService {
 
     @Transactional
     public void updateMemberProfileImage(ImageSaveResponse response, Member loginMember) {
-        //이미지 정보 생성 혹은 업데이트
-        createOrUpdateImage(response, loginMember);
-
         //회원의 profile 업데이트
         Member findMember = memberRepository.findById(loginMember.getId()).get();
+
+        if (findMember.getProfileName() == null) {
+            Image image = Image.builder()
+                    .originalName(response.getOriginalName())
+                    .serverName(response.getServerName())
+                    .member(loginMember)
+                    .build();
+
+            imageRepository.save(image);
+        } else {
+            Image image = imageRepository.findByMemberAndServerName(findMember, findMember.getProfileName())
+                    .orElseThrow();
+            image.updateImagesName(response);
+        }
+
         findMember.updateProfileImageName(response.getServerName());
     }
 
     @Transactional
     public void updateMemberBackgroundImage(ImageSaveResponse response, Member loginMember) {
-        //이미지 정보 생성 혹은 업데이트
-        createOrUpdateImage(response, loginMember);
-
         //회원의 profile 업데이트
         Member findMember = memberRepository.findById(loginMember.getId()).get();
+
+        if (findMember.getBackgroundName() == null) {
+            Image image = Image.builder()
+                    .originalName(response.getOriginalName())
+                    .serverName(response.getServerName())
+                    .member(loginMember)
+                    .build();
+
+            imageRepository.save(image);
+        } else {
+            Image image = imageRepository.findByMemberAndServerName(findMember, findMember.getBackgroundName())
+                    .orElseThrow();
+            image.updateImagesName(response);
+        }
+
         findMember.updateBackgroundImageName(response.getServerName());
     }
-
-    private void createOrUpdateImage(ImageSaveResponse response, Member loginMember) {
-        Image image = imageRepository
-                .findByMemberAndServerName(loginMember, response.getServerName()).orElseGet(Image::new);
-        image.updateImagesName(response);
-        if (image.getId() == null) { //기존 프로필 정보가 없으면 저장 or 더티 체킹
-            imageRepository.save(image);
-        }
-    }
-
 
 }
