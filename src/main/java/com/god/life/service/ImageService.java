@@ -18,6 +18,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -123,7 +124,7 @@ public class ImageService {
         //회원의 profile 업데이트
         Member findMember = memberRepository.findById(loginMember.getId()).get();
 
-        if (findMember.getProfileName() == null) {
+        if (!StringUtils.hasText(findMember.getBackgroundName())) {
             Image image = Image.builder()
                     .originalName(response.getOriginalName())
                     .serverName(response.getServerName())
@@ -145,7 +146,7 @@ public class ImageService {
         //회원의 profile 업데이트
         Member findMember = memberRepository.findById(loginMember.getId()).get();
 
-        if (findMember.getBackgroundName() == null) {
+        if (!StringUtils.hasText(findMember.getBackgroundName())) {
             Image image = Image.builder()
                     .originalName(response.getOriginalName())
                     .serverName(response.getServerName())
