@@ -10,15 +10,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@NoArgsConstructor
 public class RecommendAuthorResponse {
 
     private String nickname;
     private String profileUrl;
     private String backgroundUrl;
     private String whoAmI;
+    private List<GodLifeStimulationBoardBriefResponse> responses;
 
-    private List<GodLifeStimulationBoardBriefResponse> responses = new ArrayList<>();
+    public RecommendAuthorResponse() {
+        this.nickname = "";
+        this.profileUrl = "";
+        this.backgroundUrl = "";
+        this.whoAmI = "";
+        this.responses = new ArrayList<>();
+    }
 
     public RecommendAuthorResponse(Member member, List<GodLifeStimulationBoardBriefResponse> responses) {
         nickname = member.getNickname();

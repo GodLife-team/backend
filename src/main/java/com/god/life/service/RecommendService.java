@@ -35,6 +35,9 @@ public class RecommendService {
             return new RecommendAuthorResponse();
         }
         List<Board> boardWrittenAuthor = boardRepository.findBoardWrittenAuthor(author);
+        if (boardWrittenAuthor.isEmpty()) {
+            return new RecommendAuthorResponse();
+        }
         List<GodLifeStimulationBoardBriefResponse> response =
                 boardWrittenAuthor.stream().map(GodLifeStimulationBoardBriefResponse::of).toList();
 
