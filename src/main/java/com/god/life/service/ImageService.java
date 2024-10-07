@@ -124,7 +124,7 @@ public class ImageService {
         //회원의 profile 업데이트
         Member findMember = memberRepository.findByIdWithPessimisticLock(loginMember.getId()).get();
 
-        if (!StringUtils.hasText(findMember.getBackgroundName())) {
+        if (!StringUtils.hasText(findMember.getProfileName())) {
             Image image = Image.builder()
                     .originalName(response.getOriginalName())
                     .serverName(response.getServerName())
