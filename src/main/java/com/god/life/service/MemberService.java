@@ -13,6 +13,7 @@ import com.god.life.error.ErrorMessage;
 import com.god.life.error.JwtInvalidException;
 import com.god.life.error.NotFoundResource;
 import com.god.life.repository.MemberRepository;
+import com.god.life.service.alarm.FcmAlarmService;
 import com.god.life.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,7 @@ public class MemberService {
     private final GodLifeScoreService godLifeScoreService;
     private final ImageService imageService;
     private final RedisService redisService;
+    private final FcmAlarmService alarmService;
 
     @Value("${jwt.secret.expire.refresh}")
     private int REFRESH_EXPIRATION_TIME;
@@ -130,12 +132,13 @@ public class MemberService {
         Member deleteMember = memberRepository.findById(memberId).get();
         //회원 이미지, 게시판 이미지 삭제
         imageService.deleteUserImages(deleteMember);
-
         commentService.deleteCommentWrittenByMember(deleteMember);
         //좋아요 삭제
         godLifeScoreService.deleteUserLikedHistory(deleteMember);
         //게시판, 댓글, 갓생 점수 기록 삭제
         boardService.deleteBoardWrittenByMember(deleteMember);
+        //알람 토큰 삭제
+        alarmService.deleteAllAlarm(memberId);
         //멤버 삭제
         memberRepository.delete(deleteMember);
     }

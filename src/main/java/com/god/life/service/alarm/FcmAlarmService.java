@@ -64,6 +64,11 @@ public class FcmAlarmService {
         fcmAlarm.updateAlarm(sendTime);
     }
 
+    @Transactional
+    public void deleteAllAlarm(Long memberId) {
+        fcmAlarmRepository.deleteByMember(memberId);
+    }
+
     // 매 분마다 알람을 보낼 유저의 토큰값을 얻어내 해당 유저의 기기로 알림을 전송합니다.
     @Scheduled(cron = "0 * * * * *")
     public void sendMessage() {
