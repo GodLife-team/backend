@@ -122,7 +122,7 @@ public class ImageService {
     @Transactional
     public void updateMemberProfileImage(ImageSaveResponse response, Member loginMember) {
         //회원의 profile 업데이트
-        Member findMember = memberRepository.findById(loginMember.getId()).get();
+        Member findMember = memberRepository.findByIdWithPessimisticLock(loginMember.getId()).get();
 
         if (!StringUtils.hasText(findMember.getBackgroundName())) {
             Image image = Image.builder()
@@ -144,7 +144,7 @@ public class ImageService {
     @Transactional
     public void updateMemberBackgroundImage(ImageSaveResponse response, Member loginMember) {
         //회원의 profile 업데이트
-        Member findMember = memberRepository.findById(loginMember.getId()).get();
+        Member findMember = memberRepository.findByIdWithPessimisticLock(loginMember.getId()).get();
 
         if (!StringUtils.hasText(findMember.getBackgroundName())) {
             Image image = Image.builder()

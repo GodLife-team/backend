@@ -1,12 +1,15 @@
 package com.god.life.repository;
 
 import com.god.life.domain.Member;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long>, CustomMemberRepository {
@@ -32,5 +35,10 @@ public interface MemberRepository extends JpaRepository<Member, Long>, CustomMem
     @Modifying
     @Query("update Member m set m.checkAlarm = :onOff where m.id = :memberId")
     void updateAlarmOption(@Param("memberId") Long memberId, @Param("onOff") boolean onOff);
+
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select m from Member m where m.id = :id")
+    Optional<Member> findByIdWithPessimisticLock(@Param("id") Long id);
 
 }

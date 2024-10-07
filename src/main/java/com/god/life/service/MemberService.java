@@ -114,7 +114,7 @@ public class MemberService {
     // 자기소개 업데이트
     @Transactional
     public Boolean updateWhoAmI(Long memberId, ModifyWhoAmIRequest modifyWhoAmIRequest) {
-        Member member = memberRepository.findById(memberId).get();
+        Member member = memberRepository.findByIdWithPessimisticLock(memberId).get();
         member.updateWhoAmI(modifyWhoAmIRequest.getWhoAmI());
         return true;
     }
